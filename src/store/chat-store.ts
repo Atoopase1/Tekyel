@@ -1,0 +1,356 @@
+// ============================================================
+// Chat Store — Zustand store for chat & message state
+// ============================================================
+'use client';
+
+import { create } from 'zustand';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
+import type { ChatWithDetails, Message, Profile } from '@/types';
+
+interface ChatState {
+  chats: ChatWithDetails[];
+  activeChat: ChatWithDetails | null;
+  activeChatId: string | null;
+  messages: Message[];
+  isLoadingChats: boolean;
+  isLoadingMessages: boolean;
+  hasMoreMessages: boolean;
+  searchQuery: string;
+
+  // Actions
+  fetchChats: () => Promise<void>;
+  setActiveChat: (chatId: string | null) => Promise<void>;
+  fetchMessages: (chatId: string, before?: string) => Promise<void>;
+  sendMessage: (chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string) => Promise<Message | null>;
+  markAsRead: (chatId: string) => Promise<void>;
+  addMessage: (message: Message) => void;
+  updateMessageInList: (message: Message) => void;
+  setSearchQuery: (query: string) => void;
+  startDirectChat: (otherUserId: string) => Promise<string | null>;
+  createGroupChat: (name: string, participantIds: string[], description?: string) => Promise<string | null>;
+  resetUnreadCount: (chatId: string) => void;
+}
+
+export const useChatStore = create<ChatState>((set, get) => ({
+  chats: [],
+  activeChat: null,
+  activeChatId: null,
+  messages: [],
+  isLoadingChats: false,
+  isLoadingMessages: false,
+  hasMoreMessages: true,
+  searchQuery: '',
+
+  fetchChats: async () => {
+    set({ isLoadingChats: true });
+    const supabase = getSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      // Fetch chat participants for current user
+      const { data: myParticipations } = await supabase
+        .from('chat_participants')
+        .select('chat_id, role, unread_count')
+        .eq('user_id', user.id);
+
+      if (!myParticipations?.length) {
+        set({ chats: [], isLoadingChats: false });
+        return;
+      }
+
+      const chatIds = myParticipations.map((p) => p.chat_id);
+
+      // Fetch chats
+      const { data: chatsData } = await supabase
+        .from('chats')
+        .select('*')
+        .in('id', chatIds)
+        .order('last_message_at', { ascending: false, nullsFirst: false });
+
+      if (!chatsData) {
+        set({ chats: [], isLoadingChats: false });
+        return;
+      }
+
+      // Fetch all participants with profiles
+      const { data: allParticipants } = await supabase
+        .from('chat_participants')
+        .select('*, profile:profiles(*)')
+        .in('chat_id', chatIds);
+
+      // Fetch last messages
+      const lastMessageIds = chatsData
+        .map((c) => c.last_message_id)
+        .filter(Boolean);
+
+      let lastMessages: Message[] = [];
+      if (lastMessageIds.length) {
+        const { data } = await supabase
+          .from('messages')
+          .select('*')
+          .in('id', lastMessageIds);
+        lastMessages = (data || []) as Message[];
+      }
+
+      // Build ChatWithDetails
+      const chats: ChatWithDetails[] = chatsData.map((chat) => {
+        const participants = (allParticipants || []).filter(
+          (p) => p.chat_id === chat.id
+        );
+        const myParticipant = myParticipations.find(
+          (p) => p.chat_id === chat.id
+        );
+        const otherParticipant = participants.find(
+          (p) => p.user_id !== user.id
+        );
+        const lastMessage = lastMessages.find(
+          (m) => m.id === chat.last_message_id
+        );
+
+        return {
+          ...chat,
+          participants,
+          last_message: lastMessage,
+          other_user: !chat.is_group && otherParticipant
+            ? otherParticipant.profile
+            : undefined,
+          my_participant: myParticipant
+            ? { ...myParticipant, id: '', chat_id: chat.id, user_id: user.id, joined_at: '' }
+            : undefined,
+        } as ChatWithDetails;
+      });
+
+      set({ chats, isLoadingChats: false });
+    } catch (err) {
+      console.error('fetchChats error:', err);
+      set({ isLoadingChats: false });
+    }
+  },
+
+  setActiveChat: async (chatId: string | null) => {
+    if (!chatId) {
+      set({ activeChat: null, activeChatId: null, messages: [] });
+      return;
+    }
+
+    set({ activeChatId: chatId });
+
+    const chat = get().chats.find((c) => c.id === chatId);
+    if (chat) {
+      set({ activeChat: chat });
+    }
+
+    // Fetch messages
+    await get().fetchMessages(chatId);
+    // Mark as read
+    await get().markAsRead(chatId);
+  },
+
+  fetchMessages: async (chatId: string, before?: string) => {
+    set({ isLoadingMessages: true });
+    const supabase = getSupabaseBrowserClient();
+
+    try {
+      let query = supabase
+        .from('messages')
+        .select('*, sender:profiles!messages_sender_id_fkey(*)')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (before) {
+        query = query.lt('created_at', before);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      const messages = ((data || []) as Message[]).reverse();
+
+      if (before) {
+        // Prepend older messages
+        set((state) => ({
+          messages: [...messages, ...state.messages],
+          hasMoreMessages: messages.length === 50,
+          isLoadingMessages: false,
+        }));
+      } else {
+        set({
+          messages,
+          hasMoreMessages: messages.length === 50,
+          isLoadingMessages: false,
+        });
+      }
+    } catch (err) {
+      console.error('fetchMessages error:', err);
+      set({ isLoadingMessages: false });
+    }
+  },
+
+  sendMessage: async (chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId) => {
+    const supabase = getSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert({
+        chat_id: chatId,
+        sender_id: user.id,
+        content,
+        message_type: messageType,
+        media_url: mediaUrl || null,
+        media_metadata: mediaMetadata || null,
+        reply_to_id: replyToId || null,
+      })
+      .select('*, sender:profiles!messages_sender_id_fkey(*)')
+      .single();
+
+    if (error) {
+      console.error('sendMessage error:', error);
+      return null;
+    }
+
+    return data as Message;
+  },
+
+  markAsRead: async (chatId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Reset unread count
+    await supabase
+      .from('chat_participants')
+      .update({ unread_count: 0 })
+      .eq('chat_id', chatId)
+      .eq('user_id', user.id);
+
+    // Update message statuses to 'seen'
+    const { data: unreadStatuses } = await supabase
+      .from('message_status')
+      .select('id')
+      .eq('user_id', user.id)
+      .in('status', ['sent', 'delivered'])
+      .in(
+        'message_id',
+        get()
+          .messages.filter((m) => m.sender_id !== user.id)
+          .map((m) => m.id)
+      );
+
+    if (unreadStatuses?.length) {
+      await supabase
+        .from('message_status')
+        .update({ status: 'seen', updated_at: new Date().toISOString() })
+        .in('id', unreadStatuses.map((s) => s.id));
+    }
+
+    // Update local state
+    get().resetUnreadCount(chatId);
+  },
+
+  addMessage: (message: Message) => {
+    set((state) => {
+      // Avoid duplicates
+      if (state.messages.some((m) => m.id === message.id)) return state;
+      return { messages: [...state.messages, message] };
+    });
+
+    // Update chat list
+    set((state) => ({
+      chats: state.chats
+        .map((c) =>
+          c.id === message.chat_id
+            ? { ...c, last_message: message, last_message_at: message.created_at }
+            : c
+        )
+        .sort((a, b) => {
+          const aTime = a.last_message_at || a.created_at;
+          const bTime = b.last_message_at || b.created_at;
+          return new Date(bTime).getTime() - new Date(aTime).getTime();
+        }),
+    }));
+  },
+
+  updateMessageInList: (message: Message) => {
+    set((state) => ({
+      messages: state.messages.map((m) => (m.id === message.id ? { ...message, sender: m.sender } : m)),
+    }));
+  },
+
+  setSearchQuery: (query: string) => set({ searchQuery: query }),
+
+  startDirectChat: async (otherUserId: string) => {
+    const supabase = getSupabaseBrowserClient();
+
+    const { data, error } = await supabase.rpc('find_or_create_direct_chat', {
+      other_user_id: otherUserId,
+    });
+
+    if (error) {
+      console.error('startDirectChat error:', error);
+      return null;
+    }
+
+    // Refresh chats
+    await get().fetchChats();
+    return data as string;
+  },
+
+  createGroupChat: async (name: string, participantIds: string[], description?: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    // Create chat
+    const { data: chat, error: chatError } = await supabase
+      .from('chats')
+      .insert({
+        is_group: true,
+        group_name: name,
+        group_description: description || null,
+        created_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (chatError || !chat) {
+      console.error('createGroupChat error:', chatError);
+      return null;
+    }
+
+    // Add creator as admin
+    await supabase.from('chat_participants').insert({
+      chat_id: chat.id,
+      user_id: user.id,
+      role: 'admin',
+    });
+
+    // Add other participants
+    const participants = participantIds.map((id) => ({
+      chat_id: chat.id,
+      user_id: id,
+      role: 'member' as const,
+    }));
+
+    if (participants.length) {
+      await supabase.from('chat_participants').insert(participants);
+    }
+
+    await get().fetchChats();
+    return chat.id;
+  },
+
+  resetUnreadCount: (chatId: string) => {
+    set((state) => ({
+      chats: state.chats.map((c) =>
+        c.id === chatId && c.my_participant
+          ? { ...c, my_participant: { ...c.my_participant, unread_count: 0 } }
+          : c
+      ),
+    }));
+  },
+}));
