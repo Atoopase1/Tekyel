@@ -8,6 +8,10 @@ export const metadata: Metadata = {
     "Circle is a modern social messaging platform. Chat, call, share status updates, and stay connected with your circle.",
   keywords: ["circle", "chat", "messaging", "social", "realtime", "video call", "audio call"],
   manifest: "/manifest.json",
+  icons: {
+    icon: "/logo.jpg",
+    apple: "/logo.jpg",
+  },
 };
 
 export const viewport: Viewport = {
