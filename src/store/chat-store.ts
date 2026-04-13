@@ -200,7 +200,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const buildQuery = (advanced: boolean) => {
         const selectStr = advanced
           ? '*, sender:profiles!messages_sender_id_fkey(*), status:message_status(*), reply_to:messages!messages_reply_to_id_fkey(*), stars:message_stars!message_stars_message_id_fkey(*), reactions:message_reactions!message_reactions_message_id_fkey(*, profile:profiles!message_reactions_user_id_fkey(*)), deletions:message_deletions!message_deletions_message_id_fkey(*)'
-          : '*, sender:profiles!messages_sender_id_fkey(*), status:message_status(*), reply_to:messages!messages_reply_to_id_fkey(*)';
+          : '*, sender:profiles(*), status:message_status(*), reply_to:messages(*)';
         
         let q = supabase
           .from('messages')

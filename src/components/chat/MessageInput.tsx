@@ -9,7 +9,7 @@ import { useChatStore } from '@/store/chat-store';
 import { useTypingIndicator } from '@/hooks/usePresence';
 import { uploadMedia, getMessageTypeFromFile } from '@/lib/media';
 import toast from 'react-hot-toast';
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 
 interface MessageInputProps {
   chatId: string;
@@ -312,7 +312,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
       <div className="flex items-end gap-2 px-4 py-3 relative">
         {showEmoji && (
           <div className="absolute bottom-[60px] left-4 z-50 animate-scaleIn">
-            <EmojiPicker onEmojiClick={onEmojiClick} theme="auto" />
+            <EmojiPicker onEmojiClick={onEmojiClick} theme={Theme.AUTO} />
           </div>
         )}
 
