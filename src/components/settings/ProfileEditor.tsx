@@ -1,10 +1,10 @@
 // ============================================================
-// ProfileEditor — Premium profile editor component
+// ProfileEditor — Premium profile editor with cover + avatar
 // ============================================================
 'use client';
 
 import { useState, useRef } from 'react';
-import { Camera } from 'lucide-react';
+import { Camera, Image as ImageIcon, X } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
@@ -17,14 +17,16 @@ export default function ProfileEditor() {
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
   const [bio, setBio] = useState(profile?.bio || '');
   const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
+    setIsUploadingAvatar(true);
     const supabase = getSupabaseBrowserClient();
     const fileName = `avatars/${profile?.id}-${Date.now()}.${file.name.split('.').pop()}`;
 
@@ -35,7 +37,7 @@ export default function ProfileEditor() {
     if (error) {
       console.error('Storage error:', error);
       toast.error(`Upload failed: ${error.message || 'Unknown error'}`);
-      setIsUploading(false);
+      setIsUploadingAvatar(false);
       return;
     }
 
@@ -45,7 +47,42 @@ export default function ProfileEditor() {
 
     await updateProfile({ avatar_url: urlData.publicUrl });
     toast.success('Photo updated!');
-    setIsUploading(false);
+    setIsUploadingAvatar(false);
+    e.target.value = '';
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    const supabase = getSupabaseBrowserClient();
+    const fileName = `covers/${profile?.id}-${Date.now()}.${file.name.split('.').pop()}`;
+
+    const { data, error } = await supabase.storage
+      .from('chat-media')
+      .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+    if (error) {
+      console.error('Storage error:', error);
+      toast.error(`Cover upload failed: ${error.message || 'Unknown error'}`);
+      setIsUploadingCover(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('chat-media')
+      .getPublicUrl(data.path);
+
+    await updateProfile({ cover_url: urlData.publicUrl });
+    toast.success('Cover photo updated!');
+    setIsUploadingCover(false);
+    e.target.value = '';
+  };
+
+  const handleRemoveCover = async () => {
+    await updateProfile({ cover_url: null });
+    toast.success('Cover photo removed');
   };
 
   const handleSave = async () => {
@@ -60,37 +97,81 @@ export default function ProfileEditor() {
 
   return (
     <div className="space-y-6">
+      {/* Hidden file inputs */}
+      <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+
+      {/* Cover Image */}
+      <div>
+        <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+          Cover Photo
+        </label>
+        <div 
+          className="relative w-full h-32 rounded-xl overflow-hidden cursor-pointer group border border-[var(--border-color)]"
+          onClick={() => !isUploadingCover && coverInputRef.current?.click()}
+        >
+          {profile?.cover_url ? (
+            <img src={profile.cover_url} alt="Cover" className="w-full h-full object-cover" />
+          ) : (
+            <div 
+              className="w-full h-full flex flex-col items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}
+            >
+              <ImageIcon size={24} className="text-white/30" />
+              <span className="text-white/40 text-xs">Click to add cover photo</span>
+            </div>
+          )}
+
+          {/* Hover overlay */}
+          {!isUploadingCover && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <Camera size={24} className="text-white" />
+            </div>
+          )}
+
+          {/* Uploading overlay */}
+          {isUploadingCover && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <Spinner size="md" />
+            </div>
+          )}
+
+          {/* Remove cover button */}
+          {profile?.cover_url && !isUploadingCover && (
+            <button
+              onClick={(e) => { e.stopPropagation(); handleRemoveCover(); }}
+              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 p-1.5 rounded-full text-white transition-all opacity-0 group-hover:opacity-100"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Avatar */}
       <div className="flex flex-col items-center">
-        <div className="relative cursor-pointer group" onClick={() => !isUploading && fileInputRef.current?.click()}>
+        <div className="relative cursor-pointer group" onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}>
           <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, var(--navy), var(--emerald))' }}>
             <div className="rounded-full bg-[var(--bg-primary)] p-0.5">
               <Avatar
                 src={profile?.avatar_url}
                 name={profile?.display_name || 'User'}
                 size="xl"
-                className={isUploading ? 'opacity-50' : ''}
+                className={isUploadingAvatar ? 'opacity-50' : ''}
               />
             </div>
           </div>
-          {isUploading && (
+          {isUploadingAvatar && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Spinner size="md" />
             </div>
           )}
-          {!isUploading && (
+          {!isUploadingAvatar && (
             <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
               <Camera size={24} className="text-white" />
             </div>
           )}
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleAvatarUpload}
-        />
         <p className="text-[12px] text-[var(--text-muted)] mt-3">Click to change photo</p>
       </div>
 
@@ -149,3 +230,4 @@ export default function ProfileEditor() {
     </div>
   );
 }
+

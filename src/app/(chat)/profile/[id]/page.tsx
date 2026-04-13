@@ -1,11 +1,11 @@
 // ============================================================
-// ProfileViewPage — Premium user profile view
+// ProfileViewPage — LinkedIn-style profile with cover & avatar upload
 // ============================================================
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Settings, Pencil, UserCheck, UserPlus, Image as ImageIcon, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Settings, Pencil, Camera, UserCheck, UserPlus, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
@@ -19,17 +19,24 @@ export default function ProfileViewPage() {
   const params = useParams();
   const router = useRouter();
   const profileId = params.id as string;
-  const { profile: currentUser } = useAuthStore();
+  const { profile: currentUser, updateProfile } = useAuthStore();
   const { startDirectChat } = useChatStore();
   const supabase = getSupabaseBrowserClient();
+
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const [author, setAuthor] = useState<any>(null);
   const [statuses, setStatuses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   
   const [followerCount, setFollowerCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [relationship, setRelationship] = useState<string | null>(null);
+
+  const isMe = currentUser?.id === profileId;
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -89,6 +96,13 @@ export default function ProfileViewPage() {
     loadProfileData();
   }, [profileId, currentUser, supabase]);
 
+  // Keep author in sync with currentUser profile changes (for own profile)
+  useEffect(() => {
+    if (isMe && currentUser) {
+      setAuthor((prev: any) => prev ? { ...prev, avatar_url: currentUser.avatar_url, cover_url: currentUser.cover_url, display_name: currentUser.display_name, bio: currentUser.bio } : prev);
+    }
+  }, [currentUser, isMe]);
+
   const toggleFollow = async () => {
     if (!currentUser) return;
     
@@ -114,8 +128,57 @@ export default function ProfileViewPage() {
     router.push('/settings');
   };
 
-  const handleEditBanner = () => {
-    toast('Banner upload coming soon!', { icon: '🚧' });
+  // ── Cover Image Upload ──
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    setIsUploadingCover(true);
+    const fileName = `covers/${currentUser.id}-${Date.now()}.${file.name.split('.').pop()}`;
+
+    const { data, error } = await supabase.storage
+      .from('chat-media')
+      .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+    if (error) {
+      toast.error(`Cover upload failed: ${error.message}`);
+      setIsUploadingCover(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('chat-media').getPublicUrl(data.path);
+    await updateProfile({ cover_url: urlData.publicUrl });
+    setAuthor((prev: any) => ({ ...prev, cover_url: urlData.publicUrl }));
+    toast.success('Cover photo updated!');
+    setIsUploadingCover(false);
+    // Reset the input so re-selecting the same file still triggers onChange
+    e.target.value = '';
+  };
+
+  // ── Avatar Image Upload ──
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    setIsUploadingAvatar(true);
+    const fileName = `avatars/${currentUser.id}-${Date.now()}.${file.name.split('.').pop()}`;
+
+    const { data, error } = await supabase.storage
+      .from('chat-media')
+      .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+    if (error) {
+      toast.error(`Avatar upload failed: ${error.message}`);
+      setIsUploadingAvatar(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from('chat-media').getPublicUrl(data.path);
+    await updateProfile({ avatar_url: urlData.publicUrl });
+    setAuthor((prev: any) => ({ ...prev, avatar_url: urlData.publicUrl }));
+    toast.success('Profile photo updated!');
+    setIsUploadingAvatar(false);
+    e.target.value = '';
   };
 
   if (isLoading) {
@@ -134,11 +197,13 @@ export default function ProfileViewPage() {
     );
   }
 
-  const isMe = currentUser?.id === profileId;
-
   return (
     <div className="flex-1 flex flex-col bg-[var(--bg-app)] overflow-x-hidden relative min-h-screen">
       
+      {/* Hidden file inputs */}
+      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+      <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+
       {/* Header bar */}
       <div className="glass-header w-full z-20 sticky top-0 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)]">
         <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
@@ -147,51 +212,80 @@ export default function ProfileViewPage() {
         
         <h1 className="text-[15px] font-semibold text-[var(--text-primary)]">{author.display_name}</h1>
 
-        <button className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
-          <Settings size={20} />
-        </button>
+        {isMe ? (
+          <button onClick={handleEditProfile} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
+            <Settings size={20} />
+          </button>
+        ) : (
+          <div className="w-9" />
+        )}
       </div>
 
-      {/* Banner */}
-      <div className="relative w-full h-40 sm:h-56" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
+      {/* ── Cover / Banner ── */}
+      <div className="relative w-full h-44 sm:h-60 bg-[var(--bg-secondary)] overflow-hidden">
         {author.cover_url ? (
           <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center opacity-10">
-            <ImageIcon size={48} className="text-white" />
+          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
+            <ImageIcon size={48} className="text-white opacity-10" />
           </div>
         )}
-        
-        {isMe && (
-          <button 
-            onClick={handleEditBanner}
-            className="absolute right-4 bottom-4 bg-white/15 hover:bg-white/25 backdrop-blur-md p-2.5 rounded-xl text-white transition-all border border-white/10"
+
+        {/* Uploading overlay */}
+        {isUploadingCover && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+            <Spinner size="lg" />
+          </div>
+        )}
+
+        {/* Cover edit button (own profile) */}
+        {isMe && !isUploadingCover && (
+          <button
+            onClick={() => coverInputRef.current?.click()}
+            className="absolute right-4 bottom-4 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-full text-white transition-all border border-white/15 flex items-center gap-2 text-xs font-medium shadow-lg"
           >
-            <Pencil size={16} />
+            <Camera size={16} />
+            <span className="hidden sm:inline">Edit cover</span>
           </button>
         )}
       </div>
 
-      {/* Profile body */}
+      {/* ── Profile body ── */}
       <div className="relative max-w-4xl mx-auto w-full px-4 sm:px-8">
         
-        {/* Avatar overlapping banner */}
+        {/* Avatar overlapping banner — LinkedIn style */}
         <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
-          <div className="relative z-10 group">
-            <div className="rounded-full border-[5px] border-[var(--bg-app)] inline-block">
-              <div className="p-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, var(--navy), var(--emerald))' }}>
-                <div className="rounded-full bg-[var(--bg-app)] p-0.5">
-                  <Avatar src={author.avatar_url} name={author.display_name} size="xxl" />
-                </div>
+          <div className="relative z-10">
+            <div
+              className={`rounded-full border-[5px] border-[var(--bg-app)] inline-block cursor-pointer group ${isMe ? '' : 'cursor-default'}`}
+              onClick={() => isMe && !isUploadingAvatar && avatarInputRef.current?.click()}
+            >
+              <div className="relative">
+                <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className={isUploadingAvatar ? 'opacity-50' : ''} />
+                
+                {/* Camera overlay on own avatar */}
+                {isMe && !isUploadingAvatar && (
+                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <Camera size={24} className="text-white" />
+                  </div>
+                )}
+
+                {/* Uploading spinner */}
+                {isUploadingAvatar && (
+                  <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                    <Spinner size="md" />
+                  </div>
+                )}
               </div>
             </div>
-            
+
+            {/* Small pencil badge on avatar */}
             {isMe && (
               <button 
-                onClick={handleEditProfile}
-                className="absolute bottom-3 right-3 bg-[var(--bg-primary)]/80 hover:bg-[var(--bg-primary)] backdrop-blur-md p-2 rounded-full text-[var(--text-muted)] transition-all border border-[var(--border-color)]"
+                onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                className="absolute bottom-1 right-1 bg-[var(--wa-green)] hover:bg-[var(--wa-green-dark)] p-1.5 rounded-full text-white transition-all shadow-lg border-2 border-[var(--bg-app)]"
               >
-                <Pencil size={14} />
+                <Pencil size={12} />
               </button>
             )}
           </div>
@@ -210,11 +304,11 @@ export default function ProfileViewPage() {
         </div>
 
         {/* Info card */}
-        <div className="surface-card p-6 mb-8">
+        <div className="surface-card p-6 mb-8 relative">
           {isMe && (
             <button 
               onClick={handleEditProfile}
-              className="absolute right-10 top-auto text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              className="absolute right-5 top-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
               <Pencil size={16} />
             </button>
