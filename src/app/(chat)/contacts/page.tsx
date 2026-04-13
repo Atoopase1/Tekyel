@@ -1,10 +1,10 @@
 // ============================================================
-// Public Search and Contacts Page
+// Contacts Page — Premium network & contacts
 // ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, ShieldPlus, Users } from 'lucide-react';
+import { Search, UserPlus, Users, Crown, MessageSquare } from 'lucide-react';
 import SearchInput from '@/components/ui/SearchInput';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
@@ -31,13 +31,14 @@ export default function ContactsPage() {
   
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
+  const [activeTab, setActiveTab] = useState<'friend' | 'family'>('friend');
 
   // Load saved contacts
   const loadContacts = async () => {
     setIsLoadingContacts(true);
     const { data } = await supabase
       .from('contacts')
-      .select('*, profiles!contacts_contact_id_fkey(*)')   // Join with profile to get contact info
+      .select('*, profiles!contacts_contact_id_fkey(*)')
       .order('created_at', { ascending: false });
     
     if (data) setContacts(data as any);
@@ -93,11 +94,17 @@ export default function ContactsPage() {
     if (chatId) router.push(`/${chatId}`);
   };
 
+  const friendCount = contacts.filter(c => c.category === 'friend').length;
+  const familyCount = contacts.filter(c => c.category === 'family').length;
+  const filteredContacts = contacts.filter(c => c.category === activeTab);
+
   return (
     <div className="flex-1 flex flex-col bg-[var(--bg-app)]">
       {/* Search Header */}
-      <div className="bg-[var(--bg-header)] px-6 py-8 shadow-sm z-10 w-full max-w-4xl mx-auto">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)] mb-6">Network & Contacts</h1>
+      <div className="glass-header px-6 py-6 border-b border-[var(--border-color)] z-10 w-full max-w-4xl mx-auto">
+        <h1 className="text-[22px] font-semibold text-[var(--text-primary)] mb-5" style={{ fontFamily: 'var(--font-heading)' }}>
+          Network & Contacts
+        </h1>
         <SearchInput
           placeholder="Search phone, email, or name..."
           value={query}
@@ -105,43 +112,55 @@ export default function ContactsPage() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6 w-full max-w-4xl mx-auto">
+      <div className="flex-1 overflow-y-auto px-6 py-6 w-full max-w-4xl mx-auto scrollbar-thin">
         {query ? (
-          <div>
-            <h2 className="text-[var(--wa-green)] font-semibold text-sm mb-4 uppercase tracking-wider">
-              {isSearching ? <Spinner size="sm" /> : 'Global Search Results'}
+          <div className="animate-fadeIn">
+            <h2 className="text-[var(--emerald)] font-semibold text-[12px] mb-4 uppercase tracking-widest flex items-center gap-2">
+              {isSearching ? <Spinner size="sm" /> : (
+                <>
+                  <Search size={14} />
+                  Global Search Results
+                </>
+              )}
             </h2>
-            <div className="bg-[var(--bg-primary)] rounded-xl divide-y divide-[var(--border-color)] shadow-sm">
+            <div className="surface-card divide-y divide-[var(--border-color)] overflow-hidden">
               {searchResults.length === 0 && !isSearching && (
-                <div className="p-4 text-center text-[var(--text-muted)] text-sm">No users found.</div>
+                <div className="p-6 text-center text-[var(--text-muted)] text-sm">No users found.</div>
               )}
               {searchResults.map((user) => {
                 const isSaved = contacts.find((c) => c.contact_id === user.id);
                 return (
-                  <div key={user.id} className="flex items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-colors">
+                  <div key={user.id} className="flex items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-all duration-200">
                     <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/profile/${user.id}`)}>
                       <Avatar src={user.avatar_url} name={user.display_name} />
                       <div>
-                        <p className="text-[var(--text-primary)] font-medium">{user.display_name}</p>
-                        <p className="text-[var(--text-muted)] text-xs">{user.is_online ? 'Online' : 'Offline'}</p>
+                        <p className="text-[var(--text-primary)] font-medium text-[14px]">{user.display_name}</p>
+                        <p className="text-[var(--text-muted)] text-[12px]">{user.is_online ? 
+                          <span className="text-[var(--emerald)]">Online</span> : 'Offline'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isSaved ? (
-                        <div className="px-2 py-1 bg-[var(--bg-secondary)] rounded text-xs font-semibold text-[var(--wa-green)] uppercase">
+                        <div className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                          isSaved.category === 'family' 
+                            ? 'bg-[var(--gold)]/10 text-[var(--gold)]' 
+                            : 'bg-[var(--emerald)]/10 text-[var(--emerald)]'
+                        }`}>
                           {isSaved.category}
                         </div>
                       ) : (
                         <>
-                          <Button variant="secondary" size="sm" onClick={() => handleAddContact(user.id, 'friend')} className="text-xs">
-                            <UserPlus size={14} className="mr-1" /> Friend
+                          <Button variant="secondary" size="sm" onClick={() => handleAddContact(user.id, 'friend')} className="text-[12px]">
+                            <UserPlus size={13} className="mr-1" /> Friend
                           </Button>
-                          <Button variant="primary" size="sm" onClick={() => handleAddContact(user.id, 'family')} className="text-xs">
-                            <ShieldPlus size={14} className="mr-1" /> Family
+                          <Button variant="primary" size="sm" onClick={() => handleAddContact(user.id, 'family')} className="text-[12px]">
+                            <Crown size={13} className="mr-1" /> Family
                           </Button>
                         </>
                       )}
-                      <Button variant="secondary" size="sm" onClick={() => handleMessage(user.id)} className="text-xs ml-2">Message</Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleMessage(user.id)} className="text-[12px]">
+                        <MessageSquare size={13} />
+                      </Button>
                     </div>
                   </div>
                 );
@@ -149,56 +168,80 @@ export default function ContactsPage() {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            {/* Saved Contacts Sections */}
+          <div className="animate-fadeIn">
             {isLoadingContacts ? (
               <div className="flex justify-center p-8"><Spinner size="lg" /></div>
             ) : (
               <>
-                {/* Family */}
-                <div>
-                  <h2 className="text-[var(--wa-green)] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
-                    <ShieldPlus size={16} /> Family Circle
-                  </h2>
-                  <div className="bg-[var(--bg-primary)] rounded-xl divide-y divide-[var(--border-color)] shadow-sm">
-                    {contacts.filter(c => c.category === 'family').length === 0 && (
-                      <div className="p-4 text-center text-[var(--text-muted)] text-sm">No family members added.</div>
-                    )}
-                    {contacts.filter(c => c.category === 'family').map((contact) => (
-                      <div key={contact.id} className="flex items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-colors">
-                        <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/profile/${contact.contact_id}`)}>
-                          <Avatar src={contact.profiles.avatar_url} name={contact.profiles.display_name} />
-                          <div>
-                            <p className="text-[var(--text-primary)] font-medium">{contact.profiles.display_name}</p>
-                          </div>
-                        </div>
-                        <Button variant="secondary" size="sm" onClick={() => handleMessage(contact.contact_id)}>Message</Button>
-                      </div>
-                    ))}
-                  </div>
+                {/* Side-by-side tab buttons */}
+                <div className="flex gap-3 mb-6">
+                  <button
+                    onClick={() => setActiveTab('friend')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[14px] font-semibold transition-all duration-300 ${
+                      activeTab === 'friend'
+                        ? 'bg-[var(--emerald)] text-white shadow-lg shadow-[var(--emerald)]/25'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <Users size={16} />
+                    Friends
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      activeTab === 'friend' 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'
+                    }`}>
+                      {friendCount}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('family')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[14px] font-semibold transition-all duration-300 ${
+                      activeTab === 'family'
+                        ? 'bg-[var(--gold)] text-white shadow-lg shadow-[var(--gold)]/25'
+                        : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <Crown size={16} />
+                    Family
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                      activeTab === 'family' 
+                        ? 'bg-white/20 text-white' 
+                        : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'
+                    }`}>
+                      {familyCount}
+                    </span>
+                  </button>
                 </div>
 
-                {/* Friends */}
-                <div>
-                  <h2 className="text-[var(--wa-green)] font-semibold text-sm mb-4 uppercase tracking-wider flex items-center gap-2">
-                    <Users size={16} /> Friends List
-                  </h2>
-                  <div className="bg-[var(--bg-primary)] rounded-xl divide-y divide-[var(--border-color)] shadow-sm">
-                    {contacts.filter(c => c.category === 'friend').length === 0 && (
-                      <div className="p-4 text-center text-[var(--text-muted)] text-sm">No friends added.</div>
-                    )}
-                    {contacts.filter(c => c.category === 'friend').map((contact) => (
-                      <div key={contact.id} className="flex items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-colors">
-                        <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/profile/${contact.contact_id}`)}>
-                          <Avatar src={contact.profiles.avatar_url} name={contact.profiles.display_name} />
-                          <div>
-                            <p className="text-[var(--text-primary)] font-medium">{contact.profiles.display_name}</p>
-                          </div>
-                        </div>
-                        <Button variant="secondary" size="sm" onClick={() => handleMessage(contact.contact_id)}>Message</Button>
+                {/* Filtered Contact List */}
+                <div className="surface-card divide-y divide-[var(--border-color)] overflow-hidden">
+                  {filteredContacts.length === 0 && (
+                    <div className="p-8 text-center">
+                      <div className="w-12 h-12 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center mx-auto mb-3">
+                        {activeTab === 'friend' ? <Users size={22} className="text-[var(--text-muted)]" /> : <Crown size={22} className="text-[var(--text-muted)]" />}
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-[var(--text-muted)] text-sm">
+                        No {activeTab === 'friend' ? 'friends' : 'family members'} added yet.
+                      </p>
+                      <p className="text-[var(--text-muted)] text-xs mt-1">
+                        Search above to find and add people.
+                      </p>
+                    </div>
+                  )}
+                  {filteredContacts.map((contact) => (
+                    <div key={contact.id} className="flex items-center justify-between p-4 hover:bg-[var(--bg-hover)] transition-all duration-200">
+                      <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push(`/profile/${contact.contact_id}`)}>
+                        <Avatar src={contact.profiles.avatar_url} name={contact.profiles.display_name} />
+                        <div>
+                          <p className="text-[var(--text-primary)] font-medium text-[14px]">{contact.profiles.display_name}</p>
+                          <p className="text-[var(--text-muted)] text-[11px]">{contact.profiles.bio || 'Hey there! I am using Circle.'}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => handleMessage(contact.contact_id)}>
+                        <MessageSquare size={16} />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </>
             )}

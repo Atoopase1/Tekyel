@@ -1,5 +1,5 @@
 // ============================================================
-// ChatHeader — Top bar of an active chat with call buttons
+// ChatHeader — Premium glass header with call actions
 // ============================================================
 'use client';
 
@@ -41,7 +41,12 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
   if (typingUsers.length > 0) {
     const names = typingUsers.map((t) => t.display_name).join(', ');
     statusText = (
-      <span className="text-[var(--wa-green)] animate-pulse">
+      <span className="text-[var(--emerald)] font-medium flex items-center gap-1.5">
+        <span className="flex gap-0.5">
+          <span className="w-1 h-1 rounded-full bg-[var(--emerald)]" style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '0ms' }} />
+          <span className="w-1 h-1 rounded-full bg-[var(--emerald)]" style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '200ms' }} />
+          <span className="w-1 h-1 rounded-full bg-[var(--emerald)]" style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '400ms' }} />
+        </span>
         {chat.is_group ? `${names} typing…` : 'typing…'}
       </span>
     );
@@ -51,7 +56,7 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
       .join(', ');
     statusText = participantNames;
   } else if (isOnline) {
-    statusText = 'online';
+    statusText = <span className="text-[var(--emerald)] font-medium">online</span>;
   } else if (chat.other_user?.last_seen) {
     statusText = formatLastSeen(chat.other_user.last_seen);
   }
@@ -69,11 +74,11 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-[var(--bg-header)] border-b border-[var(--border-color)]">
+    <div className="flex items-center gap-3 px-4 py-3 glass-header border-b border-[var(--border-color)]">
       {/* Back button (mobile) */}
       <button
         onClick={() => router.push('/')}
-        className="lg:hidden p-1.5 -ml-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+        className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       >
         <ArrowLeft size={20} />
       </button>
@@ -89,32 +94,32 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
           {displayName}
         </h2>
         {statusText && (
-          <p className="text-xs text-[var(--text-muted)] truncate">{statusText}</p>
+          <p className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">{statusText}</p>
         )}
       </button>
 
-      {/* Actions — Call buttons work in 1-on-1 chats */}
-      <div className="flex items-center gap-1">
+      {/* Actions */}
+      <div className="flex items-center gap-0.5">
         {!chat.is_group && (
           <>
             <button
               onClick={handleVideoCall}
-              className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--wa-green)]"
+              className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--emerald)]"
               title="Video call"
             >
-              <Video size={20} />
+              <Video size={19} />
             </button>
             <button
               onClick={handleAudioCall}
-              className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--wa-green)]"
+              className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--emerald)]"
               title="Audio call"
             >
-              <Phone size={20} />
+              <Phone size={19} />
             </button>
           </>
         )}
-        <button className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]">
-          <Search size={20} />
+        <button className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+          <Search size={19} />
         </button>
       </div>
     </div>

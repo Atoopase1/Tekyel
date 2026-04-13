@@ -1,5 +1,5 @@
 // ============================================================
-// GroupInfoPanel — Group details side panel
+// GroupInfoPanel — Premium group details side panel
 // ============================================================
 'use client';
 
@@ -28,32 +28,36 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
   return (
     <div className="w-80 h-full bg-[var(--bg-primary)] border-l border-[var(--border-color)] flex flex-col animate-slideInRight">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-4 bg-[var(--bg-header)] border-b border-[var(--border-color)]">
+      <div className="flex items-center gap-3 px-5 py-4 glass-header border-b border-[var(--border-color)]">
         <button
           onClick={onClose}
-          className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+          className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
         >
-          <X size={20} />
+          <X size={19} />
         </button>
-        <h2 className="font-semibold text-[var(--text-primary)]">Group info</h2>
+        <h2 className="font-semibold text-[var(--text-primary)] text-[15px]">Group info</h2>
       </div>
 
       {/* Group details */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col items-center py-6 px-4 border-b border-[var(--border-color)]">
-          <Avatar
-            src={chat.group_icon_url}
-            name={chat.group_name || 'Group'}
-            size="xl"
-          />
-          <h3 className="mt-3 text-lg font-semibold text-[var(--text-primary)]">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex flex-col items-center py-8 px-5 border-b border-[var(--border-color)]">
+          <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, var(--navy), var(--emerald))' }}>
+            <div className="rounded-full bg-[var(--bg-primary)] p-0.5">
+              <Avatar
+                src={chat.group_icon_url}
+                name={chat.group_name || 'Group'}
+                size="xl"
+              />
+            </div>
+          </div>
+          <h3 className="mt-4 text-[18px] font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-heading)' }}>
             {chat.group_name || 'Group'}
           </h3>
-          <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-[13px] text-[var(--text-muted)] mt-1">
             Group · {chat.participants.length} participants
           </p>
           {chat.group_description && (
-            <p className="mt-2 text-sm text-[var(--text-secondary)] text-center">
+            <p className="mt-3 text-[13px] text-[var(--text-secondary)] text-center leading-relaxed">
               {chat.group_description}
             </p>
           )}
@@ -61,13 +65,13 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
 
         {/* Participants */}
         <div className="py-4">
-          <p className="px-4 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+          <p className="px-5 text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">
             {chat.participants.length} Participants
           </p>
           {chat.participants.map((p) => (
             <div
               key={p.user_id}
-              className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-hover)] transition-colors"
+              className="flex items-center gap-3 px-5 py-3 hover:bg-[var(--bg-hover)] transition-all duration-200"
             >
               <Avatar
                 src={p.profile?.avatar_url}
@@ -76,17 +80,17 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
                 isOnline={isUserOnline(p.user_id)}
               />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-medium text-[var(--text-primary)] truncate">
                     {p.user_id === user?.id ? 'You' : p.profile?.display_name || 'User'}
                   </span>
                   {p.role === 'admin' && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-[var(--wa-green)] bg-opacity-15 text-[var(--wa-green)] rounded font-semibold">
+                    <span className="text-[10px] px-2 py-0.5 bg-[var(--emerald)]/10 text-[var(--emerald)] rounded-full font-semibold">
                       Admin
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[var(--text-muted)] truncate">
+                <p className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">
                   {p.profile?.bio || 'Hey there!'}
                 </p>
               </div>

@@ -1,5 +1,5 @@
 // ============================================================
-// IncomingCallModal — Incoming call notification overlay
+// IncomingCallModal — Premium incoming call overlay
 // ============================================================
 'use client';
 
@@ -12,55 +12,59 @@ export default function IncomingCallModal() {
 
   if (!incomingCall) return null;
 
-  const isVideo = incomingCall.callType === 'video';
-
   return (
-    <div className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm flex items-center justify-center animate-fadeIn">
-      <div className="bg-gradient-to-b from-[#1a1a3e] to-[#0d0d2a] rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-white/10">
-        {/* Ripple animation */}
-        <div className="relative flex items-center justify-center mb-6">
-          <div className="absolute w-32 h-32 rounded-full border border-white/10 animate-ping" style={{ animationDuration: '1.5s' }} />
-          <div className="absolute w-24 h-24 rounded-full border border-white/5 animate-ping" style={{ animationDuration: '1.5s', animationDelay: '0.3s' }} />
-          <Avatar
-            src={incomingCall.caller.avatar_url}
-            name={incomingCall.caller.display_name}
-            size="xl"
-          />
-        </div>
+    <div 
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fadeIn"
+      style={{ background: 'linear-gradient(180deg, #0F172A 0%, #020617 100%)' }}
+    >
+      {/* Animated rings */}
+      <div className="absolute w-56 h-56 rounded-full border border-[var(--emerald)]/10" style={{ animation: 'ringExpand 2.5s ease-out infinite' }} />
+      <div className="absolute w-56 h-56 rounded-full border border-[var(--emerald)]/10" style={{ animation: 'ringExpand 2.5s ease-out infinite', animationDelay: '0.8s' }} />
+      <div className="absolute w-56 h-56 rounded-full border border-[var(--emerald)]/10" style={{ animation: 'ringExpand 2.5s ease-out infinite', animationDelay: '1.6s' }} />
 
-        {/* Info */}
-        <div className="text-center mb-8">
-          <h2 className="text-xl font-semibold text-white">{incomingCall.caller.display_name}</h2>
-          <p className="text-white/50 text-sm mt-1 flex items-center justify-center gap-1.5">
-            {isVideo ? <Video size={14} /> : <Phone size={14} />}
-            Incoming {isVideo ? 'video' : 'audio'} call…
+      {/* Caller info */}
+      <div className="relative z-10 flex flex-col items-center gap-6">
+        <Avatar src={incomingCall.caller.avatar_url} name={incomingCall.caller.display_name || '?'} size="xxl" />
+        
+        <div className="text-center">
+          <h2 className="text-[24px] font-semibold text-white tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+            {incomingCall.caller.display_name}
+          </h2>
+          <p className="text-white/50 text-[14px] mt-2 flex items-center gap-2 justify-center">
+            {incomingCall.callType === 'video' && <Video size={16} className="text-white/40" />}
+            <span className="animate-pulse text-[var(--emerald)]">
+              Incoming {incomingCall.callType} call…
+            </span>
           </p>
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center justify-center gap-12">
-          {/* Reject */}
+        <div className="flex items-center gap-12 mt-8">
+          {/* Decline */}
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={rejectCall}
-              className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all shadow-lg shadow-red-500/30 animate-pulse"
-              style={{ animationDuration: '2s' }}
+              className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all duration-200 active:scale-95"
+              style={{ boxShadow: '0 0 24px rgba(239, 68, 68, 0.4)' }}
             >
-              <PhoneOff size={26} />
+              <PhoneOff size={24} />
             </button>
-            <span className="text-white/60 text-xs">Decline</span>
+            <span className="text-white/50 text-[12px] font-medium">Decline</span>
           </div>
 
           {/* Accept */}
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={acceptCall}
-              className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/30 animate-pulse"
-              style={{ animationDuration: '2s' }}
+              className="w-16 h-16 rounded-full text-white flex items-center justify-center hover:brightness-110 transition-all duration-200 active:scale-95"
+              style={{ 
+                background: 'linear-gradient(135deg, #16A34A, #22C55E)',
+                boxShadow: '0 0 24px rgba(22, 163, 74, 0.4)',
+              }}
             >
-              {isVideo ? <Video size={26} /> : <Phone size={26} />}
+              <Phone size={24} />
             </button>
-            <span className="text-white/60 text-xs">Accept</span>
+            <span className="text-white/50 text-[12px] font-medium">Accept</span>
           </div>
         </div>
       </div>

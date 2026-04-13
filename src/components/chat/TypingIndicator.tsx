@@ -1,5 +1,5 @@
 // ============================================================
-// TypingIndicator — Animated "typing…" bubble
+// TypingIndicator — Premium animated emerald typing bubble
 // ============================================================
 'use client';
 
@@ -11,13 +11,25 @@ export default function TypingIndicator({ names }: TypingIndicatorProps) {
   if (names.length === 0) return null;
 
   return (
-    <div className="flex justify-start mb-1 px-4">
-      <div className="bg-[var(--bubble-in)] rounded-xl rounded-tl-sm px-4 py-2.5 shadow-sm">
-        <div className="flex items-center gap-1">
+    <div className="flex justify-start mb-1.5 px-4 animate-fadeIn">
+      <div 
+        className="bg-[var(--bubble-in)] rounded-2xl rounded-bl-md px-4 py-3 border border-[var(--border-color)]"
+        style={{ boxShadow: 'var(--shadow-xs)' }}
+      >
+        <div className="flex items-center gap-1.5">
           <div className="flex gap-1">
-            <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span 
+              className="w-[6px] h-[6px] rounded-full bg-[var(--emerald)]" 
+              style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '0ms' }} 
+            />
+            <span 
+              className="w-[6px] h-[6px] rounded-full bg-[var(--emerald)]" 
+              style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '200ms' }} 
+            />
+            <span 
+              className="w-[6px] h-[6px] rounded-full bg-[var(--emerald)]" 
+              style={{ animation: 'typingBounce 1.2s infinite', animationDelay: '400ms' }} 
+            />
           </div>
         </div>
       </div>

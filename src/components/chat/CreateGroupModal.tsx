@@ -1,5 +1,5 @@
 // ============================================================
-// CreateGroupModal — Modal for creating group chats
+// CreateGroupModal — Premium group creation modal
 // ============================================================
 'use client';
 
@@ -90,29 +90,29 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search contacts"
-            className="mb-3"
+            className="mb-4"
           />
 
           {/* Selected chips */}
           {selectedIds.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-2 mb-4">
               {selectedIds.map((id) => {
                 const u = users.find((x) => x.id === id);
                 return (
                   <button
                     key={id}
                     onClick={() => toggleUser(id)}
-                    className="flex items-center gap-1.5 px-2 py-1 bg-[var(--wa-green)] bg-opacity-10 rounded-full text-xs text-[var(--wa-green)]"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--emerald)]/10 rounded-full text-[12px] text-[var(--emerald)] font-medium hover:bg-[var(--emerald)]/20 transition-colors"
                   >
                     {u?.display_name || 'User'}
-                    <span className="text-[10px]">✕</span>
+                    <span className="text-[10px] opacity-60">✕</span>
                   </button>
                 );
               })}
             </div>
           )}
 
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto scrollbar-thin -mx-2">
             {isLoading ? (
               <Spinner className="my-8" />
             ) : (
@@ -122,18 +122,18 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                   <button
                     key={user.id}
                     onClick={() => toggleUser(user.id)}
-                    className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200"
                   >
                     <Avatar src={user.avatar_url} name={user.display_name} size="md" />
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{user.display_name}</p>
-                      <p className="text-xs text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
+                      <p className="text-[14px] font-medium text-[var(--text-primary)]">{user.display_name}</p>
+                      <p className="text-[12px] text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
                     </div>
                     <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                         isSelected
-                          ? 'bg-[var(--wa-green)] border-[var(--wa-green)]'
-                          : 'border-[var(--text-muted)]'
+                          ? 'bg-[var(--emerald)] border-[var(--emerald)]'
+                          : 'border-[var(--text-muted)]/40'
                       }`}
                     >
                       {isSelected && <Check size={12} className="text-white" />}
@@ -144,7 +144,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
             )}
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <Button
               onClick={() => setStep('details')}
               disabled={selectedIds.length === 0}
@@ -155,9 +155,9 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
         </>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
                 Group name
               </label>
               <input
@@ -165,12 +165,12 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="Enter group name"
-                className="w-full px-3 py-2 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--wa-green)]"
+                className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200"
                 autoFocus
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
                 Description (optional)
               </label>
               <textarea
@@ -178,15 +178,15 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                 onChange={(e) => setGroupDescription(e.target.value)}
                 placeholder="What is this group about?"
                 rows={2}
-                className="w-full px-3 py-2 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--wa-green)] resize-none"
+                className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 resize-none transition-all duration-200"
               />
             </div>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[12px] text-[var(--text-muted)]">
               {selectedIds.length} participant{selectedIds.length !== 1 ? 's' : ''} selected
             </p>
           </div>
 
-          <div className="mt-4 flex justify-between">
+          <div className="mt-5 flex justify-between">
             <Button variant="ghost" onClick={() => setStep('select')}>
               Back
             </Button>

@@ -13,12 +13,14 @@ interface ChatState {
   activeChat: ChatWithDetails | null;
   activeChatId: string | null;
   messages: Message[];
+  messagesByChat: Record<string, Message[]>;
   isLoadingChats: boolean;
   isLoadingMessages: boolean;
   hasMoreMessages: boolean;
   searchQuery: string;
   _hasFetchedOnce: boolean;
   replyingTo: Message | null;
+  editingMessage: Message | null;
 
   // Actions
   fetchChats: () => Promise<void>;
@@ -35,6 +37,10 @@ interface ChatState {
   updateChatWithNewMessage: (chatId: string, message: Message) => void;
   incrementUnreadCount: (chatId: string) => void;
   setReplyingTo: (message: Message | null) => void;
+  setEditingMessage: (message: Message | null) => void;
+  editMessage: (messageId: string, newContent: string) => Promise<void>;
+  retryMessage: (messageId: string, chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string) => Promise<void>;
+  initOfflineQueue: () => void;
   deleteMessageForMe: (messageId: string) => Promise<void>;
   deleteMessageForEveryone: (messageId: string) => Promise<void>;
   pinMessage: (chatId: string, messageId: string) => Promise<void>;
@@ -50,12 +56,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeChat: null,
   activeChatId: null,
   messages: [],
+  messagesByChat: {},
   isLoadingChats: false,
   isLoadingMessages: false,
   hasMoreMessages: true,
   searchQuery: '',
   _hasFetchedOnce: false,
   replyingTo: null,
+  editingMessage: null,
 
   fetchChats: async () => {
     const hasCachedChats = get().chats.length > 0;
@@ -162,7 +170,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return;
     }
 
-    set({ activeChatId: chatId });
+    const cached = get().messagesByChat[chatId];
+    set({ 
+      activeChatId: chatId,
+      messages: cached || [],
+      hasMoreMessages: cached ? cached.length >= 20 : true
+    });
 
     const chat = get().chats.find((c) => c.id === chatId);
     if (chat) {
@@ -176,23 +189,52 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   fetchMessages: async (chatId: string, before?: string) => {
-    set({ isLoadingMessages: true });
+    const hasCached = (get().messagesByChat[chatId]?.length || 0) > 0;
+    if (!before && !hasCached) {
+      set({ isLoadingMessages: true });
+    }
     const supabase = getSupabaseBrowserClient();
 
     try {
-      let query = supabase
-        .from('messages')
-        .select('*, sender:profiles(*), status:message_status(*), reply_to:reply_to_id(*), stars:message_stars(*), reactions:message_reactions(*, profile:profiles(*)), deletions:message_deletions(*)')
-        .eq('chat_id', chatId)
-        .order('created_at', { ascending: false })
-        .limit(50);
+      // Build query — try with advanced features, fall back to basic if tables don't exist
+      const buildQuery = (advanced: boolean) => {
+        const selectStr = advanced
+          ? '*, sender:profiles!messages_sender_id_fkey(*), status:message_status(*), reply_to:messages!messages_reply_to_id_fkey(*), stars:message_stars!message_stars_message_id_fkey(*), reactions:message_reactions!message_reactions_message_id_fkey(*, profile:profiles!message_reactions_user_id_fkey(*)), deletions:message_deletions!message_deletions_message_id_fkey(*)'
+          : '*, sender:profiles!messages_sender_id_fkey(*), status:message_status(*), reply_to:messages!messages_reply_to_id_fkey(*)';
+        
+        let q = supabase
+          .from('messages')
+          .select(selectStr)
+          .eq('chat_id', chatId)
+          .order('created_at', { ascending: false })
+          .limit(20);
 
-      if (before) {
-        query = query.lt('created_at', before);
+        if (before) {
+          q = q.lt('created_at', before);
+        }
+        return q;
+      };
+
+      // 8 second timeout fallback
+      let isTimeout = false;
+      const timeoutId = setTimeout(() => {
+        isTimeout = true;
+        set({ isLoadingMessages: false });
+      }, 8000);
+
+      let { data, error } = await buildQuery(true);
+      
+      // Fallback to basic query if advanced tables don't exist
+      if (error && (error.message?.includes('schema cache') || error.message?.includes('relationship'))) {
+        console.warn('Advanced interaction tables not found, falling back to basic query');
+        const result = await buildQuery(false);
+        data = result.data;
+        error = result.error;
       }
 
-      const { data, error } = await query;
+      clearTimeout(timeoutId);
 
+      if (isTimeout) return;
       if (error) throw error;
 
       const user = useAuthStore.getState().user;
@@ -207,20 +249,25 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (before) {
         // Prepend older messages
+        set((state) => {
+          const combined = [...messages, ...state.messages];
+          return {
+            messages: combined,
+            messagesByChat: { ...state.messagesByChat, [chatId]: combined },
+            hasMoreMessages: messages.length === 20,
+            isLoadingMessages: false,
+          };
+        });
+      } else {
         set((state) => ({
-          messages: [...messages, ...state.messages],
-          hasMoreMessages: messages.length === 50,
+          messages,
+          messagesByChat: { ...state.messagesByChat, [chatId]: messages },
+          hasMoreMessages: messages.length === 20,
           isLoadingMessages: false,
         }));
-      } else {
-        set({
-          messages,
-          hasMoreMessages: messages.length === 50,
-          isLoadingMessages: false,
-        });
       }
-    } catch (err) {
-      console.error('fetchMessages error:', err);
+    } catch (err: any) {
+      console.error('fetchMessages error:', err?.message || JSON.stringify(err) || err);
       set({ isLoadingMessages: false });
     }
   },
@@ -233,6 +280,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     const messageId = crypto.randomUUID();
     
+    const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
+
     // 1. Create Optimistic Message
     const optimisticMessage = {
       id: messageId,
@@ -246,12 +295,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
       is_deleted: false,
       created_at: new Date().toISOString(),
       sender: profile || undefined,
-      status: [],
+      status: [{ id: 'temp', message_id: messageId, user_id: '', status: isOffline ? 'queued' : 'sent', updated_at: new Date().toISOString() }],
     } as Message;
 
     // 2. Instantly show it on screen
     get().addMessage(optimisticMessage);
     get().updateChatWithNewMessage(chatId, optimisticMessage);
+
+    if (isOffline) {
+      const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
+      queue.push({ chatId, content, messageType, mediaUrl, mediaMetadata, replyToId, optimisticId: messageId });
+      localStorage.setItem('offline-messages-queue', JSON.stringify(queue));
+      return optimisticMessage;
+    }
 
     // 3. Send to Database in background (minimal — no heavy joins)
     const { error } = await supabase
@@ -269,22 +325,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     if (error) {
       console.error('sendMessage error:', error);
-      if (typeof window !== 'undefined') {
-        const { toast } = require('react-hot-toast');
-        toast.error(`Send Error: ${error.message}`);
-      }
-      // Remove the optimistic message on failure
-      set((state) => ({
-        messages: state.messages.filter((m) => m.id !== messageId),
-      }));
-      return null;
+      // Mark as failed instead of deleting
+      get().updateMessageInList({
+        ...optimisticMessage,
+        status: [{ id: 'temp', message_id: messageId, user_id: '', status: 'failed', updated_at: new Date().toISOString() }],
+      });
+      return optimisticMessage;
     }
-
-    // 4. Mark optimistic message as "sent" (single checkmark)
-    get().updateMessageInList({
-      ...optimisticMessage,
-      status: [{ id: '', message_id: messageId, user_id: '', status: 'sent', updated_at: new Date().toISOString() }],
-    });
 
     return optimisticMessage;
   },
@@ -327,9 +374,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   addMessage: (message: Message) => {
     set((state) => {
-      // Avoid duplicates
-      if (state.messages.some((m) => m.id === message.id)) return state;
-      return { messages: [...state.messages, message] };
+      const chatId = message.chat_id;
+      const cached = state.messagesByChat[chatId] || [];
+      if (cached.some((m) => m.id === message.id)) return state;
+      
+      const newCache = [...cached, message];
+      const updates: Partial<ChatState> = {
+        messagesByChat: { ...state.messagesByChat, [chatId]: newCache }
+      };
+      if (state.activeChatId === chatId) {
+        updates.messages = [...state.messages, message];
+      }
+      return updates;
     });
 
     // Update chat list with the new message
@@ -367,9 +423,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   updateMessageInList: (message: Message) => {
-    set((state) => ({
-      messages: state.messages.map((m) => (m.id === message.id ? { ...message, sender: m.sender } : m)),
-    }));
+    set((state) => {
+      const chatId = message.chat_id;
+      const cached = state.messagesByChat[chatId] || [];
+      const newCache = cached.map((m) => (m.id === message.id ? { ...message, sender: m.sender } : m));
+      
+      const updates: Partial<ChatState> = {
+        messagesByChat: { ...state.messagesByChat, [chatId]: newCache }
+      };
+      if (state.activeChatId === chatId) {
+        updates.messages = state.messages.map((m) => (m.id === message.id ? { ...message, sender: m.sender } : m));
+      }
+      return updates;
+    });
   },
 
   setSearchQuery: (query: string) => set({ searchQuery: query }),
@@ -453,6 +519,101 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({ replyingTo: message });
   },
 
+  setEditingMessage: (message: Message | null) => {
+    set({ editingMessage: message });
+  },
+
+  editMessage: async (messageId: string, newContent: string) => {
+    const supabase = getSupabaseBrowserClient();
+    
+    // Optimistic cache update
+    set((state) => {
+      const msgs = state.messages.map((m) =>
+        m.id === messageId ? { ...m, content: newContent } : m
+      );
+      const msgsByChat = Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, chatMsgs]) => [
+          cId,
+          chatMsgs.map((m) =>
+            m.id === messageId ? { ...m, content: newContent } : m
+          ),
+        ])
+      );
+      return { messages: msgs, messagesByChat: msgsByChat };
+    });
+
+    const { error } = await supabase
+      .from('messages')
+      .update({ content: newContent })
+      .eq('id', messageId);
+
+    if (error) {
+      console.error('editMessage error:', error);
+      if (typeof window !== 'undefined') {
+        const { toast } = require('react-hot-toast');
+        toast.error(`Edit Error: ${error.message}`);
+      }
+    }
+  },
+
+  retryMessage: async (messageId, chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    // Optimistically set to sending (sent)
+    const existing = get().messages.find(m => m.id === messageId);
+    if (existing) {
+      get().updateMessageInList({
+        ...existing,
+        status: [{ id: 'temp', message_id: messageId, user_id: '', status: 'sent', updated_at: new Date().toISOString() }],
+      });
+    }
+
+    const { error } = await supabase
+      .from('messages')
+      .insert({
+        id: messageId,
+        chat_id: chatId,
+        sender_id: user.id,
+        content,
+        message_type: messageType,
+        media_url: mediaUrl || null,
+        media_metadata: mediaMetadata || null,
+        reply_to_id: replyToId || null,
+      });
+
+    if (error) {
+      // Mark as failed again
+      if (existing) {
+        get().updateMessageInList({
+          ...existing,
+          status: [{ id: 'temp', message_id: messageId, user_id: '', status: 'failed', updated_at: new Date().toISOString() }],
+        });
+      }
+    } else {
+      // Remove from queue if it was there
+      const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
+      const newQueue = queue.filter((q: any) => q.optimisticId !== messageId);
+      localStorage.setItem('offline-messages-queue', JSON.stringify(newQueue));
+    }
+  },
+
+  initOfflineQueue: () => {
+    if (typeof window === 'undefined') return;
+    
+    const handleOnline = () => {
+      const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
+      if (queue.length > 0) {
+        queue.forEach((q: any) => {
+          get().retryMessage(q.optimisticId, q.chatId, q.content, q.messageType, q.mediaUrl, q.mediaMetadata, q.replyToId);
+        });
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+  },
+
   deleteMessageForMe: async (messageId: string) => {
     const supabase = getSupabaseBrowserClient();
     const user = useAuthStore.getState().user;
@@ -461,6 +622,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Optimistically hide it
     set((state) => ({
       messages: state.messages.filter((m) => m.id !== messageId),
+      messagesByChat: Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, msgs]) => [
+          cId,
+          msgs.filter((m) => m.id !== messageId)
+        ])
+      )
     }));
 
     await supabase.from('message_deletions').insert({
@@ -477,6 +644,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
       messages: state.messages.map((m) => 
         m.id === messageId ? { ...m, is_deleted: true } : m
       ),
+      messagesByChat: Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, msgs]) => [
+          cId,
+          msgs.map((m) => m.id === messageId ? { ...m, is_deleted: true } : m)
+        ])
+      )
     }));
 
     await supabase.from('messages').update({ is_deleted: true }).eq('id', messageId);
@@ -515,6 +688,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
           stars: [...(m.stars || []), { id: 'temp', user_id: user.id, message_id: messageId, created_at: '' }] 
         } : m
       ),
+      messagesByChat: Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, msgs]) => [
+          cId,
+          msgs.map((m) => m.id === messageId ? { ...m, stars: [...(m.stars || []), { id: 'temp', user_id: user.id, message_id: messageId, created_at: '' }] } : m)
+        ])
+      )
     }));
 
     await supabase.from('message_stars').insert({ user_id: user.id, message_id: messageId });
@@ -532,6 +711,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
           stars: (m.stars || []).filter(s => s.user_id !== user.id) 
         } : m
       ),
+      messagesByChat: Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, msgs]) => [
+          cId,
+          msgs.map((m) => m.id === messageId ? { ...m, stars: (m.stars || []).filter(s => s.user_id !== user.id) } : m)
+        ])
+      )
     }));
 
     await supabase.from('message_stars').delete().eq('user_id', user.id).eq('message_id', messageId);
@@ -554,7 +739,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
           reactions: [...filtered, { id: 'temp', user_id: user.id, message_id: messageId, emoji, created_at: '', profile }],
         };
       });
-      return { messages: msgs };
+      const msgsByChat = Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, chatMsgs]) => [
+          cId,
+          chatMsgs.map((m) => {
+            if (m.id !== messageId) return m;
+            const filtered = (m.reactions || []).filter(r => r.user_id !== user.id);
+            return {
+              ...m,
+              reactions: [...filtered, { id: 'temp', user_id: user.id, message_id: messageId, emoji, created_at: '', profile }],
+            };
+          })
+        ])
+      );
+      return { messages: msgs, messagesByChat: msgsByChat };
     });
 
     // Delete existing first to avoid unique constraint if changing emoji
@@ -574,6 +772,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
           reactions: (m.reactions || []).filter(r => !(r.user_id === user.id && r.emoji === emoji)) 
         } : m
       ),
+      messagesByChat: Object.fromEntries(
+        Object.entries(state.messagesByChat).map(([cId, msgs]) => [
+          cId,
+          msgs.map((m) => m.id === messageId ? { ...m, reactions: (m.reactions || []).filter(r => !(r.user_id === user.id && r.emoji === emoji)) } : m)
+        ])
+      )
     }));
 
     await supabase.from('message_reactions').delete().eq('user_id', user.id).eq('message_id', messageId).eq('emoji', emoji);

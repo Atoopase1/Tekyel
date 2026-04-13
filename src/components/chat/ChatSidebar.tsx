@@ -1,5 +1,5 @@
 // ============================================================
-// ChatSidebar — Left panel with chat list, search, new chat
+// ChatSidebar — Premium left panel with chat list
 // ============================================================
 'use client';
 
@@ -74,53 +74,56 @@ export default function ChatSidebar() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-primary)] border-r border-[var(--border-color)]">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg-header)]">
+    <div className="flex flex-col h-full bg-[var(--bg-primary)]">
+      {/* Header — Glass effect */}
+      <div className="flex items-center justify-between px-5 py-4 glass-header border-b border-[var(--border-color)]">
         <div className="flex items-center gap-3">
           <Avatar
             src={profile?.avatar_url}
             name={profile?.display_name || 'User'}
             size="md"
           />
-          <span className="font-semibold text-[var(--text-primary)] text-[15px]">
-            {profile?.display_name || 'User'}
-          </span>
+          <div>
+            <span className="font-semibold text-[var(--text-primary)] text-[15px] block leading-tight">
+              {profile?.display_name || 'User'}
+            </span>
+            <span className="text-[11px] text-[var(--emerald)] font-medium">Online</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => setShowNewGroup(true)}
-            className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             title="New group"
           >
-            <Users size={20} />
+            <Users size={19} />
           </button>
           <button
             onClick={() => setShowNewChat(true)}
-            className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             title="New chat"
           >
-            <MessageSquarePlus size={20} />
+            <MessageSquarePlus size={19} />
           </button>
           <button
             onClick={() => router.push('/settings')}
-            className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             title="Settings"
           >
-            <Settings size={20} />
+            <Settings size={19} />
           </button>
           <button
             onClick={handleSignOut}
-            className="p-2 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-muted)]"
+            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-red-500"
             title="Log out"
           >
-            <LogOut size={20} />
+            <LogOut size={19} />
           </button>
         </div>
       </div>
 
       {/* Search */}
-      <div className="px-3 py-2">
+      <div className="px-4 py-3">
         <SearchInput value={searchQuery} onChange={setSearchQuery} />
       </div>
 
@@ -130,9 +133,11 @@ export default function ChatSidebar() {
           <Spinner className="mt-12" />
         ) : filteredChats.length === 0 ? (
           <div className="flex flex-col items-center justify-center mt-20 text-[var(--text-muted)] px-6 text-center">
-            <MessageSquarePlus size={48} className="mb-4 opacity-50" />
-            <p className="text-sm">No chats yet</p>
-            <p className="text-xs mt-1">Start a new conversation!</p>
+            <div className="w-16 h-16 rounded-2xl bg-[var(--bg-secondary)] flex items-center justify-center mb-4">
+              <MessageSquarePlus size={28} className="opacity-40" />
+            </div>
+            <p className="text-sm font-medium text-[var(--text-secondary)]">No conversations yet</p>
+            <p className="text-xs mt-1.5 text-[var(--text-muted)]">Start a new chat to get going</p>
           </div>
         ) : (
           filteredChats.map((chat) => (
@@ -151,7 +156,7 @@ export default function ChatSidebar() {
 
       {/* New Chat Modal */}
       <Modal isOpen={showNewChat} onClose={() => setShowNewChat(false)} title="New Chat">
-        <div className="max-h-80 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto -mx-2">
           {isSearching ? (
             <Spinner className="my-8" />
           ) : searchUsers.length === 0 ? (
@@ -161,7 +166,7 @@ export default function ChatSidebar() {
               <button
                 key={user.id}
                 onClick={() => handleStartChat(user.id)}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-[var(--bg-hover)] transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200"
               >
                 <Avatar src={user.avatar_url} name={user.display_name} size="md" />
                 <div className="text-left">

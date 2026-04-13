@@ -1,5 +1,5 @@
 // ============================================================
-// ChatListItem — Single row in the chat list sidebar
+// ChatListItem — Premium row in chat list
 // ============================================================
 'use client';
 
@@ -35,10 +35,17 @@ export default function ChatListItem({ chat, isActive, onClick }: ChatListItemPr
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 transition-all duration-150 hover:bg-[var(--bg-hover)] ${
-        isActive ? 'bg-[var(--bg-active)]' : ''
+      className={`w-full flex items-center gap-3.5 px-5 py-3.5 transition-all duration-200 relative group ${
+        isActive 
+          ? 'bg-[var(--bg-hover)]' 
+          : 'hover:bg-[var(--bg-hover)]'
       }`}
     >
+      {/* Active indicator bar */}
+      {isActive && (
+        <span className="absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full bg-[var(--emerald)]" />
+      )}
+
       <Avatar
         src={avatarSrc}
         name={displayName}
@@ -52,20 +59,23 @@ export default function ChatListItem({ chat, isActive, onClick }: ChatListItemPr
           </span>
           {chat.last_message_at && (
             <span
-              className={`text-xs shrink-0 ml-2 ${
-                unreadCount > 0 ? 'text-[var(--wa-green)]' : 'text-[var(--text-muted)]'
+              className={`text-[12px] shrink-0 ml-2 font-light ${
+                unreadCount > 0 ? 'text-[var(--emerald)] font-medium' : 'text-[var(--text-muted)]'
               }`}
             >
               {formatChatTime(chat.last_message_at)}
             </span>
           )}
         </div>
-        <div className="flex items-center justify-between mt-0.5">
-          <p className="text-sm text-[var(--text-muted)] truncate">
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-[13px] text-[var(--text-muted)] truncate leading-snug">
             {lastMessagePreview}
           </p>
           {unreadCount > 0 && (
-            <span className="shrink-0 ml-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-[var(--wa-green)] text-white text-xs font-bold rounded-full">
+            <span 
+              className="shrink-0 ml-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-[var(--emerald)] text-white text-[11px] font-bold rounded-full"
+              style={{ boxShadow: '0 0 8px rgba(22, 163, 74, 0.3)' }}
+            >
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}

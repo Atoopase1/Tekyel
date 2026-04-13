@@ -1,5 +1,5 @@
 // ============================================================
-// Chat Layout — Sidebar + Main panel (protected)
+// Chat Layout — Premium sidebar + main panel (protected)
 // ============================================================
 'use client';
 
@@ -13,13 +13,16 @@ import IncomingCallModal from '@/components/chat/IncomingCallModal';
 import LottieLoader from '@/components/ui/LottieLoader';
 import { Toaster } from 'react-hot-toast';
 import AppNavigation from '@/components/layout/AppNavigation';
+import { useChatStore } from '@/store/chat-store';
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const { initialize, isLoading, isInitialized } = useAuthStore();
+  const initOfflineQueue = useChatStore((s) => s.initOfflineQueue);
 
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    initOfflineQueue();
+  }, [initialize, initOfflineQueue]);
 
   // Start presence tracking
   usePresence();
@@ -32,10 +35,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   if (!isInitialized || isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="flex flex-col items-center gap-2">
+      <div className="h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, var(--bg-app) 0%, var(--bg-secondary) 100%)' }}>
+        <div className="flex flex-col items-center gap-3">
           <LottieLoader size={160} />
-          <p className="text-[var(--text-muted)] text-sm animate-pulse">Loading Circle…</p>
+          <p className="text-[var(--text-muted)] text-[13px] font-medium animate-pulse tracking-wide">Loading Circle…</p>
         </div>
       </div>
     );
@@ -49,8 +52,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
           style: {
             background: 'var(--bg-primary)',
             color: 'var(--text-primary)',
-            borderRadius: '12px',
+            borderRadius: '16px',
             border: '1px solid var(--border-color)',
+            boxShadow: 'var(--shadow-lg)',
+            fontSize: '14px',
           },
         }}
       />
@@ -62,7 +67,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       {/* Main Navigation Tab Bar */}
       <AppNavigation />
 
-      {/* Main content area — pb-16 on mobile to clear the fixed bottom nav */}
+      {/* Main content area */}
       <div className="flex-1 flex min-w-0 lg:h-full h-[calc(100vh-64px)] pb-16 lg:pb-0 relative">
         <div className="flex-1 flex min-w-0 h-full w-full">
             {children}

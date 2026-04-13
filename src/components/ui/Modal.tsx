@@ -1,5 +1,5 @@
 // ============================================================
-// Modal component — Overlay dialog
+// Modal — Premium glassmorphic overlay dialog
 // ============================================================
 'use client';
 
@@ -39,16 +39,20 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn"
       onClick={(e) => e.target === overlayRef.current && onClose()}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      {/* Premium frosted backdrop */}
+      <div className="absolute inset-0 bg-[var(--navy)]/40 backdrop-blur-md" />
+      
+      {/* Modal card */}
       <div
-        className={`relative w-full ${maxWidth} bg-[var(--bg-primary)] rounded-2xl shadow-2xl animate-scaleIn overflow-hidden`}
+        className={`relative w-full ${maxWidth} bg-[var(--bg-primary)] rounded-2xl overflow-hidden animate-scaleIn`}
+        style={{ boxShadow: 'var(--shadow-2xl)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)]">
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] transition-colors text-[var(--text-secondary)]"
+            className="p-1.5 rounded-full hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:rotate-90"
           >
             <X size={20} />
           </button>

@@ -1,8 +1,11 @@
+// ============================================================
+// ProfileViewPage — Premium user profile view
+// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Settings, Pencil, UserCheck, UserPlus, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Settings, Pencil, UserCheck, UserPlus, Image as ImageIcon, MessageSquare } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
@@ -16,7 +19,7 @@ export default function ProfileViewPage() {
   const params = useParams();
   const router = useRouter();
   const profileId = params.id as string;
-  const { profile: currentUser, setProfile } = useAuthStore();
+  const { profile: currentUser } = useAuthStore();
   const { startDirectChat } = useChatStore();
   const supabase = getSupabaseBrowserClient();
 
@@ -41,7 +44,7 @@ export default function ProfileViewPage() {
       
       if (profileData) setAuthor(profileData);
 
-      // Load specific statuses they have access to
+      // Load statuses
       const { data: statusData } = await supabase
         .from('statuses')
         .select('*, profiles!statuses_user_id_fkey(*)')
@@ -108,7 +111,7 @@ export default function ProfileViewPage() {
   };
   
   const handleEditProfile = () => {
-    toast('Profile editing coming soon!', { icon: '🚧' });
+    router.push('/settings');
   };
 
   const handleEditBanner = () => {
@@ -116,143 +119,148 @@ export default function ProfileViewPage() {
   };
 
   if (isLoading) {
-    return <div className="flex-1 flex justify-center items-center bg-[#18181B]"><Spinner size="lg" /></div>;
+    return (
+      <div className="flex-1 flex justify-center items-center bg-[var(--bg-app)]">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   if (!author) {
-    return <div className="flex-1 flex justify-center items-center bg-[#18181B] text-white">User not found.</div>;
+    return (
+      <div className="flex-1 flex justify-center items-center bg-[var(--bg-app)] text-[var(--text-primary)]">
+        User not found.
+      </div>
+    );
   }
 
   const isMe = currentUser?.id === profileId;
 
   return (
-    <div className="flex-1 flex flex-col bg-[#121212] overflow-x-hidden relative min-h-screen">
+    <div className="flex-1 flex flex-col bg-[var(--bg-app)] overflow-x-hidden relative min-h-screen">
       
-      {/* 1. Dark Header with Top Bar (Back, Search, Settings) */}
-      <div className="bg-[#18181B] w-full z-20 sticky top-0 flex items-center justify-between px-4 py-3 border-b border-black/40 shadow-sm">
-        <button onClick={() => router.back()} className="text-[var(--text-muted)] hover:text-white transition-colors">
-          <ArrowLeft size={24} />
+      {/* Header bar */}
+      <div className="glass-header w-full z-20 sticky top-0 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)]">
+        <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
+          <ArrowLeft size={20} />
         </button>
         
-        <div className="flex-1 max-w-md mx-4">
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search" 
-              className="w-full bg-[#27272A] text-white text-sm rounded-full py-2 px-4 focus:outline-none focus:ring-1 focus:ring-gray-500 placeholder-gray-400"
-            />
-          </div>
-        </div>
+        <h1 className="text-[15px] font-semibold text-[var(--text-primary)]">{author.display_name}</h1>
 
-        <button className="text-[var(--text-muted)] hover:text-white transition-colors">
-          <Settings size={22} />
+        <button className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
+          <Settings size={20} />
         </button>
       </div>
 
-      {/* 2. Banner/Cover Photo Section */}
-      <div className="relative w-full h-40 sm:h-56 bg-gradient-to-r from-gray-800 to-gray-900 border-b-2 border-black/50">
+      {/* Banner */}
+      <div className="relative w-full h-40 sm:h-56" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
         {author.cover_url ? (
           <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center opacity-30">
+          <div className="w-full h-full flex items-center justify-center opacity-10">
             <ImageIcon size={48} className="text-white" />
           </div>
         )}
         
-        {/* Banner Edit Icon overlay */}
         {isMe && (
           <button 
             onClick={handleEditBanner}
-            className="absolute right-4 bottom-4 bg-white/20 hover:bg-white/30 backdrop-blur-md p-2 rounded-full text-white transition-all shadow-lg border border-white/10"
+            className="absolute right-4 bottom-4 bg-white/15 hover:bg-white/25 backdrop-blur-md p-2.5 rounded-xl text-white transition-all border border-white/10"
           >
-            <Pencil size={18} />
+            <Pencil size={16} />
           </button>
         )}
       </div>
 
-      {/* Profile Body Layer */}
+      {/* Profile body */}
       <div className="relative max-w-4xl mx-auto w-full px-4 sm:px-8">
         
-        {/* 3. Overlapping Avatar */}
+        {/* Avatar overlapping banner */}
         <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
           <div className="relative z-10 group">
-            {/* The dense thick border matches the dark background */}
-            <div className="rounded-full border-[6px] sm:border-[8px] border-[#121212] inline-block bg-[#121212]">
-              <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className="w-24 h-24 sm:w-36 sm:h-36" />
+            <div className="rounded-full border-[5px] border-[var(--bg-app)] inline-block">
+              <div className="p-0.5 rounded-full" style={{ background: 'linear-gradient(135deg, var(--navy), var(--emerald))' }}>
+                <div className="rounded-full bg-[var(--bg-app)] p-0.5">
+                  <Avatar src={author.avatar_url} name={author.display_name} size="xxl" />
+                </div>
+              </div>
             </div>
             
-            {/* Avatar Edit Icon */}
             {isMe && (
               <button 
                 onClick={handleEditProfile}
-                className="absolute bottom-2 right-2 bg-white/20 hover:bg-white/30 backdrop-blur-md p-1.5 sm:p-2 rounded-full text-white transition-all border border-white/10"
+                className="absolute bottom-3 right-3 bg-[var(--bg-primary)]/80 hover:bg-[var(--bg-primary)] backdrop-blur-md p-2 rounded-full text-[var(--text-muted)] transition-all border border-[var(--border-color)]"
               >
-                <Pencil size={14} className="sm:w-4 sm:h-4" />
+                <Pencil size={14} />
               </button>
             )}
           </div>
           
-          {/* Action Buttons to the Right of Avatar (if not myself) */}
+          {/* Actions */}
           {!isMe && (
             <div className="flex gap-2 mb-2">
-               <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} className="px-4 py-2 text-sm h-10 rounded-full">
-                  {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />} 
-               </Button>
-               <Button variant="secondary" onClick={handleMessage} className="px-4 py-2 text-sm h-10 rounded-full bg-[#27272A] border-none text-white hover:bg-[#3F3F46]">
-                 Message
-               </Button>
+              <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} size="sm">
+                {isFollowing ? <><UserCheck size={15} className="mr-1.5" /> Following</> : <><UserPlus size={15} className="mr-1.5" /> Follow</>}
+              </Button>
+              <Button variant="secondary" onClick={handleMessage} size="sm">
+                <MessageSquare size={15} className="mr-1.5" /> Message
+              </Button>
             </div>
           )}
         </div>
 
-        {/* 4. Background and Info text */}
-        <div className="relative bg-[#18181B] rounded-2xl p-6 border border-[#27272A] shadow-md mb-8">
-          
-          {/* Main Info Edit Icon */}
+        {/* Info card */}
+        <div className="surface-card p-6 mb-8">
           {isMe && (
-             <button 
-                onClick={handleEditProfile}
-                className="absolute right-6 top-6 text-[#71717A] hover:text-white transition-colors"
-             >
-                <Pencil size={18} />
-             </button>
+            <button 
+              onClick={handleEditProfile}
+              className="absolute right-10 top-auto text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <Pencil size={16} />
+            </button>
           )}
 
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-1">
+          <h2 className="text-[22px] font-bold text-[var(--text-primary)] flex items-center gap-2.5 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
             {author.display_name}
             {relationship && (
-              <span className="text-[10px] uppercase bg-[var(--wa-green)]/20 text-[var(--wa-green)] px-2 py-0.5 rounded-full font-bold">
+              <span className={`text-[10px] uppercase px-2.5 py-0.5 rounded-full font-bold ${
+                relationship === 'family' 
+                  ? 'bg-[var(--gold)]/10 text-[var(--gold)]' 
+                  : 'bg-[var(--emerald)]/10 text-[var(--emerald)]'
+              }`}>
                 {relationship}
               </span>
             )}
           </h2>
-          <p className="text-[#A1A1AA] text-sm mb-6 leading-relaxed">
+          <p className="text-[var(--text-muted)] text-[14px] mb-6 leading-relaxed">
             {author.bio || 'No bio available.'}
           </p>
 
-          <div className="flex items-center gap-8 border-t border-[#27272A] pt-4">
+          <div className="flex items-center gap-10 border-t border-[var(--border-color)] pt-5">
             <div className="flex flex-col">
-              <span className="font-bold text-lg text-white">{followerCount}</span>
-              <span className="text-xs text-[#71717A] font-medium uppercase tracking-wider">Followers</span>
+              <span className="font-bold text-[20px] text-[var(--text-primary)]">{followerCount}</span>
+              <span className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Followers</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg text-white">{statuses.length}</span>
-              <span className="text-xs text-[#71717A] font-medium uppercase tracking-wider">Posts</span>
+              <span className="font-bold text-[20px] text-[var(--text-primary)]">{statuses.length}</span>
+              <span className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Posts</span>
             </div>
           </div>
         </div>
 
-        {/* User's Posts Feed */}
-        <h3 className="text-xs font-bold text-[#71717A] uppercase tracking-widest px-2 mb-4">Activity Timeline</h3>
+        {/* Activity timeline */}
+        <h3 className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
+          Activity Timeline
+        </h3>
         {statuses.length === 0 ? (
-          <div className="text-center p-12 bg-[#18181B] rounded-2xl border border-[#27272A] mb-20">
-            <p className="text-[#71717A]">No posts shared yet.</p>
+          <div className="text-center p-12 surface-card mb-20">
+            <p className="text-[var(--text-muted)] text-[14px]">No posts shared yet.</p>
           </div>
         ) : (
           <div className="space-y-4 mb-20">
             {statuses.map(status => (
               <div key={status.id} className="opacity-90 hover:opacity-100 transition-opacity">
-                 <StatusCard status={{...status, visibility: 'public'}} /> 
+                <StatusCard status={{...status, visibility: 'public'}} />
               </div>
             ))}
           </div>

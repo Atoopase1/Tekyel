@@ -1,7 +1,7 @@
 // ============================================================
-// Default chat page — No chat selected
+// Default chat page — Premium "no chat selected" landing
 // ============================================================
-import { Lock } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import CircleLogo from '@/components/ui/CircleLogo';
 
@@ -12,33 +12,42 @@ export default function ChatDefaultPage() {
         <ChatSidebar />
       </div>
 
-      <div className="flex-1 hidden lg:flex flex-col items-center justify-center bg-[var(--bg-chat)] border-b-4 border-[var(--wa-green)]">
-        <div className="text-center max-w-md px-8">
-          {/* Animated icon */}
-          <div className="relative mb-8">
-            <div className="w-64 h-64 mx-auto relative">
-              {/* Decorative circles */}
-              <div className="absolute inset-0 rounded-full border-2 border-[var(--border-color)] opacity-20 animate-ping" style={{ animationDuration: '3s' }} />
-              <div className="absolute inset-4 rounded-full border-2 border-[var(--border-color)] opacity-15 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-              <div className="absolute inset-8 rounded-full border-2 border-[var(--border-color)] opacity-10 animate-ping" style={{ animationDuration: '3s', animationDelay: '1s' }} />
+      <div className="flex-1 hidden lg:flex flex-col items-center justify-center relative overflow-hidden"
+        style={{ background: 'linear-gradient(180deg, var(--bg-app) 0%, var(--bg-secondary) 100%)' }}
+      >
+        {/* Subtle decorative elements */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 30% 40%, var(--emerald) 0%, transparent 50%), radial-gradient(circle at 70% 60%, var(--navy) 0%, transparent 50%)',
+          }}
+        />
 
-              {/* Center icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <CircleLogo size={80} />
+        <div className="text-center max-w-md px-8 relative z-10">
+          {/* Animated logo */}
+          <div className="relative mb-10">
+            <div className="w-52 h-52 mx-auto relative">
+              {/* Decorative rings */}
+              <div className="absolute inset-0 rounded-full border border-[var(--border-color)] opacity-20" style={{ animation: 'ringExpand 3s ease-in-out infinite' }} />
+              <div className="absolute inset-4 rounded-full border border-[var(--border-color)] opacity-15" style={{ animation: 'ringExpand 3s ease-in-out infinite', animationDelay: '0.5s' }} />
+              <div className="absolute inset-8 rounded-full border border-[var(--border-color)] opacity-10" style={{ animation: 'ringExpand 3s ease-in-out infinite', animationDelay: '1s' }} />
+
+              {/* Center logo */}
+              <div className="absolute inset-0 flex items-center justify-center animate-float">
+                <CircleLogo size={72} />
               </div>
             </div>
           </div>
 
-          <h2 className="text-3xl font-light text-[var(--text-primary)] mb-3">
+          <h2 className="text-[28px] font-light text-[var(--text-primary)] mb-3 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
             Circle
           </h2>
-          <p className="text-sm text-[var(--text-muted)] leading-relaxed mb-8">
+          <p className="text-[14px] text-[var(--text-muted)] leading-relaxed mb-10">
             Connect, share, and communicate with your circle.
             <br />
             Start a conversation or select a chat to get started.
           </p>
-          <div className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-muted)]">
-            <Lock size={12} />
+          <div className="flex items-center justify-center gap-2 text-[12px] text-[var(--text-muted)] bg-[var(--bg-primary)] rounded-full px-4 py-2 mx-auto w-fit border border-[var(--border-color)]">
+            <Shield size={13} className="text-[var(--emerald)]" />
             <span>End-to-end encrypted</span>
           </div>
         </div>

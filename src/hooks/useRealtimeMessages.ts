@@ -8,6 +8,28 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useChatStore } from '@/store/chat-store';
 import { useAuthStore } from '@/store/auth-store';
 import type { Message } from '@/types';
+import { useState } from 'react';
+
+// Global connection state to avoid multiple listeners if needed (simplified for React state)
+let globalIsReconnecting = false;
+let connectionListeners: ((state: boolean) => void)[] = [];
+const setGlobalConnectionState = (state: boolean) => {
+  globalIsReconnecting = state;
+  connectionListeners.forEach(listener => listener(state));
+};
+
+export function useRealtimeConnection() {
+  const [isReconnecting, setIsReconnecting] = useState(globalIsReconnecting);
+
+  useEffect(() => {
+    connectionListeners.push(setIsReconnecting);
+    return () => {
+      connectionListeners = connectionListeners.filter(l => l !== setIsReconnecting);
+    };
+  }, []);
+
+  return isReconnecting;
+}
 
 export function useRealtimeMessages(chatId: string | null) {
   const addMessage = useChatStore((s) => s.addMessage);
@@ -25,6 +47,11 @@ export function useRealtimeMessages(chatId: string | null) {
 
     const channel = supabase
       .channel(`messages:${chatId}`)
+      .on('system', { event: '*' }, (payload) => {
+        if (payload.extension === 'postgres_changes' && payload.extra?.status === 'error') {
+          // You could also specifically look for CHANNEL_ERROR or disconnected
+        }
+      })
       .on(
         'postgres_changes',
         {
@@ -51,23 +78,65 @@ export function useRealtimeMessages(chatId: string | null) {
         {
           event: 'UPDATE',
           schema: 'public',
+          table: 'messages',
+          filter: `chat_id=eq.${chatId}`,
+        },
+        async (payload) => {
+          const updatedMessage = payload.new as Message;
+          
+          // Re-fetch sender since it's just updating message content
+          const { data: sender } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', updatedMessage.sender_id)
+            .single();
+
+          useChatStore.getState().updateMessageInList({ ...updatedMessage, sender: sender || undefined });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'message_status',
         },
         (payload) => {
           const updatedStatus = payload.new;
+          if (!updatedStatus || !updatedStatus.message_id) return;
+
           // Update the specific message's status securely in the Zustand store
           useChatStore.getState().messages.forEach((msg) => {
             if (msg.id === updatedStatus.message_id) {
-              const newStatuses = (msg.status || []).map((s) =>
-                s.user_id === updatedStatus.user_id ? { ...s, status: updatedStatus.status } : s
-              );
+              // Remove temp optimistic statuses
+              const existingStatuses = (msg.status || []).filter((s) => s.id !== 'temp');
+              let found = false;
+              
+              const newStatuses = existingStatuses.map((s) => {
+                if (s.user_id === updatedStatus.user_id) {
+                  found = true;
+                  return { ...s, status: updatedStatus.status };
+                }
+                return s;
+              });
+
+              if (!found && updatedStatus.status) {
+                newStatuses.push(updatedStatus);
+              }
+
               // Optimistically update message list
               useChatStore.getState().updateMessageInList({ ...msg, status: newStatuses });
             }
           });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setGlobalConnectionState(false);
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setGlobalConnectionState(true);
+        }
+      });
 
     channelRef.current = channel;
 
@@ -142,7 +211,13 @@ export function useRealtimeChatList() {
           fetchChats();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setGlobalConnectionState(false);
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setGlobalConnectionState(true);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

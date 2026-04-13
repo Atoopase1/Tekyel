@@ -1,11 +1,11 @@
 // ============================================================
-// Login Page — Email/Password + Phone OTP
+// Login Page — Premium email/password + phone OTP
 // ============================================================
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import CircleLogo from '@/components/ui/CircleLogo';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -128,43 +128,43 @@ export default function LoginPage() {
       {/* Logo & Title */}
       <div className="flex flex-col items-center mb-8">
         <CircleLogo size={56} className="mb-4" />
-        <h1 className="text-2xl font-bold bg-gradient-to-br from-[#09A5DB] to-[#011B33] bg-clip-text text-transparent">Circle</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-1">
+        <h1 className="text-2xl font-bold gradient-text">Circle</h1>
+        <p className="text-[13px] text-[var(--text-muted)] mt-1.5 tracking-wide">
           {isLogin ? 'Sign in to continue' : 'Create your account'}
         </p>
       </div>
 
-      {/* Mode Tabs */}
-      <div className="flex rounded-lg bg-[var(--bg-search)] p-1 mb-6">
+      {/* Mode Tabs — Premium pill selector */}
+      <div className="flex rounded-xl bg-[var(--bg-secondary)] p-1 mb-7">
         <button
           onClick={() => { setMode('email'); setOtpSent(false); }}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
             mode === 'email'
-              ? 'bg-[var(--paystack-navy)] text-white shadow-sm'
+              ? 'bg-[var(--navy)] text-white shadow-sm'
               : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
           }`}
         >
-          <Mail size={16} />
+          <Mail size={15} />
           Email
         </button>
         <button
           onClick={() => setMode('phone')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
             mode === 'phone'
-              ? 'bg-[var(--paystack-navy)] text-white shadow-sm'
+              ? 'bg-[var(--navy)] text-white shadow-sm'
               : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
           }`}
         >
-          <Phone size={16} />
+          <Phone size={15} />
           Phone
         </button>
       </div>
 
       {/* Email Form */}
       {mode === 'email' && (
-        <div className="space-y-4">
+        <div className="space-y-5 animate-fadeIn">
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+            <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
               Email address
             </label>
             <input
@@ -172,11 +172,11 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--paystack-blue)] transition-all"
+              className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+            <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
               Password
             </label>
             <div className="relative">
@@ -185,27 +185,27 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 pr-12 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--paystack-blue)] transition-all"
+                className="w-full px-4 py-3 pr-12 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200"
                 onKeyDown={(e) => e.key === 'Enter' && handleEmailAuth()}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)]"
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
           </div>
-          <Button onClick={handleEmailAuth} isLoading={isLoading} className="w-full" size="lg">
+          <Button onClick={handleEmailAuth} isLoading={isLoading} className="w-full !rounded-xl" size="lg">
             {isLogin ? 'Sign In' : 'Create Account'}
-            <ArrowRight size={18} className="ml-2" />
+            <ArrowRight size={17} className="ml-2" />
           </Button>
-          <p className="text-center text-sm text-[var(--text-muted)]">
+          <p className="text-center text-[13px] text-[var(--text-muted)]">
             {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-[var(--wa-green)] font-medium hover:underline"
+              className="text-[var(--emerald)] font-semibold hover:underline"
             >
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
@@ -215,9 +215,9 @@ export default function LoginPage() {
 
       {/* Phone Form */}
       {mode === 'phone' && (
-        <div className="space-y-4">
+        <div className="space-y-5 animate-fadeIn">
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+            <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
               Phone number
             </label>
             <input
@@ -226,12 +226,12 @@ export default function LoginPage() {
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+1 234 567 8900"
               disabled={otpSent}
-              className="w-full px-4 py-3 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--paystack-blue)] transition-all disabled:opacity-60"
+              className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200 disabled:opacity-50"
             />
           </div>
           {otpSent && (
-            <div>
-              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1.5">
+            <div className="animate-slideUp">
+              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
                 Verification code
               </label>
               <input
@@ -240,7 +240,7 @@ export default function LoginPage() {
                 onChange={(e) => setOtp(e.target.value)}
                 placeholder="Enter 6-digit code"
                 maxLength={6}
-                className="w-full px-4 py-3 bg-[var(--bg-search)] text-[var(--text-primary)] rounded-lg text-sm text-center tracking-[0.5em] font-mono placeholder:tracking-normal placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--paystack-blue)] transition-all"
+                className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-sm text-center tracking-[0.5em] font-mono placeholder:tracking-normal placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200"
                 onKeyDown={(e) => e.key === 'Enter' && handleVerifyOtp()}
               />
             </div>
@@ -248,22 +248,28 @@ export default function LoginPage() {
           <Button
             onClick={otpSent ? handleVerifyOtp : handleSendOtp}
             isLoading={isLoading}
-            className="w-full"
+            className="w-full !rounded-xl"
             size="lg"
           >
             {otpSent ? 'Verify OTP' : 'Send OTP'}
-            <ArrowRight size={18} className="ml-2" />
+            <ArrowRight size={17} className="ml-2" />
           </Button>
           {otpSent && (
             <button
               onClick={() => { setOtpSent(false); setOtp(''); }}
-              className="w-full text-center text-sm text-[var(--text-muted)] hover:text-[var(--wa-green)]"
+              className="w-full text-center text-[13px] text-[var(--text-muted)] hover:text-[var(--emerald)] transition-colors"
             >
               Change phone number
             </button>
           )}
         </div>
       )}
+
+      {/* Security notice */}
+      <div className="flex items-center justify-center gap-1.5 mt-8 pt-6 border-t border-[var(--border-color)]">
+        <Shield size={13} className="text-[var(--text-muted)]" />
+        <span className="text-[11px] text-[var(--text-muted)] tracking-wide">End-to-end encrypted</span>
+      </div>
     </div>
   );
 }

@@ -40,7 +40,7 @@ export interface ChatParticipant {
 }
 
 export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'document';
-export type MessageStatusType = 'sent' | 'delivered' | 'seen';
+export type MessageStatusType = 'sent' | 'delivered' | 'seen' | 'failed' | 'queued';
 
 export interface Message {
   id: string;
