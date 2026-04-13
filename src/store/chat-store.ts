@@ -18,6 +18,7 @@ interface ChatState {
   hasMoreMessages: boolean;
   searchQuery: string;
   _hasFetchedOnce: boolean;
+  replyingTo: Message | null;
 
   // Actions
   fetchChats: () => Promise<void>;
@@ -33,6 +34,15 @@ interface ChatState {
   resetUnreadCount: (chatId: string) => void;
   updateChatWithNewMessage: (chatId: string, message: Message) => void;
   incrementUnreadCount: (chatId: string) => void;
+  setReplyingTo: (message: Message | null) => void;
+  deleteMessageForMe: (messageId: string) => Promise<void>;
+  deleteMessageForEveryone: (messageId: string) => Promise<void>;
+  pinMessage: (chatId: string, messageId: string) => Promise<void>;
+  unpinMessage: (chatId: string) => Promise<void>;
+  starMessage: (messageId: string) => Promise<void>;
+  unstarMessage: (messageId: string) => Promise<void>;
+  addReaction: (messageId: string, emoji: string) => Promise<void>;
+  removeReaction: (messageId: string, emoji: string) => Promise<void>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -45,6 +55,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   hasMoreMessages: true,
   searchQuery: '',
   _hasFetchedOnce: false,
+  replyingTo: null,
 
   fetchChats: async () => {
     const hasCachedChats = get().chats.length > 0;
@@ -171,7 +182,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       let query = supabase
         .from('messages')
-        .select('*, sender:profiles(*), status:message_status(*)')
+        .select('*, sender:profiles(*), status:message_status(*), reply_to:reply_to_id(*), stars:message_stars(*), reactions:message_reactions(*, profile:profiles(*)), deletions:message_deletions(*)')
         .eq('chat_id', chatId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -184,7 +195,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
       if (error) throw error;
 
-      const messages = ((data || []) as Message[]).reverse();
+      const user = useAuthStore.getState().user;
+      const rawMessages = (data || []) as Message[];
+      
+      // Filter out messages deleted for ME
+      const filteredMessages = rawMessages.filter(m => 
+        !m.deletions?.some(d => d.user_id === user?.id)
+      );
+
+      const messages = filteredMessages.reverse();
 
       if (before) {
         // Prepend older messages
@@ -428,5 +447,135 @@ export const useChatStore = create<ChatState>((set, get) => ({
           : c
       ),
     }));
+  },
+
+  setReplyingTo: (message: Message | null) => {
+    set({ replyingTo: message });
+  },
+
+  deleteMessageForMe: async (messageId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    // Optimistically hide it
+    set((state) => ({
+      messages: state.messages.filter((m) => m.id !== messageId),
+    }));
+
+    await supabase.from('message_deletions').insert({
+      user_id: user.id,
+      message_id: messageId,
+    });
+  },
+
+  deleteMessageForEveryone: async (messageId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    
+    // Optimistically update
+    set((state) => ({
+      messages: state.messages.map((m) => 
+        m.id === messageId ? { ...m, is_deleted: true } : m
+      ),
+    }));
+
+    await supabase.from('messages').update({ is_deleted: true }).eq('id', messageId);
+  },
+
+  pinMessage: async (chatId: string, messageId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    set((state) => ({
+      chats: state.chats.map((c) => 
+        c.id === chatId ? { ...c, pinned_message_id: messageId } : c
+      ),
+    }));
+    await supabase.from('chats').update({ pinned_message_id: messageId }).eq('id', chatId);
+  },
+
+  unpinMessage: async (chatId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    set((state) => ({
+      chats: state.chats.map((c) => 
+        c.id === chatId ? { ...c, pinned_message_id: null } : c
+      ),
+    }));
+    await supabase.from('chats').update({ pinned_message_id: null }).eq('id', chatId);
+  },
+
+  starMessage: async (messageId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    // Optimistic update
+    set((state) => ({
+      messages: state.messages.map((m) => 
+        m.id === messageId ? { 
+          ...m, 
+          stars: [...(m.stars || []), { id: 'temp', user_id: user.id, message_id: messageId, created_at: '' }] 
+        } : m
+      ),
+    }));
+
+    await supabase.from('message_stars').insert({ user_id: user.id, message_id: messageId });
+  },
+
+  unstarMessage: async (messageId: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    set((state) => ({
+      messages: state.messages.map((m) => 
+        m.id === messageId ? { 
+          ...m, 
+          stars: (m.stars || []).filter(s => s.user_id !== user.id) 
+        } : m
+      ),
+    }));
+
+    await supabase.from('message_stars').delete().eq('user_id', user.id).eq('message_id', messageId);
+  },
+
+  addReaction: async (messageId: string, emoji: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    const profile = useAuthStore.getState().profile;
+    if (!user || !profile) return;
+
+    // Optimistic
+    set((state) => {
+      const msgs = state.messages.map((m) => {
+        if (m.id !== messageId) return m;
+        // remove existing reaction by user if any
+        const filtered = (m.reactions || []).filter(r => r.user_id !== user.id);
+        return {
+          ...m,
+          reactions: [...filtered, { id: 'temp', user_id: user.id, message_id: messageId, emoji, created_at: '', profile }],
+        };
+      });
+      return { messages: msgs };
+    });
+
+    // Delete existing first to avoid unique constraint if changing emoji
+    await supabase.from('message_reactions').delete().eq('user_id', user.id).eq('message_id', messageId);
+    await supabase.from('message_reactions').insert({ user_id: user.id, message_id: messageId, emoji });
+  },
+
+  removeReaction: async (messageId: string, emoji: string) => {
+    const supabase = getSupabaseBrowserClient();
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    set((state) => ({
+      messages: state.messages.map((m) => 
+        m.id === messageId ? { 
+          ...m, 
+          reactions: (m.reactions || []).filter(r => !(r.user_id === user.id && r.emoji === emoji)) 
+        } : m
+      ),
+    }));
+
+    await supabase.from('message_reactions').delete().eq('user_id', user.id).eq('message_id', messageId).eq('emoji', emoji);
   },
 }));

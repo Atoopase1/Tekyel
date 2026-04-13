@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { UserPlus, UserCheck, ShieldPlus, ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Settings, Pencil, UserCheck, UserPlus, Image as ImageIcon } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
@@ -16,7 +16,7 @@ export default function ProfileViewPage() {
   const params = useParams();
   const router = useRouter();
   const profileId = params.id as string;
-  const { profile: currentUser } = useAuthStore();
+  const { profile: currentUser, setProfile } = useAuthStore();
   const { startDirectChat } = useChatStore();
   const supabase = getSupabaseBrowserClient();
 
@@ -106,81 +106,159 @@ export default function ProfileViewPage() {
     const chatId = await startDirectChat(profileId);
     if (chatId) router.push(`/${chatId}`);
   };
+  
+  const handleEditProfile = () => {
+    toast('Profile editing coming soon!', { icon: '🚧' });
+  };
+
+  const handleEditBanner = () => {
+    toast('Banner upload coming soon!', { icon: '🚧' });
+  };
 
   if (isLoading) {
-    return <div className="flex-1 flex justify-center p-12 bg-[var(--bg-app)]"><Spinner size="lg" /></div>;
+    return <div className="flex-1 flex justify-center items-center bg-[#18181B]"><Spinner size="lg" /></div>;
   }
 
   if (!author) {
-    return <div className="flex-1 p-12 text-center bg-[var(--bg-app)]">User not found.</div>;
+    return <div className="flex-1 flex justify-center items-center bg-[#18181B] text-white">User not found.</div>;
   }
 
   const isMe = currentUser?.id === profileId;
 
   return (
-    <div className="flex-1 flex flex-col bg-[var(--bg-app)] overflow-y-auto">
-      {/* Header */}
-      <div className="bg-[var(--bg-header)] shadow-sm z-10 w-full sticky top-0 border-b border-[var(--border-color)]">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button onClick={() => router.back()} className="p-2 hover:bg-[var(--bg-hover)] rounded-full text-[var(--text-muted)]">
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="text-xl font-semibold text-[var(--text-primary)]">Profile</h1>
+    <div className="flex-1 flex flex-col bg-[#121212] overflow-x-hidden relative min-h-screen">
+      
+      {/* 1. Dark Header with Top Bar (Back, Search, Settings) */}
+      <div className="bg-[#18181B] w-full z-20 sticky top-0 flex items-center justify-between px-4 py-3 border-b border-black/40 shadow-sm">
+        <button onClick={() => router.back()} className="text-[var(--text-muted)] hover:text-white transition-colors">
+          <ArrowLeft size={24} />
+        </button>
+        
+        <div className="flex-1 max-w-md mx-4">
+          <div className="relative">
+            <input 
+              type="text" 
+              placeholder="Search" 
+              className="w-full bg-[#27272A] text-white text-sm rounded-full py-2 px-4 focus:outline-none focus:ring-1 focus:ring-gray-500 placeholder-gray-400"
+            />
+          </div>
         </div>
+
+        <button className="text-[var(--text-muted)] hover:text-white transition-colors">
+          <Settings size={22} />
+        </button>
       </div>
 
-      <div className="max-w-2xl mx-auto w-full px-6 py-8">
-        {/* Profile Card */}
-        <div className="bg-[var(--bg-primary)] p-6 rounded-2xl shadow-sm border border-[var(--border-color)] mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          <Avatar src={author.avatar_url} name={author.display_name} size="xl" />
-          
-          <div className="flex-1 text-center sm:text-left">
-            <h2 className="text-2xl font-bold text-[var(--text-primary)] flex justify-center sm:justify-start items-center gap-2">
-              {author.display_name}
-              {relationship && (
-                <span className="text-[10px] uppercase bg-[var(--wa-green)]/20 text-[var(--wa-green)] px-2 py-0.5 rounded-full font-bold">
-                  {relationship}
-                </span>
-              )}
-            </h2>
-            <p className="text-[var(--text-muted)] text-sm mb-4">
-              {author.bio || 'Available'}
-            </p>
-            
-            <div className="flex items-center justify-center sm:justify-start gap-6 mb-6">
-              <div className="flex flex-col items-center sm:items-start">
-                <span className="font-bold text-[var(--text-primary)]">{followerCount}</span>
-                <span className="text-xs text-[var(--text-muted)] uppercase">Followers</span>
-              </div>
-              <div className="flex flex-col items-center sm:items-start">
-                <span className="font-bold text-[var(--text-primary)]">{statuses.length}</span>
-                <span className="text-xs text-[var(--text-muted)] uppercase">Posts</span>
-              </div>
-            </div>
-
-            {!isMe && (
-              <div className="flex flex-wrap justify-center sm:justify-start gap-3">
-                <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} className="px-6">
-                  {isFollowing ? <><UserCheck size={16} className="mr-2" /> Following</> : <><UserPlus size={16} className="mr-2" /> Follow</>}
-                </Button>
-                <Button variant="secondary" onClick={handleMessage}>Message</Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* User's Posts */}
-        <h3 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-4 px-2">Recent Posts</h3>
-        {statuses.length === 0 ? (
-          <div className="text-center p-8 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)]">
-            <p className="text-[var(--text-muted)]">No posts shared yet.</p>
-          </div>
+      {/* 2. Banner/Cover Photo Section */}
+      <div className="relative w-full h-40 sm:h-56 bg-gradient-to-r from-gray-800 to-gray-900 border-b-2 border-black/50">
+        {author.cover_url ? (
+          <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
         ) : (
-          statuses.map(status => (
-            <StatusCard key={status.id} status={status} />
-          ))
+          <div className="w-full h-full flex items-center justify-center opacity-30">
+            <ImageIcon size={48} className="text-white" />
+          </div>
+        )}
+        
+        {/* Banner Edit Icon overlay */}
+        {isMe && (
+          <button 
+            onClick={handleEditBanner}
+            className="absolute right-4 bottom-4 bg-white/20 hover:bg-white/30 backdrop-blur-md p-2 rounded-full text-white transition-all shadow-lg border border-white/10"
+          >
+            <Pencil size={18} />
+          </button>
         )}
       </div>
+
+      {/* Profile Body Layer */}
+      <div className="relative max-w-4xl mx-auto w-full px-4 sm:px-8">
+        
+        {/* 3. Overlapping Avatar */}
+        <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
+          <div className="relative z-10 group">
+            {/* The dense thick border matches the dark background */}
+            <div className="rounded-full border-[6px] sm:border-[8px] border-[#121212] inline-block bg-[#121212]">
+              <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className="w-24 h-24 sm:w-36 sm:h-36" />
+            </div>
+            
+            {/* Avatar Edit Icon */}
+            {isMe && (
+              <button 
+                onClick={handleEditProfile}
+                className="absolute bottom-2 right-2 bg-white/20 hover:bg-white/30 backdrop-blur-md p-1.5 sm:p-2 rounded-full text-white transition-all border border-white/10"
+              >
+                <Pencil size={14} className="sm:w-4 sm:h-4" />
+              </button>
+            )}
+          </div>
+          
+          {/* Action Buttons to the Right of Avatar (if not myself) */}
+          {!isMe && (
+            <div className="flex gap-2 mb-2">
+               <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} className="px-4 py-2 text-sm h-10 rounded-full">
+                  {isFollowing ? <UserCheck size={16} /> : <UserPlus size={16} />} 
+               </Button>
+               <Button variant="secondary" onClick={handleMessage} className="px-4 py-2 text-sm h-10 rounded-full bg-[#27272A] border-none text-white hover:bg-[#3F3F46]">
+                 Message
+               </Button>
+            </div>
+          )}
+        </div>
+
+        {/* 4. Background and Info text */}
+        <div className="relative bg-[#18181B] rounded-2xl p-6 border border-[#27272A] shadow-md mb-8">
+          
+          {/* Main Info Edit Icon */}
+          {isMe && (
+             <button 
+                onClick={handleEditProfile}
+                className="absolute right-6 top-6 text-[#71717A] hover:text-white transition-colors"
+             >
+                <Pencil size={18} />
+             </button>
+          )}
+
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-1">
+            {author.display_name}
+            {relationship && (
+              <span className="text-[10px] uppercase bg-[var(--wa-green)]/20 text-[var(--wa-green)] px-2 py-0.5 rounded-full font-bold">
+                {relationship}
+              </span>
+            )}
+          </h2>
+          <p className="text-[#A1A1AA] text-sm mb-6 leading-relaxed">
+            {author.bio || 'No bio available.'}
+          </p>
+
+          <div className="flex items-center gap-8 border-t border-[#27272A] pt-4">
+            <div className="flex flex-col">
+              <span className="font-bold text-lg text-white">{followerCount}</span>
+              <span className="text-xs text-[#71717A] font-medium uppercase tracking-wider">Followers</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg text-white">{statuses.length}</span>
+              <span className="text-xs text-[#71717A] font-medium uppercase tracking-wider">Posts</span>
+            </div>
+          </div>
+        </div>
+
+        {/* User's Posts Feed */}
+        <h3 className="text-xs font-bold text-[#71717A] uppercase tracking-widest px-2 mb-4">Activity Timeline</h3>
+        {statuses.length === 0 ? (
+          <div className="text-center p-12 bg-[#18181B] rounded-2xl border border-[#27272A] mb-20">
+            <p className="text-[#71717A]">No posts shared yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4 mb-20">
+            {statuses.map(status => (
+              <div key={status.id} className="opacity-90 hover:opacity-100 transition-opacity">
+                 <StatusCard status={{...status, visibility: 'public'}} /> 
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }

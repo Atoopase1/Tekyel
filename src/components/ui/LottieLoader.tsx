@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import phoneAnimation from '../../../phone.json';
+import load3Animation from '../../../3load.json';
 
 // Disable SSR for Lottie completely because it injects `<svg>` tags dynamically which causes Next.js hydration errors
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -35,7 +35,7 @@ export default function LottieLoader({ className = '', size = 120 }: LottieLoade
       style={{ width: size, height: size }}
     >
       <Lottie 
-        animationData={phoneAnimation} 
+        animationData={load3Animation} 
         loop={true} 
       />
     </div>

@@ -25,6 +25,8 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const sendMessage = useChatStore((s) => s.sendMessage);
+  const replyingTo = useChatStore((s) => s.replyingTo);
+  const setReplyingTo = useChatStore((s) => s.setReplyingTo);
   const { sendTyping } = useTypingIndicator(chatId);
 
   const handleSend = useCallback(async () => {
@@ -53,13 +55,15 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         trimmed || null!,
         messageType,
         mediaUrl,
-        mediaMetadata
+        mediaMetadata,
+        replyingTo?.id
       );
 
       setText('');
       setSelectedFile(null);
       setPreviewUrl(null);
       setUploadProgress(0);
+      setReplyingTo(null);
 
       // Reset textarea height
       if (textareaRef.current) {
@@ -157,6 +161,26 @@ export default function MessageInput({ chatId }: MessageInputProps) {
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
+        </div>
+      )}
+
+      {/* Replying To Preview */}
+      {replyingTo && (
+        <div className="px-4 py-2 border-b border-[var(--border-color)] bg-[var(--bg-search)] flex items-center justify-between">
+          <div className="flex-1 min-w-0 border-l-4 border-[var(--wa-green)] pl-3">
+            <p className="text-xs font-semibold text-[var(--wa-green)] mb-0.5">
+              {replyingTo.sender?.display_name || 'User'}
+            </p>
+            <p className="text-sm text-[var(--text-secondary)] truncate">
+              {replyingTo.content || (replyingTo.media_url ? '[Media]' : '')}
+            </p>
+          </div>
+          <button 
+            onClick={() => setReplyingTo(null)}
+            className="p-1.5 ml-3 rounded-full hover:bg-[var(--bg-hover)] text-[var(--text-muted)]"
+          >
+            <X size={18} />
+          </button>
         </div>
       )}
 

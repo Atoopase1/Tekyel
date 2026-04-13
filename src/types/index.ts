@@ -8,6 +8,7 @@ export interface Profile {
   email: string | null;
   display_name: string;
   avatar_url: string | null;
+  cover_url: string | null;
   bio: string | null;
   is_online: boolean;
   last_seen: string;
@@ -24,6 +25,7 @@ export interface Chat {
   created_by: string;
   last_message_id: string | null;
   last_message_at: string | null;
+  pinned_message_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -62,6 +64,32 @@ export interface Message {
   sender?: Profile;
   reply_to?: Message;
   status?: MessageStatus[];
+  stars?: MessageStar[];
+  reactions?: MessageReaction[];
+  deletions?: MessageDeletion[];
+}
+
+export interface MessageStar {
+  id: string;
+  user_id: string;
+  message_id: string;
+  created_at: string;
+}
+
+export interface MessageReaction {
+  id: string;
+  user_id: string;
+  message_id: string;
+  emoji: string;
+  created_at: string;
+  profile?: Profile; // optional joined profile
+}
+
+export interface MessageDeletion {
+  id: string;
+  user_id: string;
+  message_id: string;
+  created_at: string;
 }
 
 export interface MessageStatus {

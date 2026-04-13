@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   email TEXT,
   display_name TEXT NOT NULL DEFAULT 'User',
   avatar_url TEXT,
+  cover_url TEXT,
   bio TEXT DEFAULT 'Hey there! I am using WhatsApp.',
   is_online BOOLEAN DEFAULT false,
   last_seen TIMESTAMPTZ DEFAULT now(),
@@ -141,6 +142,44 @@ CREATE TABLE IF NOT EXISTS statuses (
 CREATE INDEX IF NOT EXISTS idx_statuses_user ON statuses(user_id);
 CREATE INDEX IF NOT EXISTS idx_statuses_visibility ON statuses(visibility);
 CREATE INDEX IF NOT EXISTS idx_statuses_created ON statuses(created_at DESC);
+
+-- ============================================================
+-- 5d. STATUS LIKES TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS status_likes (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(status_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_status_likes_status ON status_likes(status_id);
+
+-- ============================================================
+-- 5e. STATUS COMMENTS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS status_comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_status_comments_status ON status_comments(status_id);
+CREATE INDEX IF NOT EXISTS idx_status_comments_created ON status_comments(created_at DESC);
+
+-- ============================================================
+-- 5f. STATUS RATINGS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS status_ratings (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  rating_value SMALLINT NOT NULL CHECK (rating_value >= 1 AND rating_value <= 5),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(status_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_status_ratings_status ON status_ratings(status_id);
 
 -- ============================================================
 -- 6. DATABASE FUNCTIONS
@@ -467,6 +506,51 @@ CREATE POLICY "Users can manage own statuses"
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
 
+-- STATUS LIKES policies
+ALTER TABLE status_likes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view status likes" ON status_likes;
+CREATE POLICY "Anyone can view status likes"
+  ON status_likes FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Users can manage own likes" ON status_likes;
+CREATE POLICY "Users can manage own likes"
+  ON status_likes FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- STATUS COMMENTS policies
+ALTER TABLE status_comments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view status comments" ON status_comments;
+CREATE POLICY "Anyone can view status comments"
+  ON status_comments FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Users can manage own comments" ON status_comments;
+CREATE POLICY "Users can manage own comments"
+  ON status_comments FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- STATUS RATINGS policies
+ALTER TABLE status_ratings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view status ratings" ON status_ratings;
+CREATE POLICY "Anyone can view status ratings"
+  ON status_ratings FOR SELECT
+  TO authenticated
+  USING (true);
+
+DROP POLICY IF EXISTS "Users can manage own ratings" ON status_ratings;
+CREATE POLICY "Users can manage own ratings"
+  ON status_ratings FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
 -- ============================================================
 -- 8. REALTIME PUBLICATION
 -- ============================================================
@@ -506,6 +590,21 @@ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE statuses;
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE status_likes;
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE status_comments;
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE status_ratings;
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
 -- ============================================================
 -- 9. STORAGE BUCKET
 -- ============================================================
@@ -519,3 +618,85 @@ EXCEPTION WHEN duplicate_object THEN null; END $$;
 -- Policy 2: Allow authenticated reads
 --   Operation: SELECT
 --   Policy: (auth.role() = 'authenticated')
+
+-- ============================================================
+-- 10. NEW FEATURES: STARS, REACTIONS, DELETIONS, PINS
+-- ============================================================
+
+-- Add pinned_message_id to chats
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS pinned_message_id UUID REFERENCES messages(id) ON DELETE SET NULL;
+
+-- 10a. MESSAGE STARS TABLE
+CREATE TABLE IF NOT EXISTS message_stars (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, message_id)
+);
+CREATE INDEX IF NOT EXISTS idx_message_stars_message ON message_stars(message_id);
+
+ALTER TABLE message_stars ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage own stars" ON message_stars;
+CREATE POLICY "Users can manage own stars"
+  ON message_stars FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Anyone can read stars" ON message_stars;
+CREATE POLICY "Anyone can read stars"
+  ON message_stars FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- 10b. MESSAGE REACTIONS TABLE
+CREATE TABLE IF NOT EXISTS message_reactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, message_id)
+);
+CREATE INDEX IF NOT EXISTS idx_message_reactions_message ON message_reactions(message_id);
+
+ALTER TABLE message_reactions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage own reactions" ON message_reactions;
+CREATE POLICY "Users can manage own reactions"
+  ON message_reactions FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Anyone can read reactions" ON message_reactions;
+CREATE POLICY "Anyone can read reactions"
+  ON message_reactions FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- 10c. MESSAGE DELETIONS TABLE ("Delete for Me")
+CREATE TABLE IF NOT EXISTS message_deletions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(user_id, message_id)
+);
+
+ALTER TABLE message_deletions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can manage own deletions" ON message_deletions;
+CREATE POLICY "Users can manage own deletions"
+  ON message_deletions FOR ALL
+  TO authenticated
+  USING (user_id = auth.uid())
+  WITH CHECK (user_id = auth.uid());
+
+-- Realtime for new tables
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE chats; EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE message_stars; EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE message_reactions; EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE message_deletions; EXCEPTION WHEN duplicate_object THEN null; END $$;

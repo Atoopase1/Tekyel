@@ -8,7 +8,7 @@ import { getInitials, stringToColor } from '@/lib/utils';
 interface AvatarProps {
   src?: string | null;
   name: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   isOnline?: boolean;
   className?: string;
 }
@@ -18,6 +18,7 @@ const sizeMap = {
   md: { container: 'w-10 h-10', text: 'text-sm', dot: 'w-3 h-3' },
   lg: { container: 'w-12 h-12', text: 'text-base', dot: 'w-3.5 h-3.5' },
   xl: { container: 'w-20 h-20', text: 'text-2xl', dot: 'w-4 h-4' },
+  xxl: { container: 'w-36 h-36', text: 'text-4xl', dot: 'w-6 h-6' },
 };
 
 export default function Avatar({ src, name, size = 'md', isOnline, className = '' }: AvatarProps) {

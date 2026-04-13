@@ -18,21 +18,35 @@ export default function StatusPage() {
   const [activeTab, setActiveTab] = useState<'public' | 'circle'>('public');
   const [statuses, setStatuses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'media' | 'text'>('all');
 
   const loadStatuses = useCallback(async () => {
     setIsLoading(true);
+    // Unified Query: Fetch status AND all related social engagements
     let query = supabase
       .from('statuses')
-      .select('*, profiles!statuses_user_id_fkey(*)');
+      .select(`
+        *, 
+        profiles!statuses_user_id_fkey(*), 
+        status_likes(*), 
+        status_comments(*, profiles(*)), 
+        status_ratings(*)
+      `);
 
     if (activeTab === 'public') {
       query = query.eq('visibility', 'public');
     } else {
-      // By using RLS, we can just say 'not public' and RLS will only return friends/family we have access to
       query = query.neq('visibility', 'public');
     }
 
     const { data, error } = await query.order('created_at', { ascending: false }).limit(50);
+    
+    if (error) {
+      console.error('Error fetching statuses:', error);
+    }
     
     if (data) setStatuses(data);
     setIsLoading(false);
@@ -65,12 +79,63 @@ export default function StatusPage() {
     }
   };
 
+  const filteredStatuses = statuses.filter((status) => {
+    // 1. Filter by Search Query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesText = status.text_content?.toLowerCase().includes(query);
+      const matchesName = status.profiles?.display_name?.toLowerCase().includes(query);
+      if (!matchesText && !matchesName) return false;
+    }
+    // 2. Filter by Type
+    if (filterType === 'media') {
+      if (status.content_type === 'text') return false;
+    }
+    if (filterType === 'text') {
+      if (status.content_type !== 'text') return false;
+    }
+    return true;
+  });
+
   return (
     <div className="flex-1 flex flex-col bg-[var(--bg-app)]">
       {/* Header */}
       <div className="bg-[var(--bg-header)] shadow-sm z-10 w-full">
         <div className="max-w-2xl mx-auto px-6 py-4">
           <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Status & Feed</h1>
+          
+          {/* Search & Filter Bar */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search posts or users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[var(--bg-search)] text-[var(--text-primary)] pl-10 pr-4 py-2 rounded-xl text-sm border-none focus:ring-1 focus:ring-[var(--wa-green)]"
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 shrink-0">
+              {(['all', 'media', 'text'] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+                    filterType === type 
+                      ? 'bg-[var(--wa-green)]/10 border-[var(--wa-green)]/30 text-[var(--wa-green)]' 
+                      : 'bg-[var(--bg-secondary)] border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-4 border-b border-[var(--border-color)]">
             <button
               className={`pb-2 px-2 font-medium transition-colors ${
@@ -111,12 +176,12 @@ export default function StatusPage() {
 
           {isLoading ? (
             <div className="flex justify-center p-8"><Spinner /></div>
-          ) : statuses.length === 0 ? (
+          ) : filteredStatuses.length === 0 ? (
             <div className="text-center p-8 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)]">
               <p className="text-[var(--text-muted)]">No posts found in this feed.</p>
             </div>
           ) : (
-            statuses.map((status) => (
+            filteredStatuses.map((status) => (
               <StatusCard 
                 key={status.id} 
                 status={status} 
