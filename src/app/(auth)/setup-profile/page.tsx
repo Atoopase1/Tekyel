@@ -35,7 +35,7 @@ export default function SetupProfilePage() {
       });
 
       toast.success('Profile set up!');
-      router.push('/');
+      window.location.href = '/';
     } catch (err: any) {
       toast.error(err.message || 'Failed to save profile');
     } finally {

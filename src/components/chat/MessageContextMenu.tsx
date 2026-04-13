@@ -44,6 +44,9 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
   const [menuPos, setMenuPos] = useState<{ top: number; left: number; openUp: boolean } | null>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLongPressTriggered, setIsLongPressTriggered] = useState(false);
+  const pointerStartPosRef = useRef<{ x: number, y: number } | null>(null);
 
   const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
@@ -131,6 +134,41 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
     return () => document.removeEventListener('keydown', onKey);
   }, [isOpen, handleClose]);
 
+  const clearLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (props.disabled) return;
+    if (e.button === 2) return; // ignore right clicks
+    setIsLongPressTriggered(false);
+    pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
+
+    longPressTimerRef.current = setTimeout(() => {
+      setIsLongPressTriggered(true);
+      toggleSelectionMode(true);
+      toggleMessageSelection(props.message.id);
+      
+      // Haptic feedback if supported natively
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }, 450); // 450ms long press threshold
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!pointerStartPosRef.current) return;
+    // Cancel if movement exceeds 10px (likely scrolling)
+    const dx = e.clientX - pointerStartPosRef.current.x;
+    const dy = e.clientY - pointerStartPosRef.current.y;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearLongPress();
+    }
+  };
+
   const ActionBtn = ({ icon: Icon, label, onClick, danger, iconClass, disabled }: { 
     icon: any; label: string; onClick: () => void; danger?: boolean; iconClass?: string; disabled?: boolean 
   }) => (
@@ -152,16 +190,31 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
     <>
       <div 
         ref={triggerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={clearLongPress}
+        onPointerCancel={clearLongPress}
+        onContextMenu={(e) => {
+          if (props.disabled) return;
+          e.preventDefault(); // allow right click to just open the menu consistently!
+          if (!isOpen && !isLongPressTriggered) handleOpen();
+        }}
         onClick={(e) => {
           if (props.disabled) return;
-          // Prevent default to stop scrolling if any
+          // If a long press just triggered, swallow this click so we don't open the menu
+          if (isLongPressTriggered) {
+             e.preventDefault();
+             e.stopPropagation();
+             return;
+          }
           if (!isOpen) {
             handleOpen();
           } else {
             handleClose();
           }
         }}
-        className={`relative inline-flex transition-opacity ${isOpen ? 'opacity-90' : ''}`}
+        className={`relative inline-flex transition-opacity ${isOpen ? 'opacity-90' : ''} ${isLongPressTriggered ? 'scale-[0.98]' : ''} transition-transform`}
+        style={{ userSelect: props.disabled ? 'none' : 'auto', WebkitUserSelect: props.disabled ? 'none' : 'auto' }}
       >
         {props.children}
       </div>
