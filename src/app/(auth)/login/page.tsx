@@ -12,7 +12,6 @@ import toast, { Toaster } from 'react-hot-toast';
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<'email' | 'phone'>('email');
-  const [isLogin, setIsLogin] = useState(true);
   
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [useOtp, setUseOtp] = useState(false); // phone specific
@@ -62,23 +61,11 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success('Signed in!');
-        router.push('/');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { display_name: email.split('@')[0] },
-          },
-        });
-        if (error) throw error;
-        toast.success('Account created! Check your email to confirm.');
-        router.push('/setup-profile');
-      }
+      // Direct Login (No Sign Up allowed via Email/Phone anymore)
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast.success('Signed in!');
+      router.push('/');
     } catch (err: any) {
       const msg = err.message || 'Authentication failed';
       if (msg.includes('database error saving user')) {
@@ -102,23 +89,11 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ phone, password });
-        if (error) throw error;
-        toast.success('Signed in!');
-        router.push('/');
-      } else {
-        const { error } = await supabase.auth.signUp({
-          phone,
-          password,
-          options: {
-            data: { display_name: phone },
-          },
-        });
-        if (error) throw error;
-        toast.success('Account created! Sign in to continue.');
-        router.push('/setup-profile');
-      }
+      // Direct Login (No Sign Up allowed via Email/Phone anymore)
+      const { error } = await supabase.auth.signInWithPassword({ phone, password });
+      if (error) throw error;
+      toast.success('Signed in!');
+      router.push('/');
     } catch (err: any) {
       toast.error(err.message || 'Authentication failed');
     } finally {
@@ -135,6 +110,8 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
+      // Note: Supabase OTP will magically sign them up if they don't exist by default
+      // To strictly enforce Google-only, you could disable "Create user on OTP" in Supabase Dashboard.
       const { error } = await supabase.auth.signInWithOtp({ phone });
       if (error) throw error;
       setOtpSent(true);
@@ -185,9 +162,7 @@ export default function LoginPage() {
         <p className="text-[13px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
           {isForgotPassword 
             ? 'Reset your password' 
-            : isLogin 
-              ? 'Sign in to continue' 
-              : 'Create your account'}
+            : 'Sign in to your account'}
         </p>
       </div>
 
@@ -258,21 +233,19 @@ export default function LoginPage() {
                 </button>
               </div>
               
-              {isLogin && (
-                <div className="mt-2 flex justify-end">
-                  <button
-                    onClick={() => setIsForgotPassword(true)}
-                    className="text-[12px] font-medium text-[var(--emerald)] hover:underline"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-              )}
+              <div className="mt-2 flex justify-end">
+                <button
+                  onClick={() => setIsForgotPassword(true)}
+                  className="text-[12px] font-medium text-[var(--emerald)] hover:underline"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
           )}
 
           <Button onClick={handleEmailAuth} isLoading={isLoading} className="w-full !rounded-xl" size="lg">
-            {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
+            {isForgotPassword ? 'Send Reset Link' : 'Sign In'}
             <ArrowRight size={17} className="ml-2" />
           </Button>
           
@@ -282,15 +255,7 @@ export default function LoginPage() {
                 Back to Sign in
               </button>
             ) : (
-              <>
-                {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-                <button
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-[var(--emerald)] font-semibold hover:underline"
-                >
-                  {isLogin ? 'Sign Up' : 'Sign In'}
-                </button>
-              </>
+              <span>Don't have an account? Sign up with Google below.</span>
             )}
           </p>
         </div>
@@ -337,7 +302,7 @@ export default function LoginPage() {
                 </button>
               </div>
               <Button onClick={handlePhonePasswordAuth} isLoading={isLoading} className="w-full mt-5 !rounded-xl" size="lg">
-                {isLogin ? 'Sign In' : 'Create Account'}
+                Sign In
                 <ArrowRight size={17} className="ml-2" />
               </Button>
               <div className="mt-4 flex justify-center">
@@ -403,13 +368,7 @@ export default function LoginPage() {
           )}
           
           <p className="text-center mt-3 text-[13px] text-[var(--text-muted)]">
-            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-            <button
-               onClick={() => setIsLogin(!isLogin)}
-              className="text-[var(--emerald)] font-semibold hover:underline"
-            >
-              {isLogin ? 'Sign Up' : 'Sign In'}
-            </button>
+            <span>Don't have an account? Sign up with Google below.</span>
           </p>
         </div>
       )}
@@ -420,7 +379,7 @@ export default function LoginPage() {
           <div className="relative flex items-center justify-center mb-6">
             <div className="absolute inset-x-0 border-t border-[var(--border-color)]"></div>
             <div className="relative bg-[var(--bg-app)] px-4 text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
-              Or continue with
+              Or Sign Up / continue with
             </div>
           </div>
           
