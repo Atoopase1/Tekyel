@@ -3,7 +3,7 @@
 // ============================================================
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -18,6 +18,30 @@ export default function SetupProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    // Pre-fill if we have an existing profile name that isn't 'User'
+    if (profile?.display_name && profile.display_name !== 'User') {
+      setDisplayName(profile.display_name);
+    } else {
+      // Try to get Google Identity Name
+      const fetchGoogleMeta = async () => {
+        const { getSupabaseBrowserClient } = await import('@/lib/supabase/client');
+        const supabase = getSupabaseBrowserClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.user_metadata?.full_name) {
+          setDisplayName(user.user_metadata.full_name);
+        } else if (user?.user_metadata?.name) {
+          setDisplayName(user.user_metadata.name);
+        }
+      };
+      fetchGoogleMeta();
+    }
+    
+    if (profile?.bio && profile.bio !== 'Hey there! I am using WhatsApp.') {
+      setBio(profile.bio);
+    }
+  }, [profile]);
 
   const handleComplete = async () => {
     if (!displayName.trim()) {

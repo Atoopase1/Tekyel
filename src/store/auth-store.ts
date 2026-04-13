@@ -85,7 +85,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .select()
       .single();
 
-    if (data && !error) {
+    if (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+
+    if (data) {
       set({ profile: data as Profile });
     }
   },
