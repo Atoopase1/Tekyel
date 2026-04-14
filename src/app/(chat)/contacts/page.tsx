@@ -115,10 +115,10 @@ export default function ContactsPage() {
       <div className="flex-1 overflow-y-auto px-6 py-6 w-full max-w-4xl mx-auto scrollbar-thin">
         {query ? (
           <div className="animate-fadeIn">
-            <h2 className="text-[var(--emerald)] font-semibold text-[12px] mb-4 uppercase tracking-widest flex items-center gap-2">
+            <h2 className="text-[var(--emerald)] font-semibold text-[14px] mb-4 uppercase tracking-widest flex items-center gap-2">
               {isSearching ? <Spinner size="sm" /> : (
                 <>
-                  <Search size={14} />
+                  <Search size={22} />
                   Global Search Results
                 </>
               )}
@@ -135,13 +135,13 @@ export default function ContactsPage() {
                       <Avatar src={user.avatar_url} name={user.display_name} />
                       <div>
                         <p className="text-[var(--text-primary)] font-medium text-[14px]">{user.display_name}</p>
-                        <p className="text-[var(--text-muted)] text-[12px]">{user.is_online ? 
+                        <p className="text-[var(--text-muted)] text-[14px]">{user.is_online ? 
                           <span className="text-[var(--emerald)]">Online</span> : 'Offline'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isSaved ? (
-                        <div className={`px-3 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                        <div className={`px-3 py-1 rounded-full text-[14px] font-semibold uppercase tracking-wider ${
                           isSaved.category === 'family' 
                             ? 'bg-[var(--gold)]/10 text-[var(--gold)]' 
                             : 'bg-[var(--emerald)]/10 text-[var(--emerald)]'
@@ -150,15 +150,15 @@ export default function ContactsPage() {
                         </div>
                       ) : (
                         <>
-                          <Button variant="secondary" size="sm" onClick={() => handleAddContact(user.id, 'friend')} className="text-[12px]">
+                          <Button variant="secondary" size="sm" onClick={() => handleAddContact(user.id, 'friend')} className="text-[14px]">
                             <UserPlus size={13} className="mr-1" /> Friend
                           </Button>
-                          <Button variant="primary" size="sm" onClick={() => handleAddContact(user.id, 'family')} className="text-[12px]">
+                          <Button variant="primary" size="sm" onClick={() => handleAddContact(user.id, 'family')} className="text-[14px]">
                             <Crown size={13} className="mr-1" /> Family
                           </Button>
                         </>
                       )}
-                      <Button variant="ghost" size="sm" onClick={() => handleMessage(user.id)} className="text-[12px]">
+                      <Button variant="ghost" size="sm" onClick={() => handleMessage(user.id)} className="text-[14px]">
                         <MessageSquare size={13} />
                       </Button>
                     </div>
@@ -183,9 +183,9 @@ export default function ContactsPage() {
                         : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <Users size={16} />
+                    <Users size={22} />
                     Friends
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[14px] font-bold ${
                       activeTab === 'friend' 
                         ? 'bg-white/20 text-white' 
                         : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'
@@ -201,9 +201,9 @@ export default function ContactsPage() {
                         : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
                     }`}
                   >
-                    <Crown size={16} />
+                    <Crown size={22} />
                     Family
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[14px] font-bold ${
                       activeTab === 'family' 
                         ? 'bg-white/20 text-white' 
                         : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'
@@ -223,7 +223,7 @@ export default function ContactsPage() {
                       <p className="text-[var(--text-muted)] text-sm">
                         No {activeTab === 'friend' ? 'friends' : 'family members'} added yet.
                       </p>
-                      <p className="text-[var(--text-muted)] text-xs mt-1">
+                      <p className="text-[var(--text-muted)] text-[13px] mt-1">
                         Search above to find and add people.
                       </p>
                     </div>
@@ -234,11 +234,11 @@ export default function ContactsPage() {
                         <Avatar src={contact.profiles.avatar_url} name={contact.profiles.display_name} />
                         <div>
                           <p className="text-[var(--text-primary)] font-medium text-[14px]">{contact.profiles.display_name}</p>
-                          <p className="text-[var(--text-muted)] text-[11px]">{contact.profiles.bio || 'Hey there! I am using Circle.'}</p>
+                          <p className="text-[var(--text-muted)] text-[14px]">{contact.profiles.bio || 'Hey there! I am using Circle.'}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => handleMessage(contact.contact_id)}>
-                        <MessageSquare size={16} />
+                        <MessageSquare size={22} />
                       </Button>
                     </div>
                   ))}

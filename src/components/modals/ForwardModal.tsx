@@ -75,7 +75,7 @@ export default function ForwardModal({ message, onClose }: ForwardModalProps) {
         {/* Search */}
         <div className="p-4 border-b border-[var(--border-color)]">
           <div className="relative group">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--emerald)]" />
+            <Search size={22} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] transition-colors group-focus-within:text-[var(--emerald)]" />
             <input
               type="text"
               placeholder="Search chats"
@@ -89,7 +89,7 @@ export default function ForwardModal({ message, onClose }: ForwardModalProps) {
         {/* Chat list */}
         <div className="p-2 overflow-y-auto flex-1 h-[300px] scrollbar-thin">
           {filteredChats.length === 0 ? (
-            <div className="p-6 text-center text-[13px] text-[var(--text-muted)]">No chats found</div>
+            <div className="p-6 text-center text-[14px] text-[var(--text-muted)]">No chats found</div>
           ) : (
             filteredChats.map(chat => {
               const name = chat.is_group ? chat.group_name : chat.other_user?.display_name;
@@ -125,7 +125,7 @@ export default function ForwardModal({ message, onClose }: ForwardModalProps) {
         {/* Forward action bar */}
         {selectedChatIds.length > 0 && (
           <div className="p-4 glass-header border-t border-[var(--border-color)] flex justify-between items-center animate-slideUp">
-            <span className="text-[13px] text-[var(--text-muted)]">{selectedChatIds.length} chat{selectedChatIds.length !== 1 ? 's' : ''} selected</span>
+            <span className="text-[14px] text-[var(--text-muted)]">{selectedChatIds.length} chat{selectedChatIds.length !== 1 ? 's' : ''} selected</span>
             <button
               onClick={handleForward}
               disabled={isSending}

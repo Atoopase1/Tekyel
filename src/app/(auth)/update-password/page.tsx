@@ -70,16 +70,16 @@ export default function UpdatePasswordPage() {
 
       {/* Logo & Title */}
       <div className="flex flex-col items-center mb-8">
-        <CircleLogo size={56} className="mb-4" />
+        <CircleLogo size={64} className="mb-4 shadow-sm" />
         <h1 className="text-2xl font-bold gradient-text">New Password</h1>
-        <p className="text-[13px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
+        <p className="text-[14px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
           Secure your account with a new password.
         </p>
       </div>
 
       <div className="space-y-5 animate-fadeIn">
         <div>
-          <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+          <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
             New Password
           </label>
           <div className="relative">
@@ -96,13 +96,13 @@ export default function UpdatePasswordPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
-              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
             </button>
           </div>
         </div>
 
         <div>
-          <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+          <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
             Confirm Password
           </label>
           <input
@@ -124,10 +124,10 @@ export default function UpdatePasswordPage() {
           size="lg"
         >
           Update Password
-          <ArrowRight size={17} className="ml-2" />
+          <ArrowRight size={19} className="ml-2" />
         </Button>
         
-        <p className="text-center mt-3 text-[13px] text-[var(--text-muted)]">
+        <p className="text-center mt-3 text-[14px] text-[var(--text-muted)]">
           Remember it now?{' '}
           <button
             onClick={() => router.push('/login')}

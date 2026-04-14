@@ -19,18 +19,18 @@ export default function MessageInfoModal({ message, chatParticipants, onClose }:
   const statuses = message.status || [];
   
   const getStatusIcon = (status: string) => {
-    if (status === 'seen') return <CheckCheck size={15} className="text-[var(--emerald)]" />;
-    if (status === 'delivered') return <CheckCheck size={15} className="text-[var(--text-muted)]" />;
-    return <Check size={15} className="text-[var(--text-muted)]" />;
+    if (status === 'seen') return <CheckCheck size={19} className="text-[var(--emerald)]" />;
+    if (status === 'delivered') return <CheckCheck size={19} className="text-[var(--text-muted)]" />;
+    return <Check size={19} className="text-[var(--text-muted)]" />;
   };
 
   const StatusSection = ({ title, filterStatus }: { title: string; filterStatus: string }) => {
     const filtered = chatParticipants.filter(p => statuses.find(s => s.user_id === p.user_id && s.status === filterStatus));
     return (
       <div className="mb-6">
-        <h3 className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">{title}</h3>
+        <h3 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">{title}</h3>
         {filtered.length === 0 ? (
-          <p className="text-[13px] text-[var(--text-muted)]">No one {filterStatus === 'seen' ? 'yet' : 'else'}</p>
+          <p className="text-[14px] text-[var(--text-muted)]">No one {filterStatus === 'seen' ? 'yet' : 'else'}</p>
         ) : (
           <div className="space-y-3">
             {filtered.map(p => {
@@ -42,7 +42,7 @@ export default function MessageInfoModal({ message, chatParticipants, onClose }:
                     <p className="text-[14px] text-[var(--text-primary)] font-medium">{p.profile.display_name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {getStatusIcon(status.status)}
-                      <p className="text-[12px] text-[var(--text-muted)]">{formatMessageTime(status.updated_at)}</p>
+                      <p className="text-[14px] text-[var(--text-muted)]">{formatMessageTime(status.updated_at)}</p>
                     </div>
                   </div>
                 </div>
@@ -73,7 +73,7 @@ export default function MessageInfoModal({ message, chatParticipants, onClose }:
           {/* Original message preview */}
           <div className="mb-6 p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]">
             <p className="text-[14px] text-[var(--text-primary)]">{message.content || (message.media_url ? '[Media Message]' : '')}</p>
-            <p className="text-[11px] text-[var(--text-muted)] mt-2">{formatMessageTime(message.created_at)}</p>
+            <p className="text-[14px] text-[var(--text-muted)] mt-2">{formatMessageTime(message.created_at)}</p>
           </div>
 
           <StatusSection title="Read by" filterStatus="seen" />

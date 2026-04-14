@@ -37,7 +37,7 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
           onClick={() => clearSelection()}
           className="p-2 -ml-2 rounded-xl text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
         >
-          <X size={20} />
+          <X size={22} />
         </button>
         <div className="flex-1 min-w-0">
           <h2 className="font-semibold text-[var(--text-primary)] text-[16px]">
@@ -51,28 +51,28 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
             onClick={handleBulkDelete}
             title="Delete Selected"
           >
-            <Trash2 size={20} />
+            <Trash2 size={22} />
           </button>
           <button 
             disabled={selectedMessageIds.length === 0}
             className="p-2.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--emerald)] hover:bg-[var(--emerald)]/10 disabled:opacity-50 transition-all"
             title="Forward Selected"
           >
-            <Forward size={20} />
+            <Forward size={22} />
           </button>
           <button 
             disabled={selectedMessageIds.length === 0}
             className="p-2.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50 transition-all"
             title="Star Selected"
           >
-            <Star size={20} />
+            <Star size={22} />
           </button>
           <button 
             disabled={selectedMessageIds.length === 0}
             className="p-2.5 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] disabled:opacity-50 transition-all"
             title="Copy Selected"
           >
-            <Copy size={20} />
+            <Copy size={22} />
           </button>
         </div>
       </div>
@@ -112,7 +112,12 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
       .join(', ');
     statusText = participantNames;
   } else if (isOnline) {
-    statusText = <span className="text-[var(--emerald)] font-medium">online</span>;
+    statusText = (
+      <span className="flex items-center gap-1.5 text-[var(--text-muted)] font-medium tracking-wide">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] shadow-[0_0_5px_var(--emerald)] animate-pulse" />
+        Online
+      </span>
+    );
   } else if (chat.other_user?.last_seen) {
     statusText = formatLastSeen(chat.other_user.last_seen);
   }
@@ -136,7 +141,7 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
         onClick={() => router.push('/')}
         className="lg:hidden p-2 -ml-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       >
-        <ArrowLeft size={20} />
+        <ArrowLeft size={22} />
       </button>
 
       {/* Avatar */}
@@ -150,7 +155,7 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
           {displayName}
         </h2>
         {statusText && (
-          <p className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">{statusText}</p>
+          <p className="text-[14px] text-[var(--text-muted)] truncate mt-0.5">{statusText}</p>
         )}
       </button>
 

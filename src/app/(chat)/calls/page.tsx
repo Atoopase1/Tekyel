@@ -19,7 +19,7 @@ export default function CallsPage() {
         <h1 className="text-[22px] font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-heading)' }}>
           Calls
         </h1>
-        <p className="text-[13px] text-[var(--text-muted)] mt-1">Your recent calls will appear here</p>
+        <p className="text-[14px] text-[var(--text-muted)] mt-1">Your recent calls will appear here</p>
       </div>
 
       {/* Call history */}
@@ -34,7 +34,7 @@ export default function CallsPage() {
           <h3 className="text-[16px] font-medium text-[var(--text-primary)] mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
             No Recent Calls
           </h3>
-          <p className="text-[13px] text-[var(--text-muted)] max-w-xs leading-relaxed">
+          <p className="text-[14px] text-[var(--text-muted)] max-w-xs leading-relaxed">
             Start a voice or video call from any chat. Your call history will appear here.
           </p>
         </div>

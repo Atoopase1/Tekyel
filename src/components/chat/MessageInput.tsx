@@ -234,7 +234,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-sm text-[var(--text-primary)] truncate font-medium">{selectedFile.name}</p>
-            <p className="text-xs text-[var(--text-muted)]">
+            <p className="text-[13px] text-[var(--text-muted)]">
               {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
             </p>
           </div>
@@ -242,7 +242,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
             onClick={clearFile}
             className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] transition-all"
           >
-            <X size={17} />
+            <X size={19} />
           </button>
         </div>
       )}
@@ -266,10 +266,10 @@ export default function MessageInput({ chatId }: MessageInputProps) {
       {replyingTo && !editingMessage && (
         <div className="px-4 py-2.5 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between animate-slideUp">
           <div className="flex-1 min-w-0 border-l-3 border-[var(--emerald)] pl-3">
-            <p className="text-[11px] font-semibold text-[var(--emerald)] mb-0.5">
+            <p className="text-[14px] font-semibold text-[var(--emerald)] mb-0.5">
               {replyingTo.sender?.display_name || 'User'}
             </p>
-            <p className="text-[13px] text-[var(--text-secondary)] truncate">
+            <p className="text-[14px] text-[var(--text-secondary)] truncate">
               {replyingTo.content || (replyingTo.media_url ? '[Media]' : '')}
             </p>
           </div>
@@ -277,7 +277,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
             onClick={() => setReplyingTo(null)}
             className="p-2 ml-3 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] transition-all"
           >
-            <X size={17} />
+            <X size={19} />
           </button>
         </div>
       )}
@@ -286,12 +286,12 @@ export default function MessageInput({ chatId }: MessageInputProps) {
       {editingMessage && (
         <div className="px-4 py-2.5 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] flex items-center justify-between animate-slideUp">
           <div className="flex-1 min-w-0 flex items-start gap-3 pl-1">
-            <Pencil size={17} className="text-[var(--emerald)] mt-0.5 shrink-0" />
+            <Pencil size={19} className="text-[var(--emerald)] mt-0.5 shrink-0" />
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-[var(--emerald)] mb-0.5">
+              <p className="text-[14px] font-semibold text-[var(--emerald)] mb-0.5">
                 Edit message
               </p>
-              <p className="text-[13px] text-[var(--text-secondary)] truncate">
+              <p className="text-[14px] text-[var(--text-secondary)] truncate">
                 {editingMessage.content}
               </p>
             </div>
@@ -303,7 +303,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
             }}
             className="p-2 ml-3 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] transition-all"
           >
-            <X size={17} />
+            <X size={19} />
           </button>
         </div>
       )}
@@ -347,7 +347,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
                   onClick={() => handleFileSelect(opt.accept)}
                   className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-hover)] transition-all duration-150 text-[14px] text-[var(--text-primary)]"
                 >
-                  <opt.icon size={18} className={opt.color} />
+                  <opt.icon size={22} className={opt.color} />
                   {opt.label}
                 </button>
               ))}

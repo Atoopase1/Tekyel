@@ -72,7 +72,7 @@ export default function SetupProfilePage() {
       <Toaster position="top-center" />
 
       <div className="flex flex-col items-center mb-8">
-        <CircleLogo size={56} className="mb-4" />
+        <CircleLogo size={64} className="mb-4 shadow-sm" />
         <h1 className="text-xl font-bold text-[var(--text-primary)]">Set up your profile</h1>
         <p className="text-sm text-[var(--text-muted)] mt-1">Tell us about yourself</p>
       </div>
@@ -117,7 +117,7 @@ export default function SetupProfilePage() {
 
         <Button onClick={handleComplete} isLoading={isLoading} className="w-full" size="lg">
           Get Started
-          <ArrowRight size={18} className="ml-2" />
+          <ArrowRight size={22} className="ml-2" />
         </Button>
       </div>
     </div>

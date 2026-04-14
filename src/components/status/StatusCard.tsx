@@ -130,7 +130,7 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
                 {visibility}
               </span>
             </div>
-            <span className="text-xs text-[var(--text-muted)]">
+            <span className="text-[13px] text-[var(--text-muted)]">
               {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
             </span>
           </div>
@@ -140,13 +140,13 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
         {!isOwnPost && (
           <button
             onClick={handleFollow}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all ${
               followed
                 ? 'bg-[var(--wa-green)]/10 text-[var(--wa-green)] border border-[var(--wa-green)]/30'
                 : 'bg-[var(--wa-green)] text-white hover:bg-[var(--wa-green-dark)] shadow-sm'
             }`}
           >
-            {followed ? <UserCheck size={14} /> : <UserPlus size={14} />}
+            {followed ? <UserCheck size={22} /> : <UserPlus size={22} />}
             {followed ? 'Following' : 'Follow'}
           </button>
         )}
@@ -183,11 +183,11 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
             }`}
           >
             <Heart
-              size={20}
+              size={22}
               fill={liked ? 'currentColor' : 'none'}
               className={`transition-transform ${likeAnimating ? 'scale-125' : 'scale-100'}`}
             />
-            {likeCount > 0 && <span className="text-xs font-medium">{likeCount}</span>}
+            {likeCount > 0 && <span className="text-[13px] font-medium">{likeCount}</span>}
           </button>
 
           {/* Comment Toggle */}
@@ -195,18 +195,18 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
             onClick={() => setShowComments(!showComments)}
             className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
-            <MessageSquare size={20} />
-            {comments.length > 0 && <span className="text-xs font-medium">{comments.length}</span>}
+            <MessageSquare size={22} />
+            {comments.length > 0 && <span className="text-[13px] font-medium">{comments.length}</span>}
           </button>
 
           {/* 5-Star Rating System */}
           <div className="flex items-center gap-1 ml-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button key={star} onClick={() => handleRating(star)} className="focus:outline-none transition-transform hover:scale-110">
-                <Star size={16} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
+                <Star size={22} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
               </button>
             ))}
-            {ratingCount > 0 && <span className="text-xs text-[var(--text-muted)] ml-1">({averageRating})</span>}
+            {ratingCount > 0 && <span className="text-[13px] text-[var(--text-muted)] ml-1">({averageRating})</span>}
           </div>
         </div>
 
@@ -217,7 +217,7 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
             saved ? 'text-[var(--wa-green)]' : 'text-[var(--text-muted)] hover:text-[var(--wa-green)]'
           }`}
         >
-           {saved ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+           {saved ? <BookmarkCheck size={22} /> : <Bookmark size={22} />}
         </button>
       </div>
 
@@ -239,7 +239,7 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
               disabled={isSubmittingComment || !commentText.trim()}
               className="bg-[var(--wa-green)] text-white p-2 rounded-xl disabled:opacity-50 hover:bg-[var(--wa-green-dark)] transition-colors"
             >
-              <Send size={18} />
+              <Send size={22} />
             </button>
           </div>
 
@@ -249,7 +249,7 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
               <div key={comment.id} className="flex gap-2">
                 <Avatar src={comment.profiles?.avatar_url} name={comment.profiles?.display_name || '?'} size="sm" />
                 <div className="bg-[var(--bg-primary)] p-2 px-3 rounded-2xl rounded-tl-sm border border-[var(--border-color)]">
-                  <p className="text-xs font-semibold text-[var(--text-primary)] mb-0.5">{comment.profiles?.display_name || 'Unknown User'}</p>
+                  <p className="text-[13px] font-semibold text-[var(--text-primary)] mb-0.5">{comment.profiles?.display_name || 'Unknown User'}</p>
                   <p className="text-sm text-[var(--text-primary)]">{comment.content}</p>
                 </div>
               </div>

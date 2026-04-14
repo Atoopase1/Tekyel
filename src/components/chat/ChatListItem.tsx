@@ -59,7 +59,7 @@ export default function ChatListItem({ chat, isActive, onClick }: ChatListItemPr
           </span>
           {chat.last_message_at && (
             <span
-              className={`text-[12px] shrink-0 ml-2 font-light ${
+              className={`text-[14px] shrink-0 ml-2 font-light ${
                 unreadCount > 0 ? 'text-[var(--emerald)] font-medium' : 'text-[var(--text-muted)]'
               }`}
             >
@@ -68,12 +68,12 @@ export default function ChatListItem({ chat, isActive, onClick }: ChatListItemPr
           )}
         </div>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-[13px] text-[var(--text-muted)] truncate leading-snug">
+          <p className="text-[14px] text-[var(--text-muted)] truncate leading-snug">
             {lastMessagePreview}
           </p>
           {unreadCount > 0 && (
             <span 
-              className="shrink-0 ml-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-[var(--emerald)] text-white text-[11px] font-bold rounded-full"
+              className="shrink-0 ml-2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-[var(--emerald)] text-white text-[14px] font-bold rounded-full"
               style={{ boxShadow: '0 0 8px rgba(22, 163, 74, 0.3)' }}
             >
               {unreadCount > 99 ? '99+' : unreadCount}

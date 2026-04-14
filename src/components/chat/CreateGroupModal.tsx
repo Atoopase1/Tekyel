@@ -102,7 +102,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                   <button
                     key={id}
                     onClick={() => toggleUser(id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--emerald)]/10 rounded-full text-[12px] text-[var(--emerald)] font-medium hover:bg-[var(--emerald)]/20 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--emerald)]/10 rounded-full text-[14px] text-[var(--emerald)] font-medium hover:bg-[var(--emerald)]/20 transition-colors"
                   >
                     {u?.display_name || 'User'}
                     <span className="text-[10px] opacity-60">✕</span>
@@ -127,7 +127,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                     <Avatar src={user.avatar_url} name={user.display_name} size="md" />
                     <div className="flex-1 text-left">
                       <p className="text-[14px] font-medium text-[var(--text-primary)]">{user.display_name}</p>
-                      <p className="text-[12px] text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
+                      <p className="text-[14px] text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
                     </div>
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
@@ -157,7 +157,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
         <>
           <div className="space-y-5">
             <div>
-              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+              <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
                 Group name
               </label>
               <input
@@ -170,7 +170,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
               />
             </div>
             <div>
-              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+              <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
                 Description (optional)
               </label>
               <textarea
@@ -181,7 +181,7 @@ export default function CreateGroupModal({ isOpen, onClose }: CreateGroupModalPr
                 className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 resize-none transition-all duration-200"
               />
             </div>
-            <p className="text-[12px] text-[var(--text-muted)]">
+            <p className="text-[14px] text-[var(--text-muted)]">
               {selectedIds.length} participant{selectedIds.length !== 1 ? 's' : ''} selected
             </p>
           </div>

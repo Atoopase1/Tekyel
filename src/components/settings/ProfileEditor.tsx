@@ -103,7 +103,7 @@ export default function ProfileEditor() {
 
       {/* Cover Image */}
       <div>
-        <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+        <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
           Cover Photo
         </label>
         <div 
@@ -118,7 +118,7 @@ export default function ProfileEditor() {
               style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}
             >
               <ImageIcon size={24} className="text-white/30" />
-              <span className="text-white/40 text-xs">Click to add cover photo</span>
+              <span className="text-white/40 text-[13px]">Click to add cover photo</span>
             </div>
           )}
 
@@ -142,7 +142,7 @@ export default function ProfileEditor() {
               onClick={(e) => { e.stopPropagation(); handleRemoveCover(); }}
               className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 p-1.5 rounded-full text-white transition-all opacity-0 group-hover:opacity-100"
             >
-              <X size={14} />
+              <X size={22} />
             </button>
           )}
         </div>
@@ -172,12 +172,12 @@ export default function ProfileEditor() {
             </div>
           )}
         </div>
-        <p className="text-[12px] text-[var(--text-muted)] mt-3">Click to change photo</p>
+        <p className="text-[14px] text-[var(--text-muted)] mt-3">Click to change photo</p>
       </div>
 
       {/* Name */}
       <div>
-        <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+        <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
           Your name
         </label>
         <input
@@ -192,7 +192,7 @@ export default function ProfileEditor() {
 
       {/* Bio */}
       <div>
-        <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+        <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
           About
         </label>
         <textarea
@@ -203,7 +203,7 @@ export default function ProfileEditor() {
           maxLength={200}
           className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 resize-none transition-all duration-200"
         />
-        <p className={`text-[11px] mt-1.5 text-right transition-colors ${bio.length > 180 ? 'text-[var(--gold)]' : 'text-[var(--text-muted)]'}`}>
+        <p className={`text-[14px] mt-1.5 text-right transition-colors ${bio.length > 180 ? 'text-[var(--gold)]' : 'text-[var(--text-muted)]'}`}>
           {bio.length}/200
         </p>
       </div>
@@ -212,13 +212,13 @@ export default function ProfileEditor() {
       <div className="space-y-3 pt-2">
         {profile?.email && (
           <div className="flex items-center justify-between">
-            <label className="text-[12px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Email</label>
+            <label className="text-[14px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Email</label>
             <p className="text-[14px] text-[var(--text-primary)]">{profile.email}</p>
           </div>
         )}
         {profile?.phone && (
           <div className="flex items-center justify-between">
-            <label className="text-[12px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Phone</label>
+            <label className="text-[14px] font-medium text-[var(--text-muted)] uppercase tracking-wider">Phone</label>
             <p className="text-[14px] text-[var(--text-primary)]">{profile.phone}</p>
           </div>
         )}

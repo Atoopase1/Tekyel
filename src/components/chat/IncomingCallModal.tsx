@@ -31,7 +31,7 @@ export default function IncomingCallModal() {
             {incomingCall.caller.display_name}
           </h2>
           <p className="text-white/50 text-[14px] mt-2 flex items-center gap-2 justify-center">
-            {incomingCall.callType === 'video' && <Video size={16} className="text-white/40" />}
+            {incomingCall.callType === 'video' && <Video size={22} className="text-white/40" />}
             <span className="animate-pulse text-[var(--emerald)]">
               Incoming {incomingCall.callType} call…
             </span>
@@ -49,7 +49,7 @@ export default function IncomingCallModal() {
             >
               <PhoneOff size={24} />
             </button>
-            <span className="text-white/50 text-[12px] font-medium">Decline</span>
+            <span className="text-white/50 text-[14px] font-medium">Decline</span>
           </div>
 
           {/* Accept */}
@@ -64,7 +64,7 @@ export default function IncomingCallModal() {
             >
               <Phone size={24} />
             </button>
-            <span className="text-white/50 text-[12px] font-medium">Accept</span>
+            <span className="text-white/50 text-[14px] font-medium">Accept</span>
           </div>
         </div>
       </div>

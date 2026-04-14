@@ -207,14 +207,14 @@ export default function ProfileViewPage() {
       {/* Header bar */}
       <div className="glass-header w-full z-20 sticky top-0 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)]">
         <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
-          <ArrowLeft size={20} />
+          <ArrowLeft size={22} />
         </button>
         
         <h1 className="text-[15px] font-semibold text-[var(--text-primary)]">{author.display_name}</h1>
 
         {isMe ? (
           <button onClick={handleEditProfile} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
-            <Settings size={20} />
+            <Settings size={22} />
           </button>
         ) : (
           <div className="w-9" />
@@ -242,9 +242,9 @@ export default function ProfileViewPage() {
         {isMe && !isUploadingCover && (
           <button
             onClick={() => coverInputRef.current?.click()}
-            className="absolute right-4 bottom-4 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-full text-white transition-all border border-white/15 flex items-center gap-2 text-xs font-medium shadow-lg"
+            className="absolute right-4 bottom-4 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-full text-white transition-all border border-white/15 flex items-center gap-2 text-[13px] font-medium shadow-lg"
           >
-            <Camera size={16} />
+            <Camera size={22} />
             <span className="hidden sm:inline">Edit cover</span>
           </button>
         )}
@@ -294,10 +294,10 @@ export default function ProfileViewPage() {
           {!isMe && (
             <div className="flex gap-2 mb-2">
               <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} size="sm">
-                {isFollowing ? <><UserCheck size={15} className="mr-1.5" /> Following</> : <><UserPlus size={15} className="mr-1.5" /> Follow</>}
+                {isFollowing ? <><UserCheck size={19} className="mr-1.5" /> Following</> : <><UserPlus size={19} className="mr-1.5" /> Follow</>}
               </Button>
               <Button variant="secondary" onClick={handleMessage} size="sm">
-                <MessageSquare size={15} className="mr-1.5" /> Message
+                <MessageSquare size={19} className="mr-1.5" /> Message
               </Button>
             </div>
           )}
@@ -310,7 +310,7 @@ export default function ProfileViewPage() {
               onClick={handleEditProfile}
               className="absolute right-5 top-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             >
-              <Pencil size={16} />
+              <Pencil size={22} />
             </button>
           )}
 
@@ -333,17 +333,17 @@ export default function ProfileViewPage() {
           <div className="flex items-center gap-10 border-t border-[var(--border-color)] pt-5">
             <div className="flex flex-col">
               <span className="font-bold text-[20px] text-[var(--text-primary)]">{followerCount}</span>
-              <span className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Followers</span>
+              <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Followers</span>
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-[20px] text-[var(--text-primary)]">{statuses.length}</span>
-              <span className="text-[11px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Posts</span>
+              <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Posts</span>
             </div>
           </div>
         </div>
 
         {/* Activity timeline */}
-        <h3 className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
+        <h3 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
           Activity Timeline
         </h3>
         {statuses.length === 0 ? (

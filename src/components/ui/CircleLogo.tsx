@@ -9,7 +9,7 @@ interface CircleLogoProps {
   showText?: boolean;
 }
 
-export default function CircleLogo({ size = 40, className = '', showText = false }: CircleLogoProps) {
+export default function CircleLogo({ size = 48, className = '', showText = false }: CircleLogoProps) {
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>
       <img 
@@ -17,7 +17,7 @@ export default function CircleLogo({ size = 40, className = '', showText = false
         alt="Circle Logo" 
         width={size} 
         height={size} 
-        className="rounded-xl object-cover" 
+        className="rounded-xl object-cover shadow-sm border border-[var(--border-color)]/50" 
         style={{ width: size, height: size }}
       />
       

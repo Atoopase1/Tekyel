@@ -65,7 +65,7 @@ export default function SettingsPage() {
             onClick={() => router.push('/')}
             className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={22} />
           </button>
           <h1 className="text-[18px] font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-heading)' }}>Settings</h1>
         </div>
@@ -73,8 +73,8 @@ export default function SettingsPage() {
         <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6 scrollbar-thin">
           {/* Profile Card */}
           <div className="surface-card p-6">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-5 flex items-center gap-2">
-              <User size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-5 flex items-center gap-2">
+              <User size={22} className="text-[var(--emerald)]" />
               Profile
             </h2>
             <ProfileEditor />
@@ -82,19 +82,19 @@ export default function SettingsPage() {
 
           {/* Appearance */}
           <div className="surface-card p-5">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Palette size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Palette size={22} className="text-[var(--emerald)]" />
               Appearance
             </h2>
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    {isDark ? <Moon size={18} className="text-[var(--emerald)]" /> : <Sun size={18} className="text-[var(--gold)]" />}
+                    {isDark ? <Moon size={22} className="text-[var(--emerald)]" /> : <Sun size={22} className="text-[var(--gold)]" />}
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">Dark Mode</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Toggle dark/light theme</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Toggle dark/light theme</p>
                   </div>
                 </div>
                 <Toggle checked={isDark} onChange={toggleDarkMode} />
@@ -103,17 +103,17 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    <Type size={18} className="text-[var(--text-muted)]" />
+                    <Type size={22} className="text-[var(--text-muted)]" />
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">App Font</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Select your preferred font style</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Select your preferred font style</p>
                   </div>
                 </div>
                 <select 
                   value={currentFont}
                   onChange={changeFont}
-                  className="bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[13px] rounded-lg px-2 py-1.5 border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--emerald)] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
+                  className="bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[14px] rounded-lg px-2 py-1.5 border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--emerald)] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
                 >
                   <option value="var(--font-inter)">Inter (Default)</option>
                   <option value="var(--font-poppins)">Poppins</option>
@@ -127,19 +127,19 @@ export default function SettingsPage() {
 
           {/* Notifications */}
           <div className="surface-card p-5">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Bell size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Bell size={22} className="text-[var(--emerald)]" />
               Notifications
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    <Bell size={18} className="text-[var(--text-muted)]" />
+                    <Bell size={22} className="text-[var(--text-muted)]" />
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">Push Notifications</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Receive message alerts</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Receive message alerts</p>
                   </div>
                 </div>
                 <Toggle checked={pushEnabled} onChange={() => toggleSetting('setting-push', setPushEnabled, pushEnabled)} />
@@ -147,11 +147,11 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    <Bell size={18} className="text-[var(--text-muted)]" />
+                    <Bell size={22} className="text-[var(--text-muted)]" />
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">Sound</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Play notification sounds</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Play notification sounds</p>
                   </div>
                 </div>
                 <Toggle checked={soundEnabled} onChange={() => toggleSetting('setting-sound', setSoundEnabled, soundEnabled)} />
@@ -161,19 +161,19 @@ export default function SettingsPage() {
 
           {/* Privacy */}
           <div className="surface-card p-5">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Lock size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Lock size={22} className="text-[var(--emerald)]" />
               Privacy & Security
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    <Lock size={18} className="text-[var(--text-muted)]" />
+                    <Lock size={22} className="text-[var(--text-muted)]" />
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">Read Receipts</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Show when messages are read</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Show when messages are read</p>
                   </div>
                 </div>
                 <Toggle checked={readReceiptsEnabled} onChange={() => toggleSetting('setting-receipts', setReadReceiptsEnabled, readReceiptsEnabled)} />
@@ -181,11 +181,11 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                    <User size={18} className="text-[var(--text-muted)]" />
+                    <User size={22} className="text-[var(--text-muted)]" />
                   </div>
                   <div>
                     <p className="text-[14px] font-medium text-[var(--text-primary)]">Online Status</p>
-                    <p className="text-[12px] text-[var(--text-muted)]">Show when you're online</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Show when you're online</p>
                   </div>
                 </div>
                 <Toggle checked={onlineStatusEnabled} onChange={() => toggleSetting('setting-online', setOnlineStatusEnabled, onlineStatusEnabled)} />
@@ -195,35 +195,35 @@ export default function SettingsPage() {
 
           {/* Storage */}
           <div className="surface-card p-5">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <HardDrive size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <HardDrive size={22} className="text-[var(--emerald)]" />
               Storage & Data
             </h2>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
-                <HardDrive size={18} className="text-[var(--text-muted)]" />
+                <HardDrive size={22} className="text-[var(--text-muted)]" />
               </div>
               <div>
                 <p className="text-[14px] font-medium text-[var(--text-primary)]">Manage Storage</p>
-                <p className="text-[12px] text-[var(--text-muted)]">Review and clear cached data</p>
+                <p className="text-[14px] text-[var(--text-muted)]">Review and clear cached data</p>
               </div>
             </div>
           </div>
 
           {/* About */}
           <div className="surface-card p-5">
-            <h2 className="text-[12px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
-              <Info size={14} className="text-[var(--emerald)]" />
+            <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+              <Info size={22} className="text-[var(--emerald)]" />
               About
             </h2>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[14px] text-[var(--text-primary)]">Version</span>
-                <span className="text-[13px] text-[var(--text-muted)]">2.0.0</span>
+                <span className="text-[14px] text-[var(--text-muted)]">2.0.0</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[14px] text-[var(--text-primary)]">Build</span>
-                <span className="text-[13px] text-[var(--text-muted)]">Premium</span>
+                <span className="text-[14px] text-[var(--text-muted)]">Premium</span>
               </div>
             </div>
           </div>

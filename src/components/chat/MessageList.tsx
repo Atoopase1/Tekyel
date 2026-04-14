@@ -104,7 +104,7 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
     }}>
       {/* Reconnecting banner */}
       {isReconnecting && (
-        <div className="absolute top-0 left-0 right-0 z-30 bg-[var(--gold)]/90 text-[var(--navy)] text-[12px] py-1.5 text-center font-medium backdrop-blur-sm flex items-center justify-center gap-2">
+        <div className="absolute top-0 left-0 right-0 z-30 bg-[var(--gold)]/90 text-[var(--navy)] text-[14px] py-1.5 text-center font-medium backdrop-blur-sm flex items-center justify-center gap-2">
           <WifiOff size={13} />
           Waiting for network...
         </div>
@@ -116,10 +116,10 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
           className={`absolute left-0 right-0 z-20 glass-header border-b border-[var(--border-color)] p-2.5 px-4 flex items-center gap-3 cursor-pointer hover:bg-[var(--bg-hover)] transition-all duration-200 ${isReconnecting ? 'top-8' : 'top-0'}`} 
           onClick={() => {}}
         >
-          <Pin size={15} className="text-[var(--emerald)] shrink-0" />
+          <Pin size={19} className="text-[var(--emerald)] shrink-0" />
           <div className="flex-1 min-w-0 border-l-3 border-[var(--emerald)] pl-2.5">
-            <p className="text-[11px] font-semibold text-[var(--emerald)] mb-0.5">Pinned Message</p>
-            <p className="text-[13px] text-[var(--text-secondary)] truncate">{pinnedMessage.content || (pinnedMessage.media_url ? '[Media]' : '')}</p>
+            <p className="text-[14px] font-semibold text-[var(--emerald)] mb-0.5">Pinned Message</p>
+            <p className="text-[14px] text-[var(--text-secondary)] truncate">{pinnedMessage.content || (pinnedMessage.media_url ? '[Media]' : '')}</p>
           </div>
         </div>
       )}
@@ -132,7 +132,7 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
       {/* Loading spinner for older messages */}
       {isLoadingMessages && messages.length > 0 && (
         <div className="py-4 text-center">
-          <span className="bg-[var(--bg-primary)] text-[var(--text-muted)] text-[12px] px-4 py-1.5 rounded-full border border-[var(--border-color)] animate-pulse inline-block">
+          <span className="bg-[var(--bg-primary)] text-[var(--text-muted)] text-[14px] px-4 py-1.5 rounded-full border border-[var(--border-color)] animate-pulse inline-block">
             Loading earlier messages...
           </span>
         </div>
@@ -156,7 +156,7 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
             {/* Date separator — premium glass pill */}
             <div className="flex items-center justify-center my-4">
               <span 
-                className="px-4 py-1.5 text-[var(--text-muted)] text-[11px] rounded-full font-medium tracking-wide border border-[var(--border-color)]"
+                className="px-4 py-1.5 text-[var(--text-muted)] text-[14px] rounded-full font-medium tracking-wide border border-[var(--border-color)]"
                 style={{ 
                   background: 'var(--bg-date-separator)',
                   backdropFilter: 'blur(8px)',

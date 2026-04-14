@@ -45,7 +45,7 @@ export default function AppNavigation() {
               )}
               
               {/* Tooltip */}
-              <span className="absolute left-[60px] px-2.5 py-1.5 bg-[var(--navy)] text-white text-[11px] rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 whitespace-nowrap z-50 shadow-lg translate-x-[-4px] group-hover:translate-x-0">
+              <span className="absolute left-[60px] px-2.5 py-1.5 bg-[var(--navy)] text-white text-[14px] rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 whitespace-nowrap z-50 shadow-lg translate-x-[-4px] group-hover:translate-x-0">
                 {tab.name}
               </span>
             </button>

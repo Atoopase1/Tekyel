@@ -53,11 +53,11 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
           <h3 className="mt-4 text-[18px] font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-heading)' }}>
             {chat.group_name || 'Group'}
           </h3>
-          <p className="text-[13px] text-[var(--text-muted)] mt-1">
+          <p className="text-[14px] text-[var(--text-muted)] mt-1">
             Group · {chat.participants.length} participants
           </p>
           {chat.group_description && (
-            <p className="mt-3 text-[13px] text-[var(--text-secondary)] text-center leading-relaxed">
+            <p className="mt-3 text-[14px] text-[var(--text-secondary)] text-center leading-relaxed">
               {chat.group_description}
             </p>
           )}
@@ -65,7 +65,7 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
 
         {/* Participants */}
         <div className="py-4">
-          <p className="px-5 text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">
+          <p className="px-5 text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">
             {chat.participants.length} Participants
           </p>
           {chat.participants.map((p) => (
@@ -90,7 +90,7 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
                     </span>
                   )}
                 </div>
-                <p className="text-[12px] text-[var(--text-muted)] truncate mt-0.5">
+                <p className="text-[14px] text-[var(--text-muted)] truncate mt-0.5">
                   {p.profile?.bio || 'Hey there!'}
                 </p>
               </div>

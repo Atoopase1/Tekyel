@@ -7,8 +7,8 @@ import CircleLogo from '@/components/ui/CircleLogo';
 
 export default function ChatDefaultPage() {
   return (
-    <div className="flex w-full h-full">
-      <div className="w-full max-w-[420px] lg:w-[420px] shrink-0 flex flex-col z-10 border-r border-[var(--border-color)]">
+    <div className="flex w-full h-full justify-center lg:justify-start bg-[var(--bg-app)]">
+      <div className="w-full md:max-w-[420px] lg:max-w-none lg:w-[420px] shrink-0 flex flex-col z-10 mx-auto lg:mx-0 border-r-0 lg:border-r border-[var(--border-color)] shadow-xl lg:shadow-none">
         <ChatSidebar />
       </div>
 
@@ -33,7 +33,7 @@ export default function ChatDefaultPage() {
 
               {/* Center logo */}
               <div className="absolute inset-0 flex items-center justify-center animate-float">
-                <CircleLogo size={72} />
+                <CircleLogo size={84} />
               </div>
             </div>
           </div>
@@ -46,9 +46,15 @@ export default function ChatDefaultPage() {
             <br />
             Start a conversation or select a chat to get started.
           </p>
-          <div className="flex items-center justify-center gap-2 text-[12px] text-[var(--text-muted)] bg-[var(--bg-primary)] rounded-full px-4 py-2 mx-auto w-fit border border-[var(--border-color)]">
-            <Shield size={13} className="text-[var(--emerald)]" />
-            <span>End-to-end encrypted</span>
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center gap-2 text-[14px] text-[var(--text-muted)] bg-[var(--bg-primary)] rounded-full px-4 py-2 border border-[var(--border-color)] shadow-sm">
+              <Shield size={13} className="text-[var(--emerald)]" />
+              <span>End-to-end encrypted</span>
+            </div>
+            
+            <div className="text-[14px] text-[var(--text-muted)] opacity-80">
+              Built by <a href="https://technoidfix.online" target="_blank" rel="noopener noreferrer" className="font-bold text-[var(--emerald)] hover:underline ml-1">technoidfix</a>
+            </div>
           </div>
         </div>
       </div>

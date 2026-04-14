@@ -24,11 +24,11 @@ interface MessageBubbleProps {
 function StatusIcon({ status }: { status?: MessageStatusType }) {
   switch (status) {
     case 'seen':
-      return <CheckCheck size={14} className="text-[#34B7F1] ml-0.5" strokeWidth={2.5} />; // WhatsApp light blue for seen
+      return <CheckCheck size={22} className="text-[#34B7F1] ml-0.5" strokeWidth={2.5} />; // WhatsApp light blue for seen
     case 'delivered':
-      return <CheckCheck size={14} className="text-white/70 ml-0.5" strokeWidth={2} />;
+      return <CheckCheck size={22} className="text-white/70 ml-0.5" strokeWidth={2} />;
     case 'sent':
-      return <Check size={14} className="text-white/70 ml-0.5" strokeWidth={2} />;
+      return <Check size={22} className="text-white/70 ml-0.5" strokeWidth={2} />;
     case 'failed':
       return <AlertCircle size={13} className="text-red-400 ml-0.5" strokeWidth={2} />;
     case 'queued':
@@ -97,7 +97,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
   if (message.is_deleted) {
     return (
       <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1.5 px-4`}>
-        <div className="px-4 py-2 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-muted)] text-[13px] italic border border-[var(--border-color)]">
+        <div className="px-4 py-2 rounded-2xl bg-[var(--bg-secondary)] text-[var(--text-muted)] text-[14px] italic border border-[var(--border-color)]">
           🚫 This message was deleted
         </div>
       </div>
@@ -186,11 +186,11 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
                 : 'bg-[var(--bg-secondary)] border-l-3 border-[var(--emerald)] hover:bg-[var(--bg-hover)]'
             }`}>
               {getDisplayName(replyData.sender) && (
-                <span className={`text-[11px] font-semibold ${isOwn ? 'text-white/80' : 'text-[var(--emerald)]'}`}>
+                <span className={`text-[14px] font-semibold ${isOwn ? 'text-white/80' : 'text-[var(--emerald)]'}`}>
                   {getDisplayName(replyData.sender)}
                 </span>
               )}
-              <span className={`text-[12px] line-clamp-2 mt-0.5 ${isOwn ? 'text-white/60' : 'text-[var(--text-secondary)]'}`}>
+              <span className={`text-[14px] line-clamp-2 mt-0.5 ${isOwn ? 'text-white/60' : 'text-[var(--text-secondary)]'}`}>
                 {replyData.content || (replyData.media_url ? 'Media' : '')}
               </span>
             </div>
@@ -200,7 +200,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
         {/* Sender name in groups — only show if we have a real name */}
         {showSenderName && !isOwn && message.sender && getDisplayName(message.sender) && (
           <p
-            className="text-[11px] font-semibold mb-1"
+            className="text-[14px] font-semibold mb-1"
             style={{ color: `hsl(${(message.sender.id ? message.sender.id.charCodeAt(0) * 37 : 1) % 360}, 65%, 55%)` }}
           >
             {getDisplayName(message.sender)}
@@ -227,7 +227,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             ) : mediaError ? (
               <div className="flex flex-col items-center justify-center p-6 text-red-400">
                 <AlertCircle size={24} className="mb-2" />
-                <span className="text-xs">Failed to load media</span>
+                <span className="text-[13px]">Failed to load media</span>
               </div>
             ) : null}
             {!mediaLoaded && !mediaError && (
@@ -257,7 +257,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {mediaError && (
               <div className="flex flex-col items-center justify-center p-6 text-red-400">
                 <AlertCircle size={24} className="mb-2" />
-                <span className="text-xs">Failed to load video</span>
+                <span className="text-[13px]">Failed to load video</span>
               </div>
             )}
             {/* Play overlay */}
@@ -296,19 +296,19 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             }`}
           >
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isOwn ? 'bg-white/15' : 'bg-[var(--emerald)]/10'}`}>
-              <FileText size={20} className={isOwn ? 'text-white/80' : 'text-[var(--emerald)]'} />
+              <FileText size={22} className={isOwn ? 'text-white/80' : 'text-[var(--emerald)]'} />
             </div>
             <div className="flex-1 min-w-0">
               <p className={`text-sm truncate font-medium ${isOwn ? 'text-white' : 'text-[var(--text-primary)]'}`}>
                 {message.media_metadata?.filename || 'Document'}
               </p>
-              <p className={`text-xs ${isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
+              <p className={`text-[13px] ${isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
                 {message.media_metadata?.size
                   ? formatFileSize(message.media_metadata.size as number)
                   : 'File'}
               </p>
             </div>
-            <Download size={17} className={isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'} />
+            <Download size={19} className={isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'} />
           </div>
         )}
 
@@ -324,7 +324,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
         {/* Time & Status */}
         <div className="flex items-center justify-end gap-1 -mb-0.5 mt-1" style={{ minWidth: isOwn ? '64px' : '44px' }}>
           {isStarred && <Star size={10} className={isOwn ? 'fill-[var(--gold)] text-[var(--gold)]' : 'fill-[var(--gold)] text-[var(--gold)]'} />}
-          <span className={`text-[11px] font-light ${isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
+          <span className={`text-[14px] font-light ${isOwn ? 'text-white/60' : 'text-[var(--text-muted)]'}`}>
             {formatMessageTime(message.created_at)}
           </span>
           {isOwn && overallStatus === 'failed' && (
@@ -342,7 +342,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
         {/* Reactions beneath bubble */}
         {message.reactions && message.reactions.length > 0 && (
           <div 
-            className={`absolute -bottom-3 ${isOwn ? '-left-2' : '-right-2'} bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-full px-2 py-0.5 text-xs flex gap-1 items-center`}
+            className={`absolute -bottom-3 ${isOwn ? '-left-2' : '-right-2'} bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-full px-2 py-0.5 text-[13px] flex gap-1 items-center`}
             style={{ boxShadow: 'var(--shadow-sm)' }}
           >
             {Array.from(new Set(message.reactions.map(r => r.emoji))).map(emoji => (
@@ -386,14 +386,14 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
                     onClick={(e) => { e.stopPropagation(); setLightboxZoom(z => Math.max(0.5, z - 0.25)); }}
                     className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                   >
-                    <ZoomOut size={18} />
+                    <ZoomOut size={22} />
                   </button>
-                  <span className="text-white/60 text-xs font-mono min-w-[40px] text-center">{Math.round(lightboxZoom * 100)}%</span>
+                  <span className="text-white/60 text-[13px] font-mono min-w-[40px] text-center">{Math.round(lightboxZoom * 100)}%</span>
                   <button
                     onClick={(e) => { e.stopPropagation(); setLightboxZoom(z => Math.min(3, z + 0.25)); }}
                     className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                   >
-                    <ZoomIn size={18} />
+                    <ZoomIn size={22} />
                   </button>
                 </>
               )}
@@ -405,13 +405,13 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
                 onClick={(e) => e.stopPropagation()}
                 className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
-                <Download size={18} />
+                <Download size={22} />
               </a>
               <button
                 onClick={closeLightbox}
                 className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
               >
-                <X size={18} />
+                <X size={22} />
               </button>
             </div>
           </div>
@@ -462,7 +462,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-secondary)] text-[var(--text-primary)] font-medium text-sm hover:bg-[var(--bg-hover)] transition-colors"
                 >
-                  <FileText size={16} />
+                  <FileText size={22} />
                   Open
                 </a>
                 <a
@@ -472,7 +472,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--emerald)] text-white font-medium text-sm hover:opacity-90 transition-opacity"
                 >
-                  <Download size={16} />
+                  <Download size={22} />
                   Download
                 </a>
               </div>

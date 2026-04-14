@@ -157,9 +157,9 @@ export default function LoginPage() {
 
       {/* Logo & Title */}
       <div className="flex flex-col items-center mb-8">
-        <CircleLogo size={56} className="mb-4" />
+        <CircleLogo size={64} className="mb-4 shadow-sm" />
         <h1 className="text-2xl font-bold gradient-text">Circle</h1>
-        <p className="text-[13px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
+        <p className="text-[14px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
           {isForgotPassword 
             ? 'Reset your password' 
             : 'Sign in to your account'}
@@ -177,7 +177,7 @@ export default function LoginPage() {
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Mail size={15} />
+            <Mail size={19} />
             Email
           </button>
           <button
@@ -188,7 +188,7 @@ export default function LoginPage() {
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Phone size={15} />
+            <Phone size={19} />
             Phone
           </button>
         </div>
@@ -198,7 +198,7 @@ export default function LoginPage() {
       {(mode === 'email' || isForgotPassword) && (
         <div className="space-y-5 animate-fadeIn">
           <div>
-            <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+            <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
               Email address
             </label>
             <input
@@ -212,7 +212,7 @@ export default function LoginPage() {
           
           {!isForgotPassword && (
             <div>
-              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+              <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
                 Password
               </label>
               <div className="relative">
@@ -229,14 +229,14 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </div>
               
               <div className="mt-2 flex justify-end">
                 <button
                   onClick={() => setIsForgotPassword(true)}
-                  className="text-[12px] font-medium text-[var(--emerald)] hover:underline"
+                  className="text-[14px] font-medium text-[var(--emerald)] hover:underline"
                 >
                   Forgot Password?
                 </button>
@@ -246,10 +246,10 @@ export default function LoginPage() {
 
           <Button onClick={handleEmailAuth} isLoading={isLoading} className="w-full !rounded-xl" size="lg">
             {isForgotPassword ? 'Send Reset Link' : 'Sign In'}
-            <ArrowRight size={17} className="ml-2" />
+            <ArrowRight size={19} className="ml-2" />
           </Button>
           
-          <p className="text-center text-[13px] text-[var(--text-muted)]">
+          <p className="text-center text-[14px] text-[var(--text-muted)]">
             {isForgotPassword ? (
               <button onClick={() => setIsForgotPassword(false)} className="font-semibold hover:text-[var(--text-primary)]">
                 Back to Sign in
@@ -265,7 +265,7 @@ export default function LoginPage() {
       {mode === 'phone' && !isForgotPassword && (
         <div className="space-y-5 animate-fadeIn">
           <div>
-            <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+            <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
               Phone number
             </label>
             <input
@@ -281,7 +281,7 @@ export default function LoginPage() {
           {/* If using Password mode */}
           {!useOtp && !otpSent && (
             <div className="animate-slideUp">
-              <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+              <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
                 Password
               </label>
               <div className="relative">
@@ -298,19 +298,19 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </div>
               <Button onClick={handlePhonePasswordAuth} isLoading={isLoading} className="w-full mt-5 !rounded-xl" size="lg">
                 Sign In
-                <ArrowRight size={17} className="ml-2" />
+                <ArrowRight size={19} className="ml-2" />
               </Button>
               <div className="mt-4 flex justify-center">
                 <button 
                   onClick={() => setUseOtp(true)}
-                  className="text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center transition-colors border border-[var(--border-color)] px-4 py-2 rounded-lg bg-[var(--bg-secondary)]"
+                  className="text-[14px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center transition-colors border border-[var(--border-color)] px-4 py-2 rounded-lg bg-[var(--bg-secondary)]"
                 >
-                  <Key size={14} className="mr-2" /> 
+                  <Key size={22} className="mr-2" /> 
                   Sign in with SMS Code instead
                 </button>
               </div>
@@ -322,7 +322,7 @@ export default function LoginPage() {
             <div className="animate-slideUp">
               {otpSent && (
                 <div className="mb-4">
-                  <label className="block text-[13px] font-medium text-[var(--text-primary)] mb-2">
+                  <label className="block text-[14px] font-medium text-[var(--text-primary)] mb-2">
                     Verification code
                   </label>
                   <input
@@ -344,21 +344,21 @@ export default function LoginPage() {
                 size="lg"
               >
                 {otpSent ? 'Verify OTP' : 'Send SMS Code'}
-                <ArrowRight size={17} className="ml-2" />
+                <ArrowRight size={19} className="ml-2" />
               </Button>
 
               <div className="mt-4 flex flex-col gap-3 justify-center">
                 {otpSent ? (
                   <button
                     onClick={() => { setOtpSent(false); setOtp(''); }}
-                    className="w-full text-center text-[13px] text-[var(--text-muted)] hover:text-[var(--emerald)] transition-colors"
+                    className="w-full text-center text-[14px] text-[var(--text-muted)] hover:text-[var(--emerald)] transition-colors"
                   >
                     Change phone number
                   </button>
                 ) : (
                   <button 
                     onClick={() => setUseOtp(false)}
-                    className="text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors"
+                    className="text-[14px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center justify-center transition-colors"
                   >
                     Use password instead
                   </button>
@@ -367,7 +367,7 @@ export default function LoginPage() {
             </div>
           )}
           
-          <p className="text-center mt-3 text-[13px] text-[var(--text-muted)]">
+          <p className="text-center mt-3 text-[14px] text-[var(--text-muted)]">
             <span>Don't have an account? Sign up with Google below.</span>
           </p>
         </div>
@@ -378,7 +378,7 @@ export default function LoginPage() {
         <div className="mt-6 animate-fadeIn">
           <div className="relative flex items-center justify-center mb-6">
             <div className="absolute inset-x-0 border-t border-[var(--border-color)]"></div>
-            <div className="relative bg-[var(--bg-app)] px-4 text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
+            <div className="relative bg-[var(--bg-app)] px-4 text-[14px] font-medium text-[var(--text-muted)] uppercase tracking-wider">
               Or Sign Up / continue with
             </div>
           </div>
@@ -413,29 +413,54 @@ export default function LoginPage() {
         </div>
       )}
 
-      {/* Policies Disclaimer */}
+      {/* Policies & Security Footer */}
       {!isForgotPassword && (
-        <div className="mt-8 text-center px-4 animate-fadeIn">
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-            By signing in or creating an account, you agree to our{' '}
-            <Link href="/legal/terms" className="font-semibold hover:text-[var(--emerald)] transition-colors text-inherit underline underline-offset-2">
+        <div className="mt-10 animate-fadeIn">
+          <p className="text-[14.5px] text-[var(--text-muted)] text-center leading-relaxed px-2">
+            By signing in or creating an account, you agree to
+            our{' '}
+            <Link
+              href="/legal/terms"
+              className="font-bold text-[var(--emerald)] hover:underline"
+            >
               Terms of Service
-            </Link> 
-            {' '}and{' '}
-            <Link href="/legal/privacy" className="font-semibold hover:text-[var(--emerald)] transition-colors text-inherit underline underline-offset-2">
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/legal/privacy"
+              className="font-bold text-[var(--emerald)] hover:underline"
+            >
               Privacy Policy
-            </Link>.
+            </Link>
+            .
           </p>
+
+          {/* Subtle gradient divider */}
+          <div className="my-6 mx-auto w-4/5 h-px bg-gradient-to-r from-transparent via-[var(--border-color)] to-transparent" />
+
+          {/* End-to-end encrypted badge */}
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Shield size={19} className="text-[var(--text-muted)] opacity-60" />
+            <span className="text-[14px] text-[var(--text-muted)] opacity-60 tracking-wide">
+              End-to-end encrypted
+            </span>
+          </div>
+          
+          <div className="flex items-center justify-center text-[14px] text-[var(--text-muted)] opacity-80 mt-2">
+            Built by <a href="https://technoidfix.online" target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--emerald)] hover:underline ml-1">technoidfix</a>
+          </div>
         </div>
       )}
 
-      {/* Security notice */}
-      <div className="flex flex-col items-center justify-center gap-1.5 mt-6 pt-6 border-t border-[var(--border-color)]">
-        <div className="flex items-center gap-1.5">
-          <Shield size={13} className="text-[var(--text-muted)]" />
-          <span className="text-[11px] text-[var(--text-muted)] tracking-wide">End-to-end encrypted</span>
+      {/* Security notice (forgot password mode) */}
+      {isForgotPassword && (
+        <div className="flex flex-col items-center justify-center gap-1.5 mt-6 pt-6 border-t border-[var(--border-color)]">
+          <div className="flex items-center gap-1.5">
+            <Shield size={13} className="text-[var(--text-muted)]" />
+            <span className="text-[14px] text-[var(--text-muted)] tracking-wide">End-to-end encrypted</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

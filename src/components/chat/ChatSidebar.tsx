@@ -1,10 +1,10 @@
 // ============================================================
-// ChatSidebar — Premium left panel with chat list
+// ChatSidebar — Premium left panel with LinkedIn-style cover
 // ============================================================
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MessageSquarePlus, Users, Settings, LogOut } from 'lucide-react';
+import { MessageSquarePlus, Users, Settings, LogOut, Image as ImageIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import SearchInput from '@/components/ui/SearchInput';
 import ChatListItem from '@/components/chat/ChatListItem';
@@ -75,51 +75,99 @@ export default function ChatSidebar() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-primary)]">
-      {/* Header — Glass effect */}
-      <div className="flex items-center justify-between px-5 py-4 glass-header border-b border-[var(--border-color)]">
-        <div className="flex items-center gap-3">
-          <Avatar
-            src={profile?.avatar_url}
-            name={profile?.display_name || 'User'}
-            size="md"
-          />
-          <div>
-            <span className="font-semibold text-[var(--text-primary)] text-[15px] block leading-tight">
-              {profile?.display_name || 'User'}
-            </span>
-            <span className="text-[11px] text-[var(--emerald)] font-medium">Online</span>
+
+      {/* ── LinkedIn-style Cover + Profile Header ── */}
+      <div className="relative shrink-0">
+        {/* Cover Photo Banner */}
+        <button
+          onClick={() => profile?.id && router.push(`/profile/${profile.id}`)}
+          className="block w-full h-24 overflow-hidden relative group"
+        >
+          {profile?.cover_url ? (
+            <img
+              src={profile.cover_url}
+              alt="Cover"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, var(--navy) 0%, #1a2332 40%, var(--emerald-dark, #15803D) 100%)',
+              }}
+            >
+              <ImageIcon size={28} className="text-white/8" />
+            </div>
+          )}
+          {/* Gradient vignette at bottom for readability */}
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--bg-primary)] to-transparent" />
+        </button>
+
+        {/* Profile Info — overlapping the cover */}
+        <div className="relative px-4 -mt-8 flex justify-between items-start">
+          {/* Avatar + Name */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => profile?.id && router.push(`/profile/${profile.id}`)}
+              className="shrink-0 rounded-full border-[4px] border-[var(--bg-primary)] shadow-lg hover:shadow-xl transition-shadow relative z-10 bg-[var(--bg-primary)]"
+            >
+              <Avatar
+                src={profile?.avatar_url}
+                name={profile?.display_name || 'User'}
+                size="xl"
+              />
+            </button>
+            <div className="pt-[38px] flex flex-col">
+              <button
+                onClick={() => profile?.id && router.push(`/profile/${profile.id}`)}
+                className="text-left group"
+              >
+                <span className="font-bold text-[var(--text-primary)] text-[16px] block leading-tight group-hover:text-[var(--emerald)] transition-colors">
+                  {profile?.display_name || 'User'}
+                </span>
+              </button>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] shadow-[0_0_5px_var(--emerald)] animate-pulse" />
+                <span className="text-[13px] text-[var(--text-muted)] font-medium tracking-wide">Online</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-0.5 pt-[38px]">
+            <button
+              onClick={() => setShowNewGroup(true)}
+              className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              title="New group"
+            >
+              <Users size={20} />
+            </button>
+            <button
+              onClick={() => setShowNewChat(true)}
+              className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              title="New chat"
+            >
+              <MessageSquarePlus size={20} />
+            </button>
+            <button
+              onClick={() => router.push('/settings')}
+              className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              title="Settings"
+            >
+              <Settings size={20} />
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-red-500"
+              title="Log out"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
         </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => setShowNewGroup(true)}
-            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="New group"
-          >
-            <Users size={19} />
-          </button>
-          <button
-            onClick={() => setShowNewChat(true)}
-            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="New chat"
-          >
-            <MessageSquarePlus size={19} />
-          </button>
-          <button
-            onClick={() => router.push('/settings')}
-            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-            title="Settings"
-          >
-            <Settings size={19} />
-          </button>
-          <button
-            onClick={handleSignOut}
-            className="p-2.5 rounded-xl hover:bg-[var(--bg-hover)] transition-all duration-200 text-[var(--text-muted)] hover:text-red-500"
-            title="Log out"
-          >
-            <LogOut size={19} />
-          </button>
-        </div>
+
+        {/* Divider */}
+        <div className="mt-2 mx-4 h-px bg-gradient-to-r from-transparent via-[var(--border-color)] to-transparent" />
       </div>
 
       {/* Search */}
@@ -137,7 +185,7 @@ export default function ChatSidebar() {
               <MessageSquarePlus size={28} className="opacity-40" />
             </div>
             <p className="text-sm font-medium text-[var(--text-secondary)]">No conversations yet</p>
-            <p className="text-xs mt-1.5 text-[var(--text-muted)]">Start a new chat to get going</p>
+            <p className="text-[13px] mt-1.5 text-[var(--text-muted)]">Start a new chat to get going</p>
           </div>
         ) : (
           filteredChats.map((chat) => (
@@ -171,7 +219,7 @@ export default function ChatSidebar() {
                 <Avatar src={user.avatar_url} name={user.display_name} size="md" />
                 <div className="text-left">
                   <p className="text-sm font-medium text-[var(--text-primary)]">{user.display_name}</p>
-                  <p className="text-xs text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
+                  <p className="text-[13px] text-[var(--text-muted)]">{user.bio || 'Hey there!'}</p>
                 </div>
               </button>
             ))
