@@ -6,7 +6,7 @@
 import { Check, CheckCheck, Clock, Download, Play, FileText, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { formatMessageTime, formatFileSize } from '@/lib/utils';
 import type { Message, MessageStatusType } from '@/types';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Star, RefreshCw, AlertCircle } from 'lucide-react';
 import { useChatStore } from '@/store/chat-store';
 import { useAuthStore } from '@/store/auth-store';
