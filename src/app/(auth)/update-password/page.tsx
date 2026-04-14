@@ -23,46 +23,60 @@ export default function UpdatePasswordPage() {
     let isMounted = true;
 
     const checkAuthStatus = async () => {
-      // 1. Direct hash check (bulletproof for implicit flow)
-      const hash = window.location.hash;
-      if (hash && (hash.includes('access_token=') || hash.includes('type=recovery'))) {
-        if (isMounted) setHasSession(true);
-        return;
-      }
-
-      // 2. Check existing session
+      // 1. Check existing session from cookies/storage
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         if (isMounted) setHasSession(true);
-        return;
+        return true;
       }
+
+      // 2. Check hash (fallback for implicit flow)
+      const hash = window.location.hash;
+      if (hash && (hash.includes('access_token=') || hash.includes('type=recovery'))) {
+        if (isMounted) setHasSession(true);
+        return true;
+      }
+      return false;
     };
 
+    // Initial check
     checkAuthStatus();
 
-    // 3. Listen for future events (like late parsing)
+    // Polling check (every 1s for 8 seconds max)
+    const interval = setInterval(() => {
+      checkAuthStatus().then(found => {
+        if (found) clearInterval(interval);
+      });
+    }, 1000);
+
+    // 3. Listen for events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        if (isMounted) setHasSession(true);
+        if (isMounted) {
+          setHasSession(true);
+          clearInterval(interval);
+        }
       }
     });
 
-    // 4. Timeout fallback
+    // 4. Longer Timeout fallback (8 seconds)
     const timeout = setTimeout(() => {
       if (isMounted) {
         setHasSession((prev) => {
           if (prev === null) {
             toast.error('Reset link is invalid or expired. Please request a new one.');
+            clearInterval(interval);
             return false;
           }
           return prev;
         });
       }
-    }, 4000);
+    }, 8000);
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
+      clearInterval(interval);
       clearTimeout(timeout);
     };
   }, [supabase]);

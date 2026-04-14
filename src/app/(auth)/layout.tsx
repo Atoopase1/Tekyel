@@ -12,20 +12,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-app)]">
       {/* Premium solid header */}
+      {/* Total black solid header */}
       <div 
-        className="h-60 relative overflow-hidden bg-[var(--navy)]"
+        className="h-60 relative overflow-hidden bg-black"
       >
-        {/* Subtle mesh overlay */}
+        {/* Subtle mesh overlay - slightly reduced opacity for black look */}
         <div 
-          className="absolute inset-0 opacity-10 bg-[var(--emerald)] mix-blend-overlay"
-        />
-        {/* Subtle grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-          }}
+          className="absolute inset-0 opacity-5 bg-[var(--emerald)] mix-blend-overlay"
         />
       </div>
 
