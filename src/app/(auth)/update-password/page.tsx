@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import CircleLogo from '@/components/ui/CircleLogo';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
@@ -14,20 +14,43 @@ export default function UpdatePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
+  // null = still waiting for auth event, false = no session, true = ready
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
 
   const supabase = getSupabaseBrowserClient();
 
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        toast.error('Session expired or invalid link. Please try resetting again.');
-      } else {
+    // Listen for PASSWORD_RECOVERY event.
+    // Supabase parses the #access_token from the URL hash and fires this event.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setHasSession(true);
+      } else if (event === 'SIGNED_IN' && session) {
+        // Also accept if they already have a valid session (e.g. refreshed the page)
         setHasSession(true);
       }
+    });
+
+    // Also check if there's already an active session (e.g. page refresh after token parsed)
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) setHasSession(true);
+    });
+
+    // If after 4 seconds we still have no session, the link is invalid/expired
+    const timeout = setTimeout(() => {
+      setHasSession((prev) => {
+        if (prev === null) {
+          toast.error('Reset link is invalid or expired. Please request a new one.');
+          return false;
+        }
+        return prev;
+      });
+    }, 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
     };
-    checkSession();
   }, [supabase]);
 
   const handleUpdatePassword = async () => {
@@ -45,24 +68,29 @@ export default function UpdatePasswordPage() {
     }
 
     setIsLoading(true);
-
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: password,
-      });
-
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      
-      toast.success('Password updated successfully!');
-      setTimeout(() => {
-        router.push('/');
-      }, 1000);
+      toast.success('Password updated! Redirecting…');
+      setTimeout(() => router.push('/'), 1200);
     } catch (err: any) {
       toast.error(err.message || 'Failed to update password');
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Loading state while waiting for auth event
+  if (hasSession === null) {
+    return (
+      <div className="p-8 flex flex-col items-center justify-center gap-4">
+        <Toaster position="top-center" />
+        <CircleLogo size={64} className="mb-2 shadow-sm" />
+        <div className="w-8 h-8 border-2 border-[var(--emerald)] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-[var(--text-muted)]">Verifying reset link…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
@@ -71,9 +99,9 @@ export default function UpdatePasswordPage() {
       {/* Logo & Title */}
       <div className="flex flex-col items-center mb-8">
         <CircleLogo size={64} className="mb-4 shadow-sm" />
-        <h1 className="text-2xl font-bold text-black dark:text-white">New Password</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">Set New Password</h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
-          Secure your account with a new password.
+          Enter and confirm your new password below.
         </p>
       </div>
 
@@ -109,24 +137,24 @@ export default function UpdatePasswordPage() {
             type={showPassword ? 'text' : 'password'}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm new password"
+            placeholder="Re-enter new password"
             disabled={!hasSession}
             className="w-full px-4 py-3 bg-[var(--bg-secondary)] text-[var(--text-primary)] rounded-xl text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--emerald)]/30 focus:bg-[var(--bg-primary)] border border-transparent focus:border-[var(--emerald)]/20 transition-all duration-200"
             onKeyDown={(e) => e.key === 'Enter' && handleUpdatePassword()}
           />
         </div>
 
-        <Button 
-          onClick={handleUpdatePassword} 
-          isLoading={isLoading} 
+        <Button
+          onClick={handleUpdatePassword}
+          isLoading={isLoading}
           disabled={!hasSession}
-          className="w-full mt-4 !rounded-xl" 
+          className="w-full mt-4 !rounded-xl"
           size="lg"
         >
           Update Password
           <ArrowRight size={19} className="ml-2" />
         </Button>
-        
+
         <p className="text-center mt-3 text-[14px] text-[var(--text-muted)]">
           Remember it now?{' '}
           <button
@@ -136,8 +164,12 @@ export default function UpdatePasswordPage() {
             Back to Sign in
           </button>
         </p>
-      </div>
 
+        <div className="flex items-center justify-center gap-1.5 pt-4 border-t border-[var(--border-color)]">
+          <Shield size={13} className="text-[var(--text-muted)]" />
+          <span className="text-[13px] text-[var(--text-muted)]">End-to-end encrypted</span>
+        </div>
+      </div>
     </div>
   );
 }
