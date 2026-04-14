@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/verify') ||
     request.nextUrl.pathname.startsWith('/setup-profile') ||
     request.nextUrl.pathname.startsWith('/update-password') ||
+    request.nextUrl.pathname.startsWith('/legal') ||
     request.nextUrl.pathname.startsWith('/auth');
 
   // Redirect unauthenticated users to login
