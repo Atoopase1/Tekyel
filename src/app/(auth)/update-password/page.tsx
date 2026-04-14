@@ -71,7 +71,7 @@ export default function UpdatePasswordPage() {
       {/* Logo & Title */}
       <div className="flex flex-col items-center mb-8">
         <CircleLogo size={64} className="mb-4 shadow-sm" />
-        <h1 className="text-2xl font-bold gradient-text">New Password</h1>
+        <h1 className="text-2xl font-bold text-black dark:text-white">New Password</h1>
         <p className="text-[14px] text-[var(--text-muted)] mt-1.5 tracking-wide text-center">
           Secure your account with a new password.
         </p>

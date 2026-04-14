@@ -64,9 +64,8 @@ export default function CallModal() {
   if (isMinimized) {
     return (
       <div
-        className="fixed bottom-24 right-4 z-[100] w-40 h-28 rounded-2xl overflow-hidden cursor-pointer group border border-white/10"
+        className="fixed bottom-24 right-4 z-[100] w-40 h-28 rounded-2xl overflow-hidden cursor-pointer group border border-white/10 bg-[#0F172A]"
         style={{ 
-          background: 'linear-gradient(135deg, #0F172A, #1E293B)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)',
         }}
         onClick={() => setIsMinimized(false)}
@@ -95,7 +94,7 @@ export default function CallModal() {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: 'linear-gradient(180deg, #0F172A 0%, #020617 100%)' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-[#0F172A]">
       {/* Video Background */}
       {isVideo && (
         <>
@@ -118,7 +117,7 @@ export default function CallModal() {
               className={`w-full h-full object-cover ${isVideoOff ? 'hidden' : ''}`}
             />
             {isVideoOff && (
-              <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1E293B, #0F172A)' }}>
+              <div className="w-full h-full flex items-center justify-center bg-[#1E293B]">
                 <VideoOff size={24} className="text-white/40" />
               </div>
             )}
@@ -142,8 +141,7 @@ export default function CallModal() {
           <div className="relative">
             {status === 'connected' && (
               <div 
-                className="absolute -inset-3 rounded-full animate-pulse"
-                style={{ background: 'radial-gradient(circle, rgba(22, 163, 74, 0.2) 0%, transparent 70%)' }}
+                className="absolute -inset-3 rounded-full animate-pulse bg-[var(--emerald)]/10"
               />
             )}
             <Avatar src={remoteUser?.avatar_url} name={remoteUser?.display_name || '?'} size="xxl" />
@@ -170,7 +168,7 @@ export default function CallModal() {
       )}
 
       {/* Bottom Controls */}
-      <div className="absolute bottom-0 left-0 right-0 pb-14 pt-10" style={{ background: 'linear-gradient(to top, rgba(2,6,23,0.9) 0%, transparent 100%)' }}>
+      <div className="absolute bottom-0 left-0 right-0 pb-14 pt-10" style={{ background: 'linear-gradient(to top, rgba(15,23,42,0.95) 0%, transparent 100%)' }}>
         <div className="flex items-center justify-center gap-5">
           {/* Mute */}
           <button

@@ -93,16 +93,13 @@ export default function ChatSidebar() {
             />
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, var(--navy) 0%, #1a2332 40%, var(--emerald-dark, #15803D) 100%)',
-              }}
+              className="w-full h-full flex items-center justify-center bg-[var(--emerald-dark,#15803D)]"
             >
               <ImageIcon size={28} className="text-white/8" />
             </div>
           )}
           {/* Gradient vignette at bottom for readability */}
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--bg-primary)] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-12" style={{ background: 'linear-gradient(to top, var(--bg-primary), transparent)' }} />
         </button>
 
         {/* Profile Info — overlapping the cover */}
@@ -169,7 +166,7 @@ export default function ChatSidebar() {
         </div>
 
         {/* Divider */}
-        <div className="mt-2 mx-4 h-px bg-gradient-to-r from-transparent via-[var(--border-color)] to-transparent" />
+        <div className="mt-2 mx-4 h-px bg-[var(--border-color)]" />
       </div>
 
       {/* Search */}

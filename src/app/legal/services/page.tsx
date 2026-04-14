@@ -83,8 +83,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-[var(--bg-app)] max-h-[100vh] overflow-y-auto scrollbar-thin">
       {/* Hero banner */}
       <div
-        className="relative px-8 pt-8 pb-14"
-        style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #0f1923 60%, #0d2818 100%)' }}
+        className="relative px-8 pt-8 pb-14 bg-[var(--navy)]"
       >
         <div className="max-w-3xl mx-auto">
           <div className="flex justify-between items-start mb-8">

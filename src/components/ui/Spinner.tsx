@@ -34,16 +34,10 @@ export default function Spinner({ size = 'md', className = '' }: SpinnerProps) {
         />
         <path
           d="M12 2a10 10 0 019.95 9"
-          stroke="url(#spinnerGrad)"
+          stroke="var(--emerald)"
           strokeWidth="2.5"
           strokeLinecap="round"
         />
-        <defs>
-          <linearGradient id="spinnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="var(--navy, #0F172A)" />
-            <stop offset="100%" stopColor="var(--emerald, #16A34A)" />
-          </linearGradient>
-        </defs>
       </svg>
     </div>
   );

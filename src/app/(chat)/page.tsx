@@ -12,15 +12,8 @@ export default function ChatDefaultPage() {
         <ChatSidebar />
       </div>
 
-      <div className="flex-1 hidden lg:flex flex-col items-center justify-center relative overflow-hidden"
-        style={{ background: 'linear-gradient(180deg, var(--bg-app) 0%, var(--bg-secondary) 100%)' }}
-      >
-        {/* Subtle decorative elements */}
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 30% 40%, var(--emerald) 0%, transparent 50%), radial-gradient(circle at 70% 60%, var(--navy) 0%, transparent 50%)',
-          }}
-        />
+      <div className="flex-1 hidden lg:flex flex-col items-center justify-center relative overflow-hidden bg-[var(--bg-app)]">
+        {/* Subtle decorative element removed - no more gradients */}
 
         <div className="text-center max-w-md px-8 relative z-10">
           {/* Animated logo */}

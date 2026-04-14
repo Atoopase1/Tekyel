@@ -114,8 +114,7 @@ export default function ProfileEditor() {
             <img src={profile.cover_url} alt="Cover" className="w-full h-full object-cover" />
           ) : (
             <div 
-              className="w-full h-full flex flex-col items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}
+              className="w-full h-full flex flex-col items-center justify-center gap-2 bg-[var(--emerald-dark,#15803D)]"
             >
               <ImageIcon size={24} className="text-white/30" />
               <span className="text-white/40 text-[13px]">Click to add cover photo</span>
@@ -151,7 +150,7 @@ export default function ProfileEditor() {
       {/* Avatar */}
       <div className="flex flex-col items-center">
         <div className="relative cursor-pointer group" onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}>
-          <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, var(--navy), var(--emerald))' }}>
+          <div className="p-1 rounded-full bg-[var(--emerald-dark,#15803D)]">
             <div className="rounded-full bg-[var(--bg-primary)] p-0.5">
               <Avatar
                 src={profile?.avatar_url}

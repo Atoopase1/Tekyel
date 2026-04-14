@@ -26,8 +26,7 @@ export default function CallsPage() {
       <div className="flex-1 overflow-y-auto scrollbar-thin">
         <div className="flex flex-col items-center justify-center h-full text-center px-8">
           <div 
-            className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5"
-            style={{ background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(15, 23, 42, 0.05))' }}
+            className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5 bg-[var(--emerald)]/10"
           >
             <Phone size={32} className="text-[var(--emerald)] opacity-50" />
           </div>

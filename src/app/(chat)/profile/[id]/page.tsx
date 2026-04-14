@@ -230,7 +230,7 @@ export default function ProfileViewPage() {
           {author.cover_url ? (
             <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
+            <div className="w-full h-full flex items-center justify-center bg-[var(--emerald-dark,#15803D)]">
               <ImageIcon size={48} className="text-white opacity-10" />
             </div>
           )}

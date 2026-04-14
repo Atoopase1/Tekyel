@@ -38,9 +38,16 @@ export async function GET(request: Request) {
     
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
+    } else {
+      // Redirect to login if there is a code but exchange failed
+      return NextResponse.redirect(`${origin}/login?error=auth-code-exchange-failed`);
     }
   }
 
-  // Redirect to login if there's an error or no code
-  return NextResponse.redirect(`${origin}/login?error=auth-code-exchange-failed`);
+  // If there is no code, redirect to the `next` path.
+  // This is required for implicit flow (like password reset) where the token is
+  // in the URL fragment (#access_token=...) rather than query parameters.
+  // The browser will preserve the hash fragment across redirects and the client-side
+  // Supabase client will parse it and authenticate the user.
+  return NextResponse.redirect(`${origin}${next}`);
 }

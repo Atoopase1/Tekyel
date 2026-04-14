@@ -22,7 +22,7 @@ export default function CircleLogo({ size = 48, className = '', showText = false
       />
       
       {showText && (
-        <span className="font-bold text-xl tracking-tight gradient-text">
+        <span className="font-bold text-xl tracking-tight text-black dark:text-white">
           Circle
         </span>
       )}

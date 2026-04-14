@@ -11,19 +11,13 @@ export const metadata: Metadata = {
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-app)]">
-      {/* Premium gradient header */}
+      {/* Premium solid header */}
       <div 
-        className="h-60 relative overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #0F172A 0%, #134E2A 50%, #0F172A 100%)',
-        }}
+        className="h-60 relative overflow-hidden bg-[var(--navy)]"
       >
         {/* Subtle mesh overlay */}
         <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: 'radial-gradient(circle at 30% 40%, rgba(22, 163, 74, 0.15) 0%, transparent 60%)',
-          }}
+          className="absolute inset-0 opacity-10 bg-[var(--emerald)] mix-blend-overlay"
         />
         {/* Subtle grid pattern */}
         <div 

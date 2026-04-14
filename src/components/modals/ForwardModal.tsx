@@ -129,9 +129,8 @@ export default function ForwardModal({ message, onClose }: ForwardModalProps) {
             <button
               onClick={handleForward}
               disabled={isSending}
-              className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all duration-200 disabled:opacity-50 active:scale-95 hover:-translate-y-[1px]"
+              className="w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all duration-200 disabled:opacity-50 active:scale-95 hover:-translate-y-[1px] bg-[var(--emerald)]"
               style={{
-                background: 'linear-gradient(135deg, var(--navy), var(--emerald))',
                 boxShadow: '0 4px 14px rgba(22, 163, 74, 0.25)',
               }}
             >

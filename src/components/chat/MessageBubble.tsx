@@ -373,7 +373,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
           onClick={closeLightbox}
         >
           {/* Controls */}
-          <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10 bg-gradient-to-b from-black/60 to-transparent">
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 z-10 bg-black/60">
             <p className="text-white/80 text-sm font-medium truncate max-w-[60%]">
               {lightboxType === 'image' ? (message.sender?.display_name || 'Photo') 
                 : lightboxType === 'video' ? (message.sender?.display_name || 'Video')

@@ -14,8 +14,7 @@ export default function IncomingCallModal() {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fadeIn"
-      style={{ background: 'linear-gradient(180deg, #0F172A 0%, #020617 100%)' }}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center animate-fadeIn bg-[#0F172A]"
     >
       {/* Animated rings */}
       <div className="absolute w-56 h-56 rounded-full border border-[var(--emerald)]/10" style={{ animation: 'ringExpand 2.5s ease-out infinite' }} />
@@ -56,9 +55,8 @@ export default function IncomingCallModal() {
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={acceptCall}
-              className="w-16 h-16 rounded-full text-white flex items-center justify-center hover:brightness-110 transition-all duration-200 active:scale-95"
+              className="w-16 h-16 rounded-full text-white flex items-center justify-center hover:brightness-110 transition-all duration-200 active:scale-95 bg-[var(--emerald)]"
               style={{ 
-                background: 'linear-gradient(135deg, #16A34A, #22C55E)',
                 boxShadow: '0 0 24px rgba(22, 163, 74, 0.4)',
               }}
             >
