@@ -173,7 +173,7 @@ export default function LoginPage() {
             onClick={() => { setMode('email'); setOtpSent(false); setUseOtp(false); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
               mode === 'email'
-                ? 'bg-[var(--navy)] text-white shadow-sm'
+                ? 'bg-[var(--emerald)] text-white shadow-sm'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -184,7 +184,7 @@ export default function LoginPage() {
             onClick={() => setMode('phone')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
               mode === 'phone'
-                ? 'bg-[var(--navy)] text-white shadow-sm'
+                ? 'bg-[var(--emerald)] text-white shadow-sm'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >

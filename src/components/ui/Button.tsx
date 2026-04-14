@@ -26,7 +26,7 @@ export default function Button({
 
   const variantStyles = {
     primary:
-      'bg-[var(--navy)] text-white hover:bg-[var(--navy-light)] focus:ring-[var(--emerald)] shadow-sm hover:shadow-md hover:-translate-y-[1px] rounded-xl',
+      'bg-[var(--emerald)] text-white hover:bg-[var(--emerald-light)] focus:ring-[var(--emerald)] shadow-sm hover:shadow-md hover:-translate-y-[1px] rounded-xl',
     secondary:
       'bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] focus:ring-[var(--border-color)] border border-[var(--border-color)] rounded-xl hover:shadow-sm',
     ghost:
