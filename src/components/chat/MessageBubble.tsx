@@ -112,7 +112,44 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
     return null;
   };
 
-  const isSelected = selectedMessageIds.includes(message.id);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const startXRef = useRef(0);
+  const threshold = 60;
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (selectionMode) return;
+    startXRef.current = e.clientX;
+    setIsDragging(true);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    const diff = e.clientX - startXRef.current;
+    
+    // Only drag to the right
+    if (diff > 0) {
+      // Add resistance as we drag further
+      const resistance = 0.6;
+      const offset = diff * resistance;
+      setDragOffset(Math.min(offset, threshold + 20));
+      
+      // Haptic feedback when threshold met
+      if (offset >= threshold && dragOffset < threshold && 'vibrate' in navigator) {
+        navigator.vibrate(10);
+      }
+    } else {
+      setDragOffset(0);
+    }
+  };
+
+  const handlePointerUp = () => {
+    if (dragOffset >= threshold) {
+      setReplyingTo(message);
+    }
+    setDragOffset(0);
+    setIsDragging(false);
+  };
 
   return (
     <div 
@@ -121,7 +158,25 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
       }`}
       onMouseEnter={() => setShowMenuHover(true)}
       onMouseLeave={() => setShowMenuHover(false)}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{ touchAction: 'pan-y' }} // Allow vertical scroll, but capture horizontal
     >
+      {/* Swipe to Reply Icon Behind Bubble */}
+      <div 
+        className="absolute left-6 text-[var(--emerald)] transition-opacity duration-200"
+        style={{ 
+          opacity: dragOffset > 20 ? 1 : 0,
+          transform: `scale(${Math.min(dragOffset / threshold, 1)})`,
+        }}
+      >
+        <div className="bg-[var(--bg-secondary)] p-2 rounded-full border border-[var(--border-color)] shadow-sm">
+          <RefreshCw size={18} className="rotate-180" />
+        </div>
+      </div>
+
       {/* Selection Checkbox */}
       {selectionMode && (
         <div 
@@ -163,7 +218,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
               toggleMessageSelection(message.id);
             }
           }}
-          className={`relative max-w-full min-w-[80px] px-3.5 py-2 ${selectionMode ? 'cursor-pointer' : ''} ${
+          className={`relative max-w-[85%] lg:max-w-[580px] min-w-[80px] px-3.5 py-2 transition-transform duration-100 ease-out ${selectionMode ? 'cursor-pointer' : ''} ${
             isOwn
               ? 'bg-[var(--bubble-out)] text-[var(--bubble-out-text)] rounded-2xl bubble-tail-out'
               : 'bg-[var(--bubble-in)] text-[var(--bubble-in-text)] rounded-2xl border border-[var(--border-color)] bubble-tail-in'
@@ -172,6 +227,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             boxShadow: isOwn 
               ? '0 1px 3px rgba(22, 163, 74, 0.12)' 
               : 'var(--shadow-xs)',
+            transform: `translateX(${dragOffset}px)`,
           }}
         >
 

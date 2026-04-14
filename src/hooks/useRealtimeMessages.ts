@@ -66,21 +66,33 @@ export function useRealtimeMessages(chatId: string | null) {
 
           console.log(`[Realtime] New message received: ${newMessage.id} from ${newMessage.sender_id}`);
 
-          // If the message is from me, I already have the profile in the store
-          if (newMessage.sender_id === currentUser?.id) {
-            const currentProfile = useAuthStore.getState().profile;
-            addMessage({ ...newMessage, sender: currentProfile || undefined } as Message);
-            return;
-          }
+          // Fetch sender profile + reply_to if needed
+          const fetchDetails = async () => {
+            const results: any = {};
+            
+            // 1. Fetch sender profile
+            if (newMessage.sender_id === currentUser?.id) {
+              results.sender = useAuthStore.getState().profile;
+            } else {
+              const { data } = await supabase.from('profiles').select('*').eq('id', newMessage.sender_id).single();
+              results.sender = data;
+            }
 
-          // Fetch sender profile for incoming messages
-          const { data: sender } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', newMessage.sender_id)
-            .single();
+            // 2. Fetch reply_to object if it's a reply
+            if (newMessage.reply_to_id) {
+              const { data } = await supabase
+                .from('messages')
+                .select('*, sender:profiles(*)')
+                .eq('id', newMessage.reply_to_id)
+                .single();
+              results.reply_to = data;
+            }
 
-          addMessage({ ...newMessage, sender: sender || undefined } as Message);
+            return results;
+          };
+
+          const details = await fetchDetails();
+          addMessage({ ...newMessage, ...details } as Message);
         }
       )
       .on(
@@ -102,6 +114,37 @@ export function useRealtimeMessages(chatId: string | null) {
             .single();
 
           useChatStore.getState().updateMessageInList({ ...updatedMessage, sender: sender || undefined });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for any reaction change
+          schema: 'public',
+          table: 'message_reactions',
+        },
+        async (payload) => {
+          const supabase = getSupabaseBrowserClient();
+          const reaction = (payload.new || payload.old) as any;
+          if (!reaction || !reaction.message_id) return;
+
+          // Only care if this message is in our current chat
+          const messages = useChatStore.getState().messages;
+          const targetMsg = messages.find(m => m.id === reaction.message_id);
+          if (!targetMsg) return;
+
+          // Full re-fetch of reactions for this message to keep it clean and synced
+          const { data: latestReactions } = await supabase
+            .from('message_reactions')
+            .select('*, profile:profiles(*)')
+            .eq('message_id', reaction.message_id);
+
+          if (latestReactions) {
+            useChatStore.getState().updateMessageInList({ 
+              ...targetMsg, 
+              reactions: latestReactions 
+            });
+          }
         }
       )
       .on(
