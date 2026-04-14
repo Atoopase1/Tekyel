@@ -41,7 +41,7 @@ export default function LoginPage() {
       setIsLoading(true);
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/update-password`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
         });
         if (error) throw error;
         toast.success('Password reset link sent! Check your email.');
@@ -419,19 +419,21 @@ export default function LoginPage() {
           <p className="text-[14.5px] text-[var(--text-muted)] text-center leading-relaxed px-2">
             By signing in or creating an account, you agree to
             our{' '}
-            <Link
-              href="/legal/terms"
-              className="font-bold text-[var(--emerald)] hover:underline"
+            <button
+              onClick={() => router.push('/legal/terms')}
+              className="font-bold text-[var(--emerald)] hover:underline cursor-pointer relative z-20 focus:outline-none bg-transparent border-none p-0 inline"
+              type="button"
             >
               Terms of Service
-            </Link>{' '}
+            </button>{' '}
             and{' '}
-            <Link
-              href="/legal/privacy"
-              className="font-bold text-[var(--emerald)] hover:underline"
+            <button
+              onClick={() => router.push('/legal/privacy')}
+              className="font-bold text-[var(--emerald)] hover:underline cursor-pointer relative z-20 focus:outline-none bg-transparent border-none p-0 inline"
+              type="button"
             >
               Privacy Policy
-            </Link>
+            </button>
             .
           </p>
 

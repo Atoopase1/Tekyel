@@ -198,19 +198,19 @@ export default function ProfileViewPage() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[var(--bg-app)] overflow-x-hidden relative min-h-screen">
+    <div className="flex-1 flex flex-col bg-[var(--bg-app)] w-full h-full relative">
       
       {/* Hidden file inputs */}
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
 
-      {/* Header bar */}
-      <div className="glass-header w-full z-20 sticky top-0 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)]">
+      {/* Header bar (Pinned) */}
+      <div className="glass-header w-full flex-shrink-0 z-20 flex items-center justify-between px-5 py-3 border-b border-[var(--border-color)]">
         <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
           <ArrowLeft size={22} />
         </button>
         
-        <h1 className="text-[15px] font-semibold text-[var(--text-primary)]">{author.display_name}</h1>
+        <h1 className="text-[15px] font-semibold text-[var(--text-primary)] truncate max-w-[200px]">{author.display_name}</h1>
 
         {isMe ? (
           <button onClick={handleEditProfile} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all duration-200">
@@ -221,146 +221,148 @@ export default function ProfileViewPage() {
         )}
       </div>
 
-      {/* ── Cover / Banner ── */}
-      <div className="relative w-full h-44 sm:h-60 bg-[var(--bg-secondary)] overflow-hidden">
-        {author.cover_url ? (
-          <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
-            <ImageIcon size={48} className="text-white opacity-10" />
-          </div>
-        )}
-
-        {/* Uploading overlay */}
-        {isUploadingCover && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-            <Spinner size="lg" />
-          </div>
-        )}
-
-        {/* Cover edit button (own profile) */}
-        {isMe && !isUploadingCover && (
-          <button
-            onClick={() => coverInputRef.current?.click()}
-            className="absolute right-4 bottom-4 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-full text-white transition-all border border-white/15 flex items-center gap-2 text-[13px] font-medium shadow-lg"
-          >
-            <Camera size={22} />
-            <span className="hidden sm:inline">Edit cover</span>
-          </button>
-        )}
-      </div>
-
-      {/* ── Profile body ── */}
-      <div className="relative max-w-4xl mx-auto w-full px-4 sm:px-8">
-        
-        {/* Avatar overlapping banner — LinkedIn style */}
-        <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
-          <div className="relative z-10">
-            <div
-              className={`rounded-full border-[5px] border-[var(--bg-app)] inline-block cursor-pointer group ${isMe ? '' : 'cursor-default'}`}
-              onClick={() => isMe && !isUploadingAvatar && avatarInputRef.current?.click()}
-            >
-              <div className="relative">
-                <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className={isUploadingAvatar ? 'opacity-50' : ''} />
-                
-                {/* Camera overlay on own avatar */}
-                {isMe && !isUploadingAvatar && (
-                  <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <Camera size={24} className="text-white" />
-                  </div>
-                )}
-
-                {/* Uploading spinner */}
-                {isUploadingAvatar && (
-                  <div className="absolute inset-0 rounded-full flex items-center justify-center">
-                    <Spinner size="md" />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Small pencil badge on avatar */}
-            {isMe && (
-              <button 
-                onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
-                className="absolute bottom-1 right-1 bg-[var(--wa-green)] hover:bg-[var(--wa-green-dark)] p-1.5 rounded-full text-white transition-all shadow-lg border-2 border-[var(--bg-app)]"
-              >
-                <Pencil size={12} />
-              </button>
-            )}
-          </div>
-          
-          {/* Actions */}
-          {!isMe && (
-            <div className="flex gap-2 mb-2">
-              <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} size="sm">
-                {isFollowing ? <><UserCheck size={19} className="mr-1.5" /> Following</> : <><UserPlus size={19} className="mr-1.5" /> Follow</>}
-              </Button>
-              <Button variant="secondary" onClick={handleMessage} size="sm">
-                <MessageSquare size={19} className="mr-1.5" /> Message
-              </Button>
+      {/* Scrollable Body */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full pb-10">
+        {/* ── Cover / Banner ── */}
+        <div className="relative w-full h-44 sm:h-60 bg-[var(--bg-secondary)] overflow-hidden">
+          {author.cover_url ? (
+            <img src={author.cover_url} alt="Cover" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--navy) 0%, #1E293B 50%, var(--emerald-dark, #15803D) 100%)' }}>
+              <ImageIcon size={48} className="text-white opacity-10" />
             </div>
           )}
-        </div>
 
-        {/* Info card */}
-        <div className="surface-card p-6 mb-8 relative">
-          {isMe && (
-            <button 
-              onClick={handleEditProfile}
-              className="absolute right-5 top-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          {/* Uploading overlay */}
+          {isUploadingCover && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+              <Spinner size="lg" />
+            </div>
+          )}
+
+          {/* Cover edit button (own profile) */}
+          {isMe && !isUploadingCover && (
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="absolute right-4 bottom-4 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-full text-white transition-all border border-white/15 flex items-center gap-2 text-[13px] font-medium shadow-lg"
             >
-              <Pencil size={22} />
+              <Camera size={22} />
+              <span className="hidden sm:inline">Edit cover</span>
             </button>
           )}
-
-          <h2 className="text-[22px] font-bold text-[var(--text-primary)] flex items-center gap-2.5 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
-            {author.display_name}
-            {relationship && (
-              <span className={`text-[10px] uppercase px-2.5 py-0.5 rounded-full font-bold ${
-                relationship === 'family' 
-                  ? 'bg-[var(--gold)]/10 text-[var(--gold)]' 
-                  : 'bg-[var(--emerald)]/10 text-[var(--emerald)]'
-              }`}>
-                {relationship}
-              </span>
-            )}
-          </h2>
-          <p className="text-[var(--text-muted)] text-[14px] mb-6 leading-relaxed">
-            {author.bio || 'No bio available.'}
-          </p>
-
-          <div className="flex items-center gap-10 border-t border-[var(--border-color)] pt-5">
-            <div className="flex flex-col">
-              <span className="font-bold text-[20px] text-[var(--text-primary)]">{followerCount}</span>
-              <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Followers</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-[20px] text-[var(--text-primary)]">{statuses.length}</span>
-              <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Posts</span>
-            </div>
-          </div>
         </div>
 
-        {/* Activity timeline */}
-        <h3 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
-          Activity Timeline
-        </h3>
-        {statuses.length === 0 ? (
-          <div className="text-center p-12 surface-card mb-20">
-            <p className="text-[var(--text-muted)] text-[14px]">No posts shared yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-4 mb-20">
-            {statuses.map(status => (
-              <div key={status.id} className="opacity-90 hover:opacity-100 transition-opacity">
-                <StatusCard status={{...status, visibility: 'public'}} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        {/* ── Profile body ── */}
+        <div className="relative max-w-4xl mx-auto w-full px-4 sm:px-8">
+          
+          {/* Avatar overlapping banner — LinkedIn style */}
+          <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
+            <div className="relative z-10">
+              <div
+                className={`rounded-full border-[5px] border-[var(--bg-app)] inline-block cursor-pointer group ${isMe ? '' : 'cursor-default'}`}
+                onClick={() => isMe && !isUploadingAvatar && avatarInputRef.current?.click()}
+              >
+                <div className="relative">
+                  <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className={isUploadingAvatar ? 'opacity-50' : ''} />
+                  
+                  {/* Camera overlay on own avatar */}
+                  {isMe && !isUploadingAvatar && (
+                    <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      <Camera size={24} className="text-white" />
+                    </div>
+                  )}
 
+                  {/* Uploading spinner */}
+                  {isUploadingAvatar && (
+                    <div className="absolute inset-0 rounded-full flex items-center justify-center">
+                      <Spinner size="md" />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Small pencil badge on avatar */}
+              {isMe && (
+                <button 
+                  onClick={() => !isUploadingAvatar && avatarInputRef.current?.click()}
+                  className="absolute bottom-1 right-1 bg-[var(--wa-green)] hover:bg-[var(--wa-green-dark)] p-1.5 rounded-full text-white transition-all shadow-lg border-2 border-[var(--bg-app)]"
+                >
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
+            
+            {/* Actions */}
+            {!isMe && (
+              <div className="flex gap-2 mb-2">
+                <Button variant={isFollowing ? 'secondary' : 'primary'} onClick={toggleFollow} size="sm">
+                  {isFollowing ? <><UserCheck size={19} className="mr-1.5" /> Following</> : <><UserPlus size={19} className="mr-1.5" /> Follow</>}
+                </Button>
+                <Button variant="secondary" onClick={handleMessage} size="sm">
+                  <MessageSquare size={19} className="mr-1.5" /> Message
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Info card */}
+          <div className="surface-card p-6 mb-8 relative">
+            {isMe && (
+              <button 
+                onClick={handleEditProfile}
+                className="absolute right-5 top-5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                <Pencil size={22} />
+              </button>
+            )}
+
+            <h2 className="text-[22px] font-bold text-[var(--text-primary)] flex items-center gap-2.5 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
+              {author.display_name}
+              {relationship && (
+                <span className={`text-[10px] uppercase px-2.5 py-0.5 rounded-full font-bold ${
+                  relationship === 'family' 
+                    ? 'bg-[var(--gold)]/10 text-[var(--gold)]' 
+                    : 'bg-[var(--emerald)]/10 text-[var(--emerald)]'
+                }`}>
+                  {relationship}
+                </span>
+              )}
+            </h2>
+            <p className="text-[var(--text-muted)] text-[14px] mb-6 leading-relaxed">
+              {author.bio || 'No bio available.'}
+            </p>
+
+            <div className="flex items-center gap-10 border-t border-[var(--border-color)] pt-5">
+              <div className="flex flex-col">
+                <span className="font-bold text-[20px] text-[var(--text-primary)]">{followerCount}</span>
+                <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Followers</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-[20px] text-[var(--text-primary)]">{statuses.length}</span>
+                <span className="text-[14px] text-[var(--text-muted)] font-medium uppercase tracking-wider">Posts</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity timeline */}
+          <h3 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-1 mb-4 flex items-center gap-2">
+            Activity Timeline
+          </h3>
+          {statuses.length === 0 ? (
+            <div className="text-center p-12 surface-card mb-20">
+              <p className="text-[var(--text-muted)] text-[14px]">No posts shared yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-20">
+              {statuses.map(status => (
+                <div key={status.id} className="opacity-90 hover:opacity-100 transition-opacity">
+                  <StatusCard status={{...status, visibility: 'public'}} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

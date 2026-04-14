@@ -27,6 +27,7 @@ export default function TouchRipple() {
       ripple.style.width = ripple.style.height = `${diameter}px`;
       ripple.style.left = `${e.clientX - rect.left - radius}px`;
       ripple.style.top = `${e.clientY - rect.top - radius}px`;
+      ripple.style.pointerEvents = 'none';
 
       // Set position context on parent if needed
       const computedStyle = window.getComputedStyle(interactiveEl);
