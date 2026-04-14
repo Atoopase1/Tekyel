@@ -129,7 +129,7 @@ export default function PoliticsPage() {
       </div>
 
       {/* Content card */}
-      <div className="max-w-3xl mx-auto px-6 -mt-6">
+      <div className="max-w-3xl mx-auto px-6 -mt-6 relative z-10">
         <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] shadow-lg overflow-hidden">
           <div className="p-6 sm:p-8 space-y-8 text-[14.5px] text-[var(--text-secondary)] leading-relaxed">
             {principles.map((principle, i) => (

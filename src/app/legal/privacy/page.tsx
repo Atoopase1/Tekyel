@@ -155,7 +155,7 @@ export default function PrivacyPolicyPage() {
       </div>
 
       {/* Content card */}
-      <div className="max-w-3xl mx-auto px-6 -mt-6">
+      <div className="max-w-3xl mx-auto px-6 -mt-6 relative z-10">
         <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] shadow-lg overflow-hidden">
           {/* Trust banner */}
           <div className="px-6 sm:px-8 py-4 bg-[var(--emerald)]/5 border-b border-[var(--emerald)]/10 flex items-center gap-3">

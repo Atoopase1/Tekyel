@@ -109,7 +109,7 @@ export default function ServicesPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 -mt-6">
+      <div className="max-w-3xl mx-auto px-6 -mt-6 relative z-10">
         {/* Core Services Grid */}
         <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] shadow-lg overflow-hidden mb-6">
           <div className="px-6 sm:px-8 py-5 border-b border-[var(--border-color)]">
