@@ -145,12 +145,24 @@ export default function ChatHeader({ chat, onInfoClick }: ChatHeaderProps) {
       </button>
 
       {/* Avatar */}
-      <button onClick={onInfoClick} className="shrink-0">
+      <button 
+        onClick={() => {
+          if (onInfoClick) onInfoClick();
+          else if (!chat.is_group && chat.other_user) router.push(`/profile/${chat.other_user.id}`);
+        }} 
+        className="shrink-0"
+      >
         <Avatar src={avatarSrc} name={displayName} size="md" isOnline={isOnline} />
       </button>
 
       {/* Name & Status */}
-      <button onClick={onInfoClick} className="flex-1 min-w-0 text-left">
+      <button 
+        onClick={() => {
+          if (onInfoClick) onInfoClick();
+          else if (!chat.is_group && chat.other_user) router.push(`/profile/${chat.other_user.id}`);
+        }} 
+        className="flex-1 min-w-0 text-left"
+      >
         <h2 className="font-semibold text-[var(--text-primary)] text-[15px] truncate">
           {displayName}
         </h2>

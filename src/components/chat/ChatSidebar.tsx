@@ -10,6 +10,7 @@ import SearchInput from '@/components/ui/SearchInput';
 import ChatListItem from '@/components/chat/ChatListItem';
 import Avatar from '@/components/ui/Avatar';
 import Modal from '@/components/ui/Modal';
+import ImageViewerModal from '@/components/ui/ImageViewerModal';
 import Spinner from '@/components/ui/Spinner';
 import CreateGroupModal from '@/components/chat/CreateGroupModal';
 import { useChatStore } from '@/store/chat-store';
@@ -24,6 +25,7 @@ export default function ChatSidebar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const [showAvatarViewer, setShowAvatarViewer] = useState(false);
   const [searchUsers, setSearchUsers] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -108,7 +110,7 @@ export default function ChatSidebar() {
           {/* Avatar + Name */}
           <div className="flex gap-3">
             <button
-              onClick={() => profile?.id && router.push(`/profile/${profile.id}`)}
+              onClick={() => profile?.avatar_url && setShowAvatarViewer(true)}
               className="shrink-0 rounded-full border-[4px] border-[var(--bg-primary)] shadow-lg hover:shadow-xl transition-shadow relative z-10 bg-[var(--bg-primary)]"
             >
               <Avatar
@@ -229,6 +231,14 @@ export default function ChatSidebar() {
 
       {/* Create Group Modal */}
       <CreateGroupModal isOpen={showNewGroup} onClose={() => setShowNewGroup(false)} />
+
+      {/* Full screen Avatar viewer */}
+      <ImageViewerModal 
+        isOpen={showAvatarViewer} 
+        onClose={() => setShowAvatarViewer(false)} 
+        src={profile?.avatar_url} 
+        align="left"
+      />
     </div>
   );
 }

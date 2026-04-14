@@ -9,6 +9,7 @@ import { ArrowLeft, Settings, Pencil, Camera, UserCheck, UserPlus, Image as Imag
 import Avatar from '@/components/ui/Avatar';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
+import ImageViewerModal from '@/components/ui/ImageViewerModal';
 import StatusCard from '@/components/status/StatusCard';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth-store';
@@ -35,6 +36,7 @@ export default function ProfileViewPage() {
   const [followerCount, setFollowerCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [relationship, setRelationship] = useState<string | null>(null);
+  const [showAvatarViewer, setShowAvatarViewer] = useState(false);
 
   const isMe = currentUser?.id === profileId;
 
@@ -259,17 +261,23 @@ export default function ProfileViewPage() {
           <div className="relative flex justify-between items-end mt-[-56px] sm:mt-[-72px] mb-4">
             <div className="relative z-10">
               <div
-                className={`rounded-full border-[5px] border-[var(--bg-app)] inline-block cursor-pointer group ${isMe ? '' : 'cursor-default'}`}
-                onClick={() => isMe && !isUploadingAvatar && avatarInputRef.current?.click()}
+                className="rounded-full border-[5px] border-[var(--bg-app)] inline-block cursor-pointer group"
+                onClick={() => author?.avatar_url && setShowAvatarViewer(true)}
               >
                 <div className="relative">
                   <Avatar src={author.avatar_url} name={author.display_name} size="xxl" className={isUploadingAvatar ? 'opacity-50' : ''} />
                   
                   {/* Camera overlay on own avatar */}
                   {isMe && !isUploadingAvatar && (
-                    <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        avatarInputRef.current?.click();
+                      }}
+                      className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 w-full h-full"
+                    >
                       <Camera size={24} className="text-white" />
-                    </div>
+                    </button>
                   )}
 
                   {/* Uploading spinner */}
@@ -363,6 +371,12 @@ export default function ProfileViewPage() {
           )}
         </div>
       </div>
+
+      <ImageViewerModal 
+        isOpen={showAvatarViewer} 
+        onClose={() => setShowAvatarViewer(false)} 
+        src={author.avatar_url} 
+      />
     </div>
   );
 }

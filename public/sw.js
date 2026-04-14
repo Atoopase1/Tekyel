@@ -2,7 +2,8 @@ const CACHE_NAME = 'circle-pwa-cache-v1';
 const STATIC_ROOT_CACHES = [
   '/',
   '/manifest.json',
-  '/logo.jpg',
+  '/icon-192.png',
+  '/icon-512.png',
   '/offline.html',
 ];
 
