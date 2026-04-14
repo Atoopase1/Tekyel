@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Circle — Offline</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0F172A;
+            color: #F1F5F9;
+            text-align: center;
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 12px;
+            font-weight: 600;
+        }
+        p {
+            font-size: 15px;
+            color: #94A3B8;
+            max-width: 300px;
+            margin: 0 0 32px;
+            line-height: 1.5;
+        }
+        button {
+            background-color: #16A34A;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
+            background-color: #15803D;
+        }
+    </style>
+</head>
+<body>
+    <img src="/logo.jpg" alt="Circle Logo" class="icon" />
+    <h1>You are offline</h1>
+    <p>Please check your internet connection to continue sending messages and syncing updates.</p>
+    <button onclick="window.location.reload()">Try Again</button>
+</body>
+</html>
