@@ -48,8 +48,14 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages (except setup-profile)
-  if (user && isAuthPage && !request.nextUrl.pathname.startsWith('/setup-profile')) {
+  // Redirect authenticated users away from auth pages (except setup-profile and update-password)
+  if (
+    user && 
+    isAuthPage && 
+    !request.nextUrl.pathname.startsWith('/setup-profile') && 
+    !request.nextUrl.pathname.startsWith('/update-password') &&
+    !request.nextUrl.pathname.startsWith('/legal')
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
