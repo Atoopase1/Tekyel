@@ -265,7 +265,7 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-2 pt-3 border-t border-[var(--border-color)]">
+      <div className="flex flex-wrap items-center justify-between gap-y-3 mt-2 pt-3 border-t border-[var(--border-color)]">
         <div className="flex items-center gap-2">
           <input
             type="file"

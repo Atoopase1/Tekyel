@@ -173,8 +173,8 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
       )}
 
       {/* Action bar: Like, Comments, Rating */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)]">
-        <div className="flex items-center gap-5">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)] flex-wrap gap-y-3">
+        <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
           {/* Like */}
           <button
             onClick={handleLike}
@@ -200,7 +200,7 @@ export default function StatusCard({ status, onAddContact }: StatusCardProps) {
           </button>
 
           {/* 5-Star Rating System */}
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-1 sm:ml-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button key={star} onClick={() => handleRating(star)} className="focus:outline-none transition-transform hover:scale-110">
                 <Star size={22} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
