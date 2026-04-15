@@ -174,7 +174,7 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
     <button 
       onClick={() => { onClick(); handleClose(); }} 
       disabled={disabled}
-      className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-center transition-all duration-150 min-w-[56px] ${
+      className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl text-center transition-all duration-150 flex-1 min-w-0 ${
         danger 
           ? 'text-red-500 hover:bg-red-500/10 active:bg-red-500/20' 
           : 'text-[var(--text-primary)] hover:bg-[var(--bg-hover)] active:bg-[var(--bg-secondary)]'
@@ -229,7 +229,7 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
           {/* Floating card — WhatsApp style */}
           <div 
             ref={menuRef}
-            className={`fixed z-[9991] w-[200px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden ${
+            className={`fixed z-[9991] w-[240px] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden ${
               menuPos.openUp ? 'origin-bottom' : 'origin-top'
             }`}
             style={{ 

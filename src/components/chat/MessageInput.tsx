@@ -222,11 +222,11 @@ export default function MessageInput({ chatId }: MessageInputProps) {
     <div className="glass-header border-t border-[var(--border-color)]">
       {/* File preview */}
       {selectedFile && (
-        <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center gap-3 animate-slideUp">
+        <div className="px-4 py-3 border-b border-[var(--border-color)] flex items-center gap-3 animate-slideUp overflow-hidden">
           {previewUrl && selectedFile.type.startsWith('image/') ? (
-            <img src={previewUrl} alt="Preview" className="w-14 h-14 object-cover rounded-xl" />
+            <img src={previewUrl} alt="Preview" className="w-14 h-14 object-cover rounded-xl shrink-0" />
           ) : previewUrl && selectedFile.type.startsWith('audio/') ? (
-            <audio src={previewUrl} controls className="h-10 max-w-[200px]" />
+            <audio src={previewUrl} controls className="h-10 w-[140px] shrink-0 sm:w-[200px]" />
           ) : (
             <div className="w-14 h-14 bg-[var(--bg-secondary)] rounded-xl flex items-center justify-center shrink-0">
               <FileText size={22} className="text-[var(--text-muted)]" />
