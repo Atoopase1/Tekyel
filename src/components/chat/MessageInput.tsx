@@ -157,7 +157,17 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      
+      let mimeType = '';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -168,10 +178,15 @@ export default function MessageInput({ chatId }: MessageInputProps) {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioFile = new File([audioBlob], `audio-${Date.now()}.webm`, { type: 'audio/webm' });
+        const actualMimeType = mediaRecorder.mimeType || mimeType || 'audio/mp4';
+        const audioBlob = new Blob(audioChunksRef.current, { type: actualMimeType });
+        const ext = actualMimeType.includes('webm') ? 'webm' : 'm4a';
+        const audioFile = new File([audioBlob], `audio-${Date.now()}.${ext}`, { type: actualMimeType });
         setSelectedFile(audioFile);
         setPreviewUrl(URL.createObjectURL(audioFile));
+        
+        // Critical: Stop microphone access immediately to prevent "infinite recording" loop on mobile!
+        stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorder.start();

@@ -144,6 +144,11 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
   const handlePointerDown = (e: React.PointerEvent) => {
     if (props.disabled) return;
     if (e.button === 2) return; // ignore right clicks
+    
+    // Ignore long press if clicking on an interactive element like an audio player
+    const target = e.target as HTMLElement;
+    if (target.closest('audio, video, button, a, input')) return;
+
     setIsLongPressTriggered(false);
     pointerStartPosRef.current = { x: e.clientX, y: e.clientY };
 
@@ -200,6 +205,10 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
         }}
         onClick={(e) => {
           if (props.disabled) return;
+          
+          const target = e.target as HTMLElement;
+          if (target.closest('audio, video, button, a, input')) return;
+
           // If a long press just triggered, swallow this click so we don't open the menu
           if (isLongPressTriggered) {
              e.preventDefault();
