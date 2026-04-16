@@ -7,7 +7,8 @@ import { Check, CheckCheck, Clock, Download, Play, FileText, X, ZoomIn, ZoomOut 
 import { formatMessageTime, formatFileSize } from '@/lib/utils';
 import type { Message, MessageStatusType } from '@/types';
 import React, { useState, useCallback } from 'react';
-import { Star, RefreshCw, AlertCircle } from 'lucide-react';
+import { Star, RefreshCw, AlertCircle, Reply } from 'lucide-react';
+import { motion, useAnimation, PanInfo } from 'framer-motion';
 import { useChatStore } from '@/store/chat-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useInView } from '@/hooks/useInView';
@@ -61,6 +62,17 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
     setLightboxZoom(1);
   }, []);
   const { ref: mediaRef, isInView: isMediaInView } = useInView({ threshold: 0.1 });
+
+  const controls = useAnimation();
+  const [dragX, setDragX] = useState(0);
+
+  const handleDragEnd = async (event: any, info: PanInfo) => {
+    if (info.offset.x > 60) {
+      setReplyingTo(message);
+    }
+    controls.start({ x: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } });
+    setDragX(0);
+  };
 
   const currentUser = useAuthStore(s => s.user);
   const activeChat = useChatStore(s => s.activeChat);
@@ -153,10 +165,8 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
 
       {/* Constraints Wrapper for perfect ~70% max width anchoring */}
       <div
-        className="max-w-[85%] sm:max-w-[70%]"
+        className="max-w-[85%] sm:max-w-[70%] relative flex items-center"
         style={{
-          display: 'flex',
-          flexDirection: 'column',
           width: 'fit-content',
           minWidth: 0,
           marginLeft: isOwn ? 'auto' : '0',
@@ -164,6 +174,37 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
           boxSizing: 'border-box',
         }}
       >
+        {/* Reply Icon Background Indicator */}
+        <div 
+          className="absolute flex items-center justify-center rounded-full text-white/80 bg-black/30 dark:bg-white/10 shrink-0 shadow-sm"
+          style={{ 
+            width: 32, 
+            height: 32,
+            left: -40,
+            opacity: dragX > 10 ? Math.min((dragX - 10) / 40, 1) : 0,
+            transform: `scale(${dragX > 10 ? Math.min((dragX - 10) / 40, 1) : 0})`,
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        >
+          <Reply size={18} />
+        </div>
+
+        {/* Draggable Message payload */}
+        <motion.div
+           drag="x"
+           dragConstraints={{ left: 0, right: 0 }}
+           dragElastic={{ left: 0, right: 0.5 }}
+           onDrag={(e, info) => setDragX(info.offset.x)}
+           onDragEnd={handleDragEnd}
+           animate={controls}
+           className="z-10 w-full"
+           style={{ 
+             touchAction: 'pan-y',
+             display: 'flex',
+             flexDirection: 'column',
+           }}
+        >
         <MessageContextMenu
           message={message}
           isOwn={isOwn}
@@ -221,18 +262,37 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {message.reply_to_id && message.reply_to && (!Array.isArray(message.reply_to) || message.reply_to.length > 0) && (() => {
               const replyData = Array.isArray(message.reply_to) ? message.reply_to[0] : message.reply_to;
               if (!replyData) return null;
+              
+              const senderColor = `hsl(${(replyData.sender?.id ? replyData.sender.id.charCodeAt(0) * 37 : 1) % 360}, 65%, 55%)`;
+              const isReplyingToMe = replyData.sender?.id === currentUser?.id;
+              const displayName = isReplyingToMe ? 'You' : getDisplayName(replyData.sender) || 'User';
+
               return (
-                <div className={`mb-2 p-2.5 rounded-xl flex flex-col cursor-pointer transition-colors ${isOwn
-                    ? 'bg-white/10 border-l-3 border-white/40 hover:bg-white/15'
-                    : 'bg-[var(--bg-secondary)] border-l-3 border-[var(--emerald)] hover:bg-[var(--bg-hover)]'
-                  }`}>
-                  {getDisplayName(replyData.sender) && (
-                    <span className={`text-[14px] font-semibold ${isOwn ? 'text-white/80' : 'text-[var(--emerald)]'}`}>
-                      {getDisplayName(replyData.sender)}
-                    </span>
-                  )}
-                  <span className={`text-[14px] line-clamp-2 mt-0.5 ${isOwn ? 'text-white/60' : 'text-[var(--text-secondary)]'}`}>
-                    {replyData.content || (replyData.media_url ? 'Media' : '')}
+                <div 
+                  className="mb-1.5 p-2 rounded-lg flex flex-col cursor-pointer transition-colors border-l-[3.5px] bg-black/10 dark:bg-black/20 hover:bg-black/15 dark:hover:bg-black/30 shadow-sm"
+                  style={{ borderColor: senderColor }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const el = document.getElementById(`msg-${replyData.id}`);
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      el.classList.add('pinned-highlight');
+                      setTimeout(() => el.classList.remove('pinned-highlight'), 2000);
+                    }
+                  }}
+                >
+                  <span 
+                    className="text-[13px] font-semibold mb-0.5 max-w-full truncate"
+                    style={{ color: senderColor }}
+                  >
+                    {displayName}
+                  </span>
+                  <span className={`text-[13px] line-clamp-2 leading-[18px] flex gap-1 items-center ${isOwn ? 'text-[var(--bubble-out-text)] opacity-80' : 'text-[var(--bubble-in-text)] opacity-80'}`}>
+                    {replyData.message_type === 'image' && '📷 Photo'}
+                    {replyData.message_type === 'video' && '🎬 Video'}
+                    {replyData.message_type === 'audio' && '🎵 Audio'}
+                    {replyData.message_type === 'document' && '📄 Document'}
+                    {replyData.content || (!replyData.message_type && replyData.media_url ? '📎 Media' : '')}
                   </span>
                 </div>
               );
@@ -390,6 +450,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             )}
           </div>
         </MessageContextMenu>
+        </motion.div>
       </div>
 
       {showInfo && activeChat && (

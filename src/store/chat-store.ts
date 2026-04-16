@@ -308,6 +308,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const messageId = crypto.randomUUID();
     const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
 
+    const replyingToMessage = replyToId ? get().messages.find(m => m.id === replyToId) : null;
+
     // 1. Create Optimistic Message
     const optimisticMessage = {
       id: messageId,
@@ -318,6 +320,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       media_url: mediaUrl || null,
       media_metadata: mediaMetadata || null,
       reply_to_id: replyToId || null,
+      reply_to: replyingToMessage ? [replyingToMessage] : undefined,
       is_deleted: false,
       created_at: new Date().toISOString(),
       sender: profile || undefined,
