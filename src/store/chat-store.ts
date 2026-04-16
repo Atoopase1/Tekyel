@@ -16,9 +16,9 @@ interface ChatState {
   messagesByChat: Record<string, Message[]>;
   isLoadingChats: boolean;
   isLoadingMessages: boolean;
-  hasMoreMessages: boolean;
   searchQuery: string;
   _hasFetchedOnce: boolean;
+  _fetchedChats: Record<string, boolean>;
   replyingTo: Message | null;
   editingMessage: Message | null;
   selectionMode: boolean;
@@ -67,6 +67,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   hasMoreMessages: true,
   searchQuery: '',
   _hasFetchedOnce: false,
+  _fetchedChats: {},
   replyingTo: null,
   editingMessage: null,
   selectionMode: false,
@@ -268,12 +269,26 @@ export const useChatStore = create<ChatState>((set, get) => ({
           };
         });
       } else {
-        set((state) => ({
-          messages,
-          messagesByChat: { ...state.messagesByChat, [chatId]: messages },
-          hasMoreMessages: messages.length === 20,
-          isLoadingMessages: false,
-        }));
+        set((state) => {
+          const cached = state.messagesByChat[chatId] || [];
+          
+          // Instead of wiping out the cache, merge the newly fetched messages (latest 20)
+          // with our existing cache to preserve scroll history and offline messages.
+          const msgMap = new Map(cached.map(m => [m.id, m]));
+          messages.forEach(m => msgMap.set(m.id, m));
+          
+          const mergedMessages = Array.from(msgMap.values()).sort(
+            (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+
+          return {
+            messages: mergedMessages,
+            messagesByChat: { ...state.messagesByChat, [chatId]: mergedMessages },
+            hasMoreMessages: cached.length > 0 ? state.hasMoreMessages : messages.length === 20,
+            isLoadingMessages: false,
+            _fetchedChats: { ...state._fetchedChats, [chatId]: true }
+          };
+        });
       }
     } catch (err: any) {
       console.error('fetchMessages error:', err?.message || JSON.stringify(err) || err);

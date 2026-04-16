@@ -33,10 +33,12 @@ export function useRealtimeConnection() {
 
 export function useRealtimeMessages(chatId: string | null) {
   const addMessage = useChatStore((s) => s.addMessage);
+  const isFetched = useChatStore((s) => chatId ? s._fetchedChats[chatId] : false);
   const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null);
 
   useEffect(() => {
-    if (!chatId) return;
+    // Only subscribe AFTER we have successfully fetched the initial historical messages for this chat
+    if (!chatId || !isFetched) return;
 
     const supabase = getSupabaseBrowserClient();
 
