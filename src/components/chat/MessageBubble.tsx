@@ -116,10 +116,10 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
           <span>🚫 This message was deleted</span>
           <button
             onClick={() => deleteMessageForMe(message.id)}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-red-500/10 text-red-400 hover:text-red-500 transition-all duration-200"
+            className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 rounded-full hover:bg-red-500/10 text-red-400/80 hover:text-red-500 transition-all duration-200 ml-1"
             title="Remove this message"
           >
-            <X size={18} />
+            <X size={14} />
           </button>
         </div>
       </div>
