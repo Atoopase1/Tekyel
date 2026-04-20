@@ -109,55 +109,7 @@ export default function ProfileViewPage() {
     }
   }, [currentUser, isMe]);
 
-  // ── Real-time subscription for followed users' new statuses ──
-  useEffect(() => {
-    if (!currentUser) return;
-
-    // Subscribe to new statuses from ANY user (we'll filter by follows client-side)
-    const channel = supabase
-      .channel('followed-posts')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'statuses' },
-        async (payload) => {
-          const newStatus = payload.new as any;
-          // Don't notify about own posts
-          if (newStatus.user_id === currentUser.id) return;
-
-          // Check if we follow this user
-          const { data: followCheck } = await supabase
-            .from('follows')
-            .select('id')
-            .eq('follower_id', currentUser.id)
-            .eq('following_id', newStatus.user_id)
-            .single();
-
-          if (!followCheck) return;
-
-          // Get the poster's profile
-          const { data: poster } = await supabase
-            .from('profiles')
-            .select('display_name, avatar_url')
-            .eq('id', newStatus.user_id)
-            .single();
-
-          if (poster) {
-            addNotification({
-              userId: newStatus.user_id,
-              userName: poster.display_name,
-              userAvatar: poster.avatar_url,
-              statusId: newStatus.id,
-              preview: newStatus.content || (newStatus.media_url ? '📷 Shared a photo' : 'New post'),
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentUser, supabase, addNotification]);
+  // Real-time subscription moved to global useAppNotifications hook
 
   const toggleFollow = async () => {
     if (!currentUser) return;
