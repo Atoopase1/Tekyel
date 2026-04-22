@@ -69,7 +69,7 @@ export function useAppNotifications() {
         (t) => (
           <div
             className={`${
-              t.visible ? 'animate-enter' : 'animate-leave'
+              t.visible ? 'animate-bounceIn' : 'animate-bounceOut'
             } max-w-sm w-full bg-[var(--bg-primary)] shadow-[var(--shadow-xl)] rounded-2xl pointer-events-auto flex ring-1 ring-black/5 overflow-hidden border border-[var(--border-color)] cursor-pointer`}
             onClick={() => {
               toast.dismiss(t.id);
@@ -147,7 +147,7 @@ export function useAppNotifications() {
         (t) => (
           <div
             className={`${
-              t.visible ? 'animate-enter' : 'animate-leave'
+              t.visible ? 'animate-bounceIn' : 'animate-bounceOut'
             } max-w-sm w-full bg-[var(--bg-primary)] shadow-[var(--shadow-xl)] rounded-2xl pointer-events-auto flex ring-1 ring-black/5 overflow-hidden border border-[var(--border-color)] cursor-pointer`}
             onClick={() => {
               toast.dismiss(t.id);
@@ -204,7 +204,7 @@ export function useAppNotifications() {
         (t) => (
           <div
             className={`${
-              t.visible ? 'animate-enter' : 'animate-leave'
+              t.visible ? 'animate-bounceIn' : 'animate-bounceOut'
             } max-w-sm w-full bg-[var(--bg-primary)] shadow-[var(--shadow-xl)] rounded-2xl pointer-events-auto flex ring-1 ring-black/5 overflow-hidden border border-[var(--border-color)] cursor-pointer`}
             onClick={() => {
               toast.dismiss(t.id);

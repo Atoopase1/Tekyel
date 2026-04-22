@@ -37,6 +37,7 @@ export interface ChatParticipant {
   role: 'member' | 'admin';
   joined_at: string;
   unread_count: number;
+  pinned_message_id?: string | null;
 }
 
 export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'document';

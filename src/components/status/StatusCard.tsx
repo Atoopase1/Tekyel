@@ -14,12 +14,12 @@ import toast from 'react-hot-toast';
 
 interface StatusCardProps {
   status: any;
-  onAddContact?: (id: string, category: 'friend' | 'family') => void;
+  onToggleFollow?: (userId: string, isFollowing: boolean) => void;
   onRefresh?: () => void;
   initialFollowed?: boolean;
 }
 
-export default function StatusCard({ status, onAddContact, onRefresh, initialFollowed = false }: StatusCardProps) {
+export default function StatusCard({ status, onToggleFollow, onRefresh, initialFollowed = false }: StatusCardProps) {
   const router = useRouter();
   const { profile } = useAuthStore();
   const supabase = getSupabaseBrowserClient();
@@ -152,9 +152,40 @@ export default function StatusCard({ status, onAddContact, onRefresh, initialFol
   };
 
   const handleFollow = async () => {
-    if (!profile || isOwnPost || followed) return; // Prevent following twice
-    if (onAddContact) onAddContact(status.user_id, 'friend');
-    setFollowed(true);
+    if (!profile || isOwnPost) return;
+    
+    const newFollowState = !followed;
+    
+    // Optimistic UI Update
+    setFollowed(newFollowState);
+    if (onToggleFollow) onToggleFollow(status.user_id, newFollowState);
+
+    if (newFollowState) {
+      const { error } = await supabase
+        .from('follows')
+        .insert({ follower_id: profile.id, following_id: status.user_id });
+      
+      if (error) {
+        toast.error('Failed to follow user');
+        setFollowed(false);
+        if (onToggleFollow) onToggleFollow(status.user_id, false);
+      } else {
+        toast.success('Following!');
+      }
+    } else {
+      const { error } = await supabase
+        .from('follows')
+        .delete()
+        .match({ follower_id: profile.id, following_id: status.user_id });
+      
+      if (error) {
+        toast.error('Failed to unfollow user');
+        setFollowed(true);
+        if (onToggleFollow) onToggleFollow(status.user_id, true);
+      } else {
+        toast.success('Unfollowed');
+      }
+    }
   };
 
   const handleDownload = async () => { /* ...existing download handler... */ };
@@ -212,10 +243,9 @@ export default function StatusCard({ status, onAddContact, onRefresh, initialFol
         ) : (
           <button
             onClick={handleFollow}
-            disabled={followed}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-semibold transition-all ${
               followed
-                ? 'bg-[var(--wa-green)]/10 text-[var(--wa-green)] border border-[var(--wa-green)]/30 cursor-default'
+                ? 'bg-[var(--wa-green)]/10 text-[var(--wa-green)] border border-[var(--wa-green)]/30 hover:bg-[var(--wa-green)]/20'
                 : 'bg-[var(--wa-green)] text-white hover:bg-[var(--wa-green-dark)] shadow-sm'
             }`}
           >

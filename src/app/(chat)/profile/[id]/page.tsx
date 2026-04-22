@@ -389,7 +389,14 @@ export default function ProfileViewPage() {
             <div className="space-y-4 mb-20">
               {statuses.map(status => (
                 <div key={status.id} className="opacity-90 hover:opacity-100 transition-opacity">
-                  <StatusCard status={{...status, visibility: 'public'}} />
+                  <StatusCard 
+                    status={{...status, visibility: 'public'}} 
+                    initialFollowed={isFollowing}
+                    onToggleFollow={(uid, following) => {
+                      setIsFollowing(following);
+                      setFollowerCount(p => following ? p + 1 : Math.max(0, p - 1));
+                    }}
+                  />
                 </div>
               ))}
             </div>

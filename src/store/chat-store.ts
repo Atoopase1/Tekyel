@@ -175,7 +175,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
         } as ChatWithDetails;
       });
 
-      set({ chats, isLoadingChats: false, _hasFetchedOnce: true });
+      // Also sync activeChat so pinned messages, group name changes, etc.
+      // are reflected for the receiver in real-time without re-entering the chat.
+      const updatedActiveChat = currentActiveChatId
+        ? chats.find((c) => c.id === currentActiveChatId) ?? null
+        : null;
+
+      set({
+        chats,
+        isLoadingChats: false,
+        _hasFetchedOnce: true,
+        ...(updatedActiveChat ? { activeChat: updatedActiveChat } : {}),
+      });
     } catch (err) {
       console.error('fetchChats error:', err);
       set({ isLoadingChats: false });
@@ -722,30 +733,68 @@ export const useChatStore = create<ChatState>((set, get) => ({
     await supabase.from('messages').update({ is_deleted: true }).eq('id', messageId);
   },
 
-  pinMessage: async (chatId: string, messageId: string) => {
+  pinMessage: async (chatId: string, messageId: string, scope: 'me' | 'everyone') => {
     const supabase = getSupabaseBrowserClient();
-    set((state) => ({
-      chats: state.chats.map((c) => 
-        c.id === chatId ? { ...c, pinned_message_id: messageId } : c
-      ),
-      activeChat: state.activeChat?.id === chatId 
-        ? { ...state.activeChat, pinned_message_id: messageId } 
-        : state.activeChat,
-    }));
-    await supabase.from('chats').update({ pinned_message_id: messageId }).eq('id', chatId);
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    if (scope === 'everyone') {
+      set((state) => ({
+        chats: state.chats.map((c) => 
+          c.id === chatId ? { ...c, pinned_message_id: messageId } : c
+        ),
+        activeChat: state.activeChat?.id === chatId 
+          ? { ...state.activeChat, pinned_message_id: messageId } 
+          : state.activeChat,
+      }));
+      await supabase.from('chats').update({ pinned_message_id: messageId }).eq('id', chatId);
+    } else {
+      set((state) => {
+        const updatedActiveChat = state.activeChat?.id === chatId && state.activeChat.my_participant
+          ? { ...state.activeChat, my_participant: { ...state.activeChat.my_participant, pinned_message_id: messageId } }
+          : state.activeChat;
+
+        return {
+          chats: state.chats.map((c) => 
+            c.id === chatId && c.my_participant ? { ...c, my_participant: { ...c.my_participant, pinned_message_id: messageId } } : c
+          ),
+          activeChat: updatedActiveChat as any,
+        };
+      });
+      await supabase.from('chat_participants').update({ pinned_message_id: messageId }).eq('chat_id', chatId).eq('user_id', user.id);
+    }
   },
 
-  unpinMessage: async (chatId: string) => {
+  unpinMessage: async (chatId: string, scope: 'me' | 'everyone') => {
     const supabase = getSupabaseBrowserClient();
-    set((state) => ({
-      chats: state.chats.map((c) => 
-        c.id === chatId ? { ...c, pinned_message_id: null } : c
-      ),
-      activeChat: state.activeChat?.id === chatId 
-        ? { ...state.activeChat, pinned_message_id: null } 
-        : state.activeChat,
-    }));
-    await supabase.from('chats').update({ pinned_message_id: null }).eq('id', chatId);
+    const user = useAuthStore.getState().user;
+    if (!user) return;
+
+    if (scope === 'everyone') {
+      set((state) => ({
+        chats: state.chats.map((c) => 
+          c.id === chatId ? { ...c, pinned_message_id: null } : c
+        ),
+        activeChat: state.activeChat?.id === chatId 
+          ? { ...state.activeChat, pinned_message_id: null } 
+          : state.activeChat,
+      }));
+      await supabase.from('chats').update({ pinned_message_id: null }).eq('id', chatId);
+    } else {
+      set((state) => {
+        const updatedActiveChat = state.activeChat?.id === chatId && state.activeChat.my_participant
+          ? { ...state.activeChat, my_participant: { ...state.activeChat.my_participant, pinned_message_id: null } }
+          : state.activeChat;
+
+        return {
+          chats: state.chats.map((c) => 
+            c.id === chatId && c.my_participant ? { ...c, my_participant: { ...c.my_participant, pinned_message_id: null } } : c
+          ),
+          activeChat: updatedActiveChat as any,
+        };
+      });
+      await supabase.from('chat_participants').update({ pinned_message_id: null }).eq('chat_id', chatId).eq('user_id', user.id);
+    }
   },
 
   starMessage: async (messageId: string) => {

@@ -95,7 +95,9 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
   } = useChatStore();
 
   const isStarred = message.stars?.some(s => s.user_id === currentUser?.id) || false;
-  const isPinned = activeChat?.pinned_message_id === message.id;
+  const isPinnedForMe = activeChat?.my_participant?.pinned_message_id === message.id;
+  const isPinnedForEveryone = activeChat?.pinned_message_id === message.id;
+  const isPinned = isPinnedForMe || isPinnedForEveryone;
 
   const overallStatus = message.status?.length
     ? message.status.some((s) => s.status === 'failed')
@@ -225,7 +227,36 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
           }}
           onCopy={() => navigator.clipboard.writeText(message.content || message.media_url || '')}
           onInfo={() => setShowInfo(true)}
-          onPin={() => isPinned ? unpinMessage(message.chat_id) : pinMessage(message.chat_id, message.id)}
+          onPin={() => {
+            if (isPinned) {
+              if (isPinnedForMe) unpinMessage(message.chat_id, 'me');
+              if (isPinnedForEveryone) unpinMessage(message.chat_id, 'everyone');
+            } else {
+              toast.custom((t) => (
+                <div className="bg-[var(--bg-primary)] p-4 rounded-xl shadow-xl border border-[var(--border-color)] flex flex-col gap-3 min-w-[200px] pointer-events-auto">
+                  <p className="text-[14px] font-medium text-center text-[var(--text-primary)]">Pin Message</p>
+                  <button 
+                    onClick={() => { pinMessage(message.chat_id, message.id, 'me'); toast.dismiss(t.id); }}
+                    className="w-full py-2 bg-[var(--bg-hover)] rounded-lg text-[14px] font-medium hover:bg-[var(--emerald)] hover:text-white transition-colors"
+                  >
+                    For Me
+                  </button>
+                  <button 
+                    onClick={() => { pinMessage(message.chat_id, message.id, 'everyone'); toast.dismiss(t.id); }}
+                    className="w-full py-2 bg-[var(--bg-hover)] rounded-lg text-[14px] font-medium hover:bg-[var(--emerald)] hover:text-white transition-colors"
+                  >
+                    For Everyone
+                  </button>
+                  <button 
+                    onClick={() => toast.dismiss(t.id)}
+                    className="w-full py-1 text-[13px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mt-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ), { duration: Infinity });
+            }
+          }}
           onForward={() => setShowForward(true)}
           onDeleteForMe={() => deleteMessageForMe(message.id)}
           onDeleteForEveryone={() => deleteMessageForEveryone(message.id)}

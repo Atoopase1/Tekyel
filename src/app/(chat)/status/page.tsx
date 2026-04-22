@@ -59,15 +59,15 @@ export default function StatusPage() {
     
     if (data) setStatuses(data);
 
-    // Also fetch the current user's contacts/follows to accurately set the Follow button states
+    // Also fetch the current user's follows to accurately set the Follow button states
     if (profile) {
-      const { data: contactsData } = await supabase
-        .from('contacts')
-        .select('contact_id')
-        .eq('user_id', profile.id);
+      const { data: followData } = await supabase
+        .from('follows')
+        .select('following_id')
+        .eq('follower_id', profile.id);
       
-      if (contactsData) {
-        setFollowingIds(contactsData.map(c => c.contact_id));
+      if (followData) {
+        setFollowingIds(followData.map(f => f.following_id));
       }
     }
 
@@ -88,19 +88,14 @@ export default function StatusPage() {
     };
   }, [loadStatuses, supabase]);
 
-  const handleAddContact = async (contactId: string, category: 'friend' | 'family') => {
-    if (!profile) return;
-    const { error } = await supabase
-      .from('contacts')
-      .upsert({ user_id: profile.id, contact_id: contactId, category }, { onConflict: 'user_id,contact_id' });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(`Added as ${category}!`);
-      // Update local state to instantly reflect the follow status
-      setFollowingIds(prev => Array.from(new Set([...prev, contactId])));
-    }
+  const handleToggleFollow = (userId: string, isFollowing: boolean) => {
+    setFollowingIds(prev => {
+      if (isFollowing) {
+        return Array.from(new Set([...prev, userId]));
+      } else {
+        return prev.filter(id => id !== userId);
+      }
+    });
   };
 
   const filteredStatuses = statuses.filter((status) => {
@@ -210,7 +205,7 @@ export default function StatusPage() {
                 key={status.id} 
                 status={status} 
                 onRefresh={loadStatuses}
-                onAddContact={handleAddContact}
+                onToggleFollow={handleToggleFollow}
                 initialFollowed={followingIds.includes(status.user_id)}
               />
             ))

@@ -95,7 +95,11 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
   const filteredTyping = typingUsers.filter((t) => t.user_id !== user?.id);
 
   // ---- Pinned message: always-visible sticky banner ----
-  const pinnedMessageId = activeChat?.pinned_message_id ?? null;
+  const personalPinnedMessageId = activeChat?.my_participant?.pinned_message_id ?? null;
+  const groupPinnedMessageId = activeChat?.pinned_message_id ?? null;
+  const pinnedMessageId = personalPinnedMessageId || groupPinnedMessageId;
+  const pinnedScope = personalPinnedMessageId ? 'me' : 'everyone';
+
   const pinnedFromMessages = pinnedMessageId
     ? messages.find((m) => m.id === pinnedMessageId) ?? null
     : null;
@@ -198,7 +202,7 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                if (activeChat) unpinMessage(activeChat.id);
+                if (activeChat) unpinMessage(activeChat.id, pinnedScope);
               }}
               className="p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] text-[var(--text-muted)] hover:text-white transition-all shrink-0"
               title="Unpin"
