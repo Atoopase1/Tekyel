@@ -167,18 +167,34 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
       backgroundSize: '400px',
       backgroundRepeat: 'repeat',
     }}>
-      {/* Reconnecting banner */}
+      {/* Reconnecting banner - Floating Pill */}
       {isReconnecting && (
-        <div className="absolute top-0 left-0 right-0 z-30 bg-[var(--gold)]/90 text-[var(--navy)] text-[14px] py-1.5 text-center font-medium backdrop-blur-sm flex items-center justify-center gap-2">
-          <WifiOff size={17} />
-          Waiting for network...
+        <div 
+          className="absolute left-1/2 -translate-x-1/2 z-40 pointer-events-none"
+          style={{ 
+            top: pinnedMessage ? '64px' : '16px',
+            animation: 'slideDown 0.3s ease-out'
+          }}
+        >
+          <div 
+            className="px-4 py-1.5 rounded-full flex items-center gap-2 text-[13px] font-medium tracking-wide border border-[var(--border-color)]"
+            style={{  
+              background: 'var(--bg-date-separator)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: 'var(--shadow-xs)',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            <WifiOff size={14} className="animate-pulse opacity-80" />
+            Waiting for network...
+          </div>
         </div>
       )}
 
       {/* Pinned message bar — WhatsApp-style compact */}
       {pinnedMessage && (
         <div 
-          className={`absolute left-0 right-0 z-20 bg-[var(--bg-primary)]/90 backdrop-blur-md shadow-sm border-b border-[var(--border-color)] cursor-pointer hover:bg-[var(--bg-hover)] transition-all duration-200 ${isReconnecting ? 'top-8' : 'top-0'}`}
+          className="absolute top-0 left-0 right-0 z-20 bg-[var(--bg-primary)]/90 backdrop-blur-md shadow-sm border-b border-[var(--border-color)] cursor-pointer hover:bg-[var(--bg-hover)] transition-all duration-200"
           style={{ animation: 'slideDown 0.2s ease-out' }}
           onClick={scrollToPinned}
         >
@@ -216,7 +232,7 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
       <div
         ref={listRef}
         onScroll={handleScroll}
-        className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin ${pinnedMessage ? (isReconnecting ? 'pt-20' : 'pt-16') : (isReconnecting ? 'pt-8' : '')}`}
+        className={`flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin ${pinnedMessage ? 'pt-16' : ''}`}
       >
       {/* Loading spinner for older messages */}
       {isLoadingMessages && messages.length > 0 && (
