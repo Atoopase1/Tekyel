@@ -229,6 +229,17 @@ export function useRealtimeMessages(chatId: string | null) {
       lastPulseTime = now;
     }, 2000);
 
+    // Aggressive background network recovery rebooter
+    // If the connection drops, force a complete teardown and rebuild every 5 seconds
+    const networkRecoveryInterval = setInterval(() => {
+      if (globalIsReconnecting) {
+        console.log('[Realtime] Attempting aggressive background network recovery...');
+        // Force the time check to pass
+        lastSyncTime = 0;
+        handleFocusSync();
+      }
+    }, 5000);
+
     const handleFocusSync = () => {
       if (isUnmountedRef.current || !chatId) return;
 
@@ -288,6 +299,7 @@ export function useRealtimeMessages(chatId: string | null) {
       isUnmountedRef.current = true;
 
       clearInterval(wakeupInterval);
+      clearInterval(networkRecoveryInterval);
       window.removeEventListener('focus', handleFocusSync);
       window.removeEventListener('online', handleFocusSync);
       document.removeEventListener('visibilitychange', onVisibilityChange);
