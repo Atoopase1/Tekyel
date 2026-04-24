@@ -13,9 +13,30 @@ import { useState } from 'react';
 // Global connection state to avoid multiple listeners if needed (simplified for React state)
 let globalIsReconnecting = false;
 let connectionListeners: ((state: boolean) => void)[] = [];
+let reconnectUIVisibilityTimer: NodeJS.Timeout | null = null;
+
 const setGlobalConnectionState = (state: boolean) => {
-  globalIsReconnecting = state;
-  connectionListeners.forEach(listener => listener(state));
+  if (state === true) {
+    // Debounce: Wait 2 seconds before showing the "Waiting for network..." UI.
+    // If we reconnect before 2s, the user never sees it flash.
+    if (!reconnectUIVisibilityTimer && !globalIsReconnecting) {
+      reconnectUIVisibilityTimer = setTimeout(() => {
+        globalIsReconnecting = true;
+        connectionListeners.forEach(listener => listener(true));
+        reconnectUIVisibilityTimer = null;
+      }, 2000);
+    }
+  } else {
+    // On connect: Instantly hide the UI and cancel any pending show timers
+    if (reconnectUIVisibilityTimer) {
+      clearTimeout(reconnectUIVisibilityTimer);
+      reconnectUIVisibilityTimer = null;
+    }
+    if (globalIsReconnecting !== false) {
+      globalIsReconnecting = false;
+      connectionListeners.forEach(listener => listener(false));
+    }
+  }
 };
 
 export function useRealtimeConnection() {
