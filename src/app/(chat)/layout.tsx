@@ -12,6 +12,7 @@ import { useAppNotifications } from '@/hooks/useAppNotifications';
 import CallModal from '@/components/chat/CallModal';
 import IncomingCallModal from '@/components/chat/IncomingCallModal';
 import LottieLoader from '@/components/ui/LottieLoader';
+import PWAInstallBanner from '@/components/ui/PWAInstallBanner';
 import { Toaster } from 'react-hot-toast';
 import AppNavigation from '@/components/layout/AppNavigation';
 import { useChatStore } from '@/store/chat-store';
@@ -67,6 +68,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       {/* Call overlays */}
       <CallModal />
       <IncomingCallModal />
+
+      {/* PWA Install prompt for desktop */}
+      <PWAInstallBanner />
 
       {/* Main Navigation Tab Bar */}
       <AppNavigation />

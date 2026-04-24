@@ -1,11 +1,16 @@
 {
+  "id": "/",
   "name": "Circle",
   "short_name": "Circle",
   "description": "Connect, Share, Communicate",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#0F172A",
+  "orientation": "any",
+  "categories": ["social", "communication"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.png",
@@ -28,6 +33,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Circle Desktop App"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Circle Mobile App"
     }
   ]
 }

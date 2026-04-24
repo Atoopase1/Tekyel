@@ -3,7 +3,8 @@
 // ============================================================
 'use client';
 
-import { ArrowLeft, Moon, Sun, Bell, Lock, HardDrive, Info, Palette, User, Type, LogOut } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Bell, Lock, HardDrive, Info, Palette, User, Type, LogOut, Download, CheckCircle, Monitor, Smartphone } from 'lucide-react';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ProfileEditor from '@/components/settings/ProfileEditor';
@@ -28,6 +29,8 @@ export default function SettingsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [readReceiptsEnabled, setReadReceiptsEnabled] = useState(true);
   const [onlineStatusEnabled, setOnlineStatusEnabled] = useState(true);
+  const { isInstallable, isInstalled, promptInstall } = usePWAInstall();
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
@@ -38,6 +41,8 @@ export default function SettingsPage() {
     setSoundEnabled(localStorage.getItem('setting-sound') !== 'false');
     setReadReceiptsEnabled(localStorage.getItem('setting-receipts') !== 'false');
     setOnlineStatusEnabled(localStorage.getItem('setting-online') !== 'false');
+
+    setIsMobile(window.innerWidth < 768);
   }, []);
 
   const toggleDarkMode = () => {
@@ -221,6 +226,48 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
+          {/* Install App — visible when PWA not installed */}
+          {(isInstallable || !isInstalled) && (
+            <div className="surface-card p-5">
+              <h2 className="text-[14px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
+                {isMobile ? <Smartphone size={26} className="text-[var(--emerald)]" /> : <Monitor size={26} className="text-[var(--emerald)]" />}
+                Install App
+              </h2>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
+                    {isInstalled ? (
+                      <CheckCircle size={26} className="text-[var(--emerald)]" />
+                    ) : (
+                      <Download size={26} className="text-[var(--text-muted)]" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-medium text-[var(--text-primary)]">
+                      {isInstalled ? 'App Installed' : 'Install Circle'}
+                    </p>
+                    <p className="text-[14px] text-[var(--text-muted)]">
+                      {isInstalled
+                        ? 'Circle is installed on this device'
+                        : isMobile
+                          ? 'Add to home screen for faster access'
+                          : 'Get the full desktop app experience'}
+                    </p>
+                  </div>
+                </div>
+                {isInstallable && !isInstalled && (
+                  <button
+                    onClick={promptInstall}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--emerald)] hover:bg-[var(--emerald-hover)] text-white text-[13px] font-semibold transition-all duration-200 shadow-lg shadow-[var(--emerald)]/20 active:scale-[0.97]"
+                  >
+                    <Download size={14} />
+                    Install
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* About */}
           <div className="surface-card p-5">
