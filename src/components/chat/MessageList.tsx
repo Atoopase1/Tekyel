@@ -177,16 +177,28 @@ export default function MessageList({ chatId, isGroup }: MessageListProps) {
           }}
         >
           <div 
-            className="px-4 py-1.5 rounded-full flex items-center gap-2 text-[13px] font-medium tracking-wide border border-[var(--border-color)]"
+            className="px-4 py-1.5 rounded-full flex items-center gap-1.5 text-[14px] font-medium tracking-wide border border-[var(--border-color)]"
             style={{  
               background: 'var(--bg-date-separator)',
               backdropFilter: 'blur(8px)',
               boxShadow: 'var(--shadow-xs)',
-              color: 'var(--text-secondary)'
             }}
           >
-            <WifiOff size={14} className="animate-pulse opacity-80" />
-            Waiting for network...
+            <WifiOff size={14} className="animate-pulse opacity-80 text-[#FBBF24]" />
+            <div className="flex">
+              {"Waiting for network...".split('').map((char, i) => (
+                <span
+                  key={i}
+                  className="animate-snakeWave"
+                  style={{
+                    animationDelay: `${i * 0.05}s`,
+                    whiteSpace: char === ' ' ? 'pre' : 'normal',
+                  }}
+                >
+                  {char}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}
