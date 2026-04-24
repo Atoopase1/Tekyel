@@ -17,13 +17,13 @@ export function getSupabaseBrowserClient() {
         // Using cache: 'no-store' prevents Next.js App Router caching.
         // NOTE: Do NOT append query params like _cb=timestamp — PostgREST
         // interprets ALL query params as column filters and will crash.
-        fetch: (url, options) => {
+        fetch: (url: any, options: any) => {
           // Safely merge headers — Supabase passes a Headers instance,
           // not a plain object, so we must convert it first.
           const existingHeaders: Record<string, string> = {};
           if (options?.headers) {
             if (options.headers instanceof Headers) {
-              options.headers.forEach((value, key) => {
+              options.headers.forEach((value: string, key: string) => {
                 existingHeaders[key] = value;
               });
             } else if (typeof options.headers === 'object') {

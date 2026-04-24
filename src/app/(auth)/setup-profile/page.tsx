@@ -87,7 +87,7 @@ export default function SetupProfilePage() {
       <div className="flex justify-center mb-6">
         <Avatar
           name={displayName || 'User'}
-          url={googleAvatar}
+          src={googleAvatar}
           size="xl"
         />
       </div>

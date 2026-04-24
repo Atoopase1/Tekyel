@@ -48,8 +48,8 @@ interface ChatState {
   initOfflineQueue: () => void;
   deleteMessageForMe: (messageId: string) => Promise<void>;
   deleteMessageForEveryone: (messageId: string) => Promise<void>;
-  pinMessage: (chatId: string, messageId: string) => Promise<void>;
-  unpinMessage: (chatId: string) => Promise<void>;
+  pinMessage: (chatId: string, messageId: string, scope: 'me' | 'everyone') => Promise<void>;
+  unpinMessage: (chatId: string, scope: 'me' | 'everyone') => Promise<void>;
   starMessage: (messageId: string) => Promise<void>;
   unstarMessage: (messageId: string) => Promise<void>;
   addReaction: (messageId: string, emoji: string) => Promise<void>;

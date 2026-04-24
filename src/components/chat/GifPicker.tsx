@@ -76,7 +76,7 @@ export default function GifPicker({ onGifSelect, onClose }: GifPickerProps) {
 
     setIsUploading(true);
     try {
-      const url = await uploadMedia(file, (progress) => {
+      const { url } = await uploadMedia(file, 'gifs', (progress: number) => {
         // Optional: show progress toast
       });
       if (url) {
