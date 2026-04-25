@@ -354,9 +354,15 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 </div>
-                {isInstallable && !isInstalled && (
+                {!isInstalled && (
                   <button
-                    onClick={promptInstall}
+                    onClick={() => {
+                      if (isInstallable) {
+                        promptInstall();
+                      } else {
+                        import('react-hot-toast').then(m => m.default('To install, click the install icon in your browser address bar or menu.', { icon: 'ℹ️' }));
+                      }
+                    }}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--emerald)] hover:bg-[var(--emerald-hover)] text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-[var(--emerald)]/20 active:scale-[0.97]"
                   >
                     <Download size={14} />
