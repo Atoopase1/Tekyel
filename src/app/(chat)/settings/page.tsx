@@ -357,8 +357,8 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Install App — visible when PWA not installed */}
-          {(isInstallable || !isInstalled) && (
+          {/* Install App — always visible */}
+          {!isInstalled && (
             <div className="surface-card p-5">
               <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-4 flex items-center gap-2">
                 {isMobile ? <Smartphone size={26} className="text-[var(--emerald)]" /> : <Monitor size={26} className="text-[var(--emerald)]" />}
@@ -392,7 +392,11 @@ export default function SettingsPage() {
                       if (isInstallable && promptInstall) {
                         promptInstall();
                       } else {
-                        toast('To install, click the install icon in your browser address bar or menu.', { icon: 'ℹ️', duration: 5000 });
+                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                        const msg = isIOS
+                          ? 'Tap the Share button (□↑) at the bottom of Safari, then tap "Add to Home Screen".'
+                          : 'Tap the browser menu (⋮) then "Add to Home Screen" or "Install App".';
+                        toast(msg, { icon: 'ℹ️', duration: 6000 });
                       }
                     }}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--emerald)] hover:bg-[var(--emerald-hover)] text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-[var(--emerald)]/20 active:scale-[0.97]"
