@@ -285,7 +285,7 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
             </div>
           </div>
         ) : text_content && (
-          <p className="text-[var(--text-primary)] whitespace-pre-wrap text-sm leading-relaxed">{text_content}</p>
+          <p className="text-[var(--text-primary)] whitespace-pre-wrap text-sm leading-relaxed text-center">{text_content}</p>
         )}
       </div>
 

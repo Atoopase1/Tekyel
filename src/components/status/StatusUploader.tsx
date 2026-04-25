@@ -144,7 +144,7 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
         {/* Preview content */}
         <div className="p-4">
           {textContent && (
-            <p className="text-[var(--text-primary)] whitespace-pre-wrap text-sm leading-relaxed mb-3">
+            <p className="text-[var(--text-primary)] whitespace-pre-wrap text-sm leading-relaxed text-center mb-3">
               {textContent}
             </p>
           )}
