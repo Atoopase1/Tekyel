@@ -48,62 +48,102 @@ export default function ProfileViewPage() {
     if (!currentUser) return; // Wait for auth to be ready
 
     const loadProfileData = async () => {
-      setIsLoading(true);
-
-      // Ensure the auth session is current (RLS needs it)
-      await supabase.auth.getSession();
-
-      // Load Profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', profileId)
-        .single();
-      
-      if (profileData) setAuthor(profileData);
-
-      // Load statuses
-      const { data: statusData } = await supabase
-        .from('statuses')
-        .select('*, profiles!statuses_user_id_fkey(*), status_likes(*), status_comments(*, profiles(*)), status_ratings(*)')
-        .eq('user_id', profileId)
-        .order('created_at', { ascending: false });
-      
-      if (statusData) setStatuses(statusData);
-
-      // Load Followers Count
-      const { data: followRows, error: followError } = await supabase
-        .from('follows')
-        .select('follower_id')
-        .eq('following_id', profileId);
-      
-      if (followError) {
-        console.error('[ProfilePage] Follower count error:', followError);
+      // 1. Try to load from cache first
+      const cacheKey = `profile-data-${profileId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed.author) setAuthor(parsed.author);
+          if (parsed.statuses) setStatuses(parsed.statuses);
+          if (parsed.followerCount !== undefined) setFollowerCount(parsed.followerCount);
+          if (parsed.isFollowing !== undefined) setIsFollowing(parsed.isFollowing);
+          if (parsed.relationship !== undefined) setRelationship(parsed.relationship);
+          setIsLoading(false); // We have cached data, so we can stop loading
+        } catch (e) {
+          console.error('Failed to parse cached profile data', e);
+        }
       }
-      console.log('[ProfilePage] Followers for', profileId, ':', followRows);
-      setFollowerCount(followRows?.length || 0);
 
-      // Check following status
-      const { data: followData } = await supabase
-        .from('follows')
-        .select('*')
-        .eq('follower_id', currentUser.id)
-        .eq('following_id', profileId)
-        .single();
-      
-      setIsFollowing(!!followData);
+      // If we don't have cached data, show loading spinner
+      if (!cached) {
+        setIsLoading(true);
+      }
 
-      // Check relationship status
-      const { data: contactData } = await supabase
-        .from('contacts')
-        .select('category')
-        .eq('user_id', currentUser.id)
-        .eq('contact_id', profileId)
-        .single();
-      
-      if (contactData) setRelationship(contactData.category);
+      try {
+        // Ensure the auth session is current (RLS needs it)
+        await supabase.auth.getSession();
 
-      setIsLoading(false);
+        // Load Profile
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', profileId)
+          .single();
+        
+        if (profileError) throw profileError;
+
+        // Load statuses
+        const { data: statusData } = await supabase
+          .from('statuses')
+          .select('*, profiles!statuses_user_id_fkey(*), status_likes(*), status_comments(*, profiles(*)), status_ratings(*)')
+          .eq('user_id', profileId)
+          .order('created_at', { ascending: false });
+
+        // Load Followers Count
+        const { data: followRows } = await supabase
+          .from('follows')
+          .select('follower_id')
+          .eq('following_id', profileId);
+        
+        const followerCount = followRows?.length || 0;
+
+        // Check following status
+        const { data: followData } = await supabase
+          .from('follows')
+          .select('*')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', profileId)
+          .single();
+
+        const isFollowing = !!followData;
+
+        // Check relationship status
+        const { data: contactData } = await supabase
+          .from('contacts')
+          .select('category')
+          .eq('user_id', currentUser.id)
+          .eq('contact_id', profileId)
+          .single();
+
+        const relationship = contactData?.category || null;
+
+        // Update state
+        if (profileData) setAuthor(profileData);
+        if (statusData) setStatuses(statusData);
+        setFollowerCount(followerCount);
+        setIsFollowing(isFollowing);
+        setRelationship(relationship);
+
+        // Update cache
+        localStorage.setItem(cacheKey, JSON.stringify({
+          author: profileData,
+          statuses: statusData || [],
+          followerCount,
+          isFollowing,
+          relationship
+        }));
+
+      } catch (err) {
+        console.warn('[ProfilePage] Network fetch failed, relying on cache if available', err);
+        // If author is still not set (no cache and network failed)
+        // And it's our own profile, we can fallback to currentUser
+        if (!author && isMe) {
+          setAuthor(currentUser);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     loadProfileData();
