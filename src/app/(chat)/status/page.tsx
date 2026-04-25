@@ -120,7 +120,7 @@ export default function StatusPage() {
     <div className="flex-1 flex flex-col bg-[var(--bg-app)]">
       {/* Header */}
       <div className="bg-[var(--bg-header)] shadow-sm z-10 w-full">
-        <div className="max-w-2xl mx-auto px-6 py-4">
+        <div className="max-w-2xl mx-auto px-3 sm:px-6 py-4">
           <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-4">Status & Feed</h1>
           
           {/* Search & Filter Bar */}
@@ -182,7 +182,7 @@ export default function StatusPage() {
 
       {/* Main Feed Container */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden w-full">
-        <div className="max-w-2xl mx-auto px-6 py-6 pb-32">
+        <div className="max-w-2xl mx-auto px-3 sm:px-6 py-6 pb-32">
           
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3 px-1">Share an update</h2>

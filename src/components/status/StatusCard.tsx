@@ -330,7 +330,7 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
           </button>
 
           {/* 5-Star Rating System */}
-          <div className="flex items-center gap-1 sm:ml-2">
+          <div className="flex items-center gap-1 sm:ml-2 flex-wrap">
             {[1, 2, 3, 4, 5].map((star) => (
               <button key={star} onClick={() => handleRating(star)} className="focus:outline-none transition-transform hover:scale-110">
                 <Star size={26} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
@@ -343,7 +343,7 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
         {/* Save/Bookmark */}
         <button
           onClick={() => { setSaved(!saved); toast.success(saved ? 'Removed from saved' : 'Saved!'); }}
-          className={`p-1.5 rounded-full transition-colors ${
+          className={`p-1.5 rounded-full transition-colors shrink-0 ${
             saved ? 'text-[var(--wa-green)]' : 'text-[var(--text-muted)] hover:text-[var(--wa-green)]'
           }`}
         >
