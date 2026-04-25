@@ -59,18 +59,31 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
     
-    const { error } = await supabase
-      .from('statuses')
-      .delete()
-      .eq('id', status.id);
+    // Optimistically hide the menu
+    setShowMenu(false);
 
-    if (error) {
-      toast.error('Failed to delete status');
-    } else {
+    try {
+      // 1. Delete associated children to avoid Foreign Key constraint errors
+      await Promise.all([
+        supabase.from('status_comments').delete().eq('status_id', status.id),
+        supabase.from('status_likes').delete().eq('status_id', status.id),
+        supabase.from('status_ratings').delete().eq('status_id', status.id)
+      ]);
+
+      // 2. Delete the status itself
+      const { error } = await supabase
+        .from('statuses')
+        .delete()
+        .eq('id', status.id);
+
+      if (error) throw error;
+      
       toast.success('Status deleted');
       onRefresh?.();
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      toast.error('Failed to delete status');
     }
-    setShowMenu(false);
   };
 
   const handleUpdate = async () => {
