@@ -115,7 +115,7 @@ export default function StatusPage() {
   });
 
   return (
-    <div className="flex-1 flex flex-col bg-[var(--bg-app)]">
+    <div className="flex-1 flex flex-col bg-[var(--bg-app)] w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <div className="bg-[var(--bg-header)] shadow-sm z-10 w-full">
         <div className="max-w-2xl mx-auto px-3 sm:px-6 py-4">

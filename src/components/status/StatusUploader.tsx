@@ -123,7 +123,7 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
   // Preview mode
   if (step === 'preview') {
     return (
-      <div className="bg-[var(--bg-primary)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden">
+      <div className="bg-[var(--bg-primary)] rounded-xl shadow-sm border border-[var(--border-color)] overflow-hidden w-full max-w-full box-border">
         {/* Preview header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]">
           <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
@@ -203,7 +203,7 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
 
   // Compose mode
   return (
-    <div className="bg-[var(--bg-primary)] p-4 rounded-xl shadow-sm border border-[var(--border-color)]">
+    <div className="bg-[var(--bg-primary)] p-4 rounded-xl shadow-sm border border-[var(--border-color)] w-full max-w-full box-border overflow-hidden">
       <textarea
         value={textContent}
         onChange={(e) => setTextContent(e.target.value)}

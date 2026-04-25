@@ -190,7 +190,7 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
   const handleSaveImage = async () => { /* ...existing save handler... */ };
 
   return (
-    <div className="bg-[var(--bg-primary)] rounded-xl shadow-sm border border-[var(--border-color)] mb-4 overflow-hidden">
+    <div className="bg-[var(--bg-primary)] rounded-xl shadow-sm border border-[var(--border-color)] mb-4 overflow-hidden w-full max-w-full box-border">
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-2 gap-3">
         <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0" onClick={() => router.push(`/profile/${status.user_id}`)}>
@@ -289,20 +289,20 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
 
       {/* Media Content (truncated logic for brevity, assuming standard rendering) */}
       {media_url && content_type === 'image' && (
-        <div className="relative w-full bg-black">
-          <img src={media_url} alt="Status media" className="object-contain w-full max-h-[500px]" />
+        <div className="relative w-full max-w-full bg-black overflow-hidden">
+          <img src={media_url} alt="Status media" className="object-contain w-full max-w-full max-h-[500px] block" />
         </div>
       )}
       
       {media_url && content_type === 'video' && (
-        <div className="relative w-full bg-black">
-          <video src={media_url} controls className="w-full max-h-[500px]" />
+        <div className="relative w-full max-w-full bg-black overflow-hidden">
+          <video src={media_url} controls className="w-full max-w-full max-h-[500px] block" />
         </div>
       )}
 
       {/* Action bar: Like, Comments, Rating */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)] gap-2 flex-wrap min-w-0">
-        <div className="flex items-center gap-2 flex-wrap min-w-0">
+      <div className="flex items-center justify-between px-3 py-3 border-t border-[var(--border-color)] gap-1 flex-wrap min-w-0 w-full max-w-full">
+        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
           {/* Like */}
           <button
             onClick={handleLike}
