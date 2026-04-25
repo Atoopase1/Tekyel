@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const [isDark, setIsDark] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [currentFont, setCurrentFont] = useState('Inter');
+  const [textSize, setTextSize] = useState('16px');
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
 
   const [pushEnabled, setPushEnabled] = useState(true);
@@ -35,6 +36,7 @@ export default function SettingsPage() {
     setIsDark(document.documentElement.classList.contains('dark'));
     setIsItalic(localStorage.getItem('app-font-style') === 'italic');
     setCurrentFont(localStorage.getItem('app-font') || 'Inter');
+    setTextSize(localStorage.getItem('app-text-size') || '16px');
     
     // Load toggle states
     setPushEnabled(localStorage.getItem('setting-push') !== 'false');
@@ -77,6 +79,13 @@ export default function SettingsPage() {
     setCurrentFont(fontKey);
     localStorage.setItem('app-font', fontKey);
     document.documentElement.style.setProperty('--font-sans', fontMap[fontKey] || fontMap['Inter']);
+  };
+
+  const changeTextSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSize = e.target.value;
+    setTextSize(newSize);
+    localStorage.setItem('app-text-size', newSize);
+    document.documentElement.style.fontSize = newSize;
   };
 
   const toggleItalicMode = () => {
@@ -187,6 +196,28 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <Toggle checked={isItalic} onChange={toggleItalicMode} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
+                    <span className="text-[var(--text-muted)] font-bold text-lg">A</span>
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-medium text-[var(--text-primary)]">Text Size</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Scale the app interface size</p>
+                  </div>
+                </div>
+                <select 
+                  value={textSize}
+                  onChange={changeTextSize}
+                  className="bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[14px] rounded-lg px-2 py-1.5 border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--emerald)] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
+                >
+                  <option value="14px">Small</option>
+                  <option value="16px">Medium (Default)</option>
+                  <option value="18px">Large</option>
+                  <option value="20px">Extra Large</option>
+                </select>
               </div>
             </div>
           </div>
