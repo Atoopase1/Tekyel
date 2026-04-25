@@ -1,6 +1,4 @@
-// ============================================================
 // Presence hook — online status & typing indicators
-// ============================================================
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';

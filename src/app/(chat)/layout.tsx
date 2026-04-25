@@ -1,6 +1,4 @@
-// ============================================================
 // Chat Layout — Premium sidebar + main panel (protected)
-// ============================================================
 'use client';
 
 import { useEffect } from 'react';

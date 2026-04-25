@@ -1,6 +1,4 @@
-// ============================================================
 // Auth Layout — Premium centered auth with navy/emerald gradient
-// ============================================================
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {

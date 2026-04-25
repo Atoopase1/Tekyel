@@ -1,6 +1,4 @@
-// ============================================================
 // StatusUploader — Create status with edit/preview before posting
-// ============================================================
 'use client';
 
 import { useState, useRef, useCallback } from 'react';

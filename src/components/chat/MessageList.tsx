@@ -1,6 +1,4 @@
-// ============================================================
 // MessageList — Premium scrollable message list
-// ============================================================
 'use client';
 
 import { useRef, useEffect, useCallback, useState } from 'react';

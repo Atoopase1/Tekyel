@@ -1,7 +1,5 @@
--- ============================================================
 -- MIGRATION: Group Admin Features
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor)
--- ============================================================
 
 -- 1. Add admin_only_messages column to chats table
 ALTER TABLE public.chats

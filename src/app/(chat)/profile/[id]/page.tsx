@@ -1,6 +1,4 @@
-// ============================================================
 // ProfileViewPage — LinkedIn-style profile with cover & avatar upload
-// ============================================================
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';

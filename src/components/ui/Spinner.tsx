@@ -1,6 +1,4 @@
-// ============================================================
 // Spinner — Premium gradient loading spinner
-// ============================================================
 'use client';
 
 interface SpinnerProps {

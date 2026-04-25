@@ -1,7 +1,5 @@
--- ============================================================
 -- MIGRATION: Performance Optimizations for Message Loading
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor)
--- ============================================================
 
 -- 1. Create critical foreign key indexes for nested message fetches
 -- Without these, fetching nested relations causes full table scans for every message loaded.

@@ -1,6 +1,4 @@
-// ============================================================
 // ChatHeader — Premium glass header with call actions
-// ============================================================
 'use client';
 
 import { ArrowLeft, Phone, Video, Search, X, Trash2, Forward, Star, Copy } from 'lucide-react';

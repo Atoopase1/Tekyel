@@ -1,6 +1,4 @@
-// ============================================================
 // Badge — Premium notification badge with pulse
-// ============================================================
 'use client';
 
 interface BadgeProps {

@@ -1,6 +1,4 @@
-// ============================================================
 // IndexedDB Message Cache — Persists messages across sessions
-// ============================================================
 'use client';
 
 const DB_NAME = 'tekyel-msg-cache';

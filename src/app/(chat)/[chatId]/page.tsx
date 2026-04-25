@@ -1,6 +1,4 @@
-// ============================================================
 // Individual Chat Page — Message thread for a specific chat
-// ============================================================
 'use client';
 
 import { useEffect, useState } from 'react';

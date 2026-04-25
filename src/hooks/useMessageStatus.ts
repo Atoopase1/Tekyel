@@ -1,9 +1,7 @@
-// ============================================================
 // Message status hook — marks messages as read when chat opens
 // NOTE: Real-time status update events (INSERT/UPDATE on message_status)
 //       are handled centrally in useRealtimeMessages.ts to avoid
 //       duplicate channel subscriptions on the same table.
-// ============================================================
 'use client';
 
 import { useEffect } from 'react';

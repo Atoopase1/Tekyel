@@ -1,6 +1,4 @@
-// ============================================================
 // useCallSignaling — Listen for incoming calls via Supabase Realtime
-// ============================================================
 'use client';
 
 import { useEffect } from 'react';

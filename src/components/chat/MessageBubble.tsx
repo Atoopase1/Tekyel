@@ -1,6 +1,4 @@
-// ============================================================
 // MessageBubble — Premium individual message bubble
-// ============================================================
 'use client';
 
 import { Check, CheckCheck, Clock, Download, Play, FileText, X, ZoomIn, ZoomOut } from 'lucide-react';

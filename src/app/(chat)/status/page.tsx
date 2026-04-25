@@ -1,6 +1,4 @@
-// ============================================================
 // Status Feed Page
-// ============================================================
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';

@@ -1,8 +1,6 @@
--- ============================================================
 -- MIGRATION: Ensure ALL required tables are in the realtime publication
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor)
 -- This is safe to run multiple times — duplicates are silently ignored.
--- ============================================================
 
 -- Core chat tables
 DO $$ BEGIN

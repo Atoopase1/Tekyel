@@ -1,6 +1,4 @@
-// ============================================================
 // Auth Store — Zustand store for authentication state
-// ============================================================
 'use client';
 
 import { create } from 'zustand';

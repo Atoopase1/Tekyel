@@ -1,6 +1,4 @@
-// ============================================================
 // Utility functions
-// ============================================================
 import { format, isToday, isYesterday, isThisWeek, formatDistanceToNow } from 'date-fns';
 
 /**

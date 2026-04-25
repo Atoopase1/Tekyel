@@ -1,6 +1,4 @@
-// ============================================================
 // TypingIndicator — Premium animated emerald typing bubble
-// ============================================================
 'use client';
 
 interface TypingIndicatorProps {

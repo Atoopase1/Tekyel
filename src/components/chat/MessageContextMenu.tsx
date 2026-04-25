@@ -1,6 +1,4 @@
-// ============================================================
 // MessageContextMenu — WhatsApp-style compact floating card
-// ============================================================
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';

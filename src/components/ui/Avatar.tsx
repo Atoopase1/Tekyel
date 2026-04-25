@@ -1,6 +1,4 @@
-// ============================================================
 // Avatar — Premium user/group avatar with glow indicator
-// ============================================================
 'use client';
 
 import { getInitials, stringToColor } from '@/lib/utils';

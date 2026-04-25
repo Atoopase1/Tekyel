@@ -1,6 +1,4 @@
-// ============================================================
 // MessageInfoModal — Premium read receipts & delivery info
-// ============================================================
 'use client';
 
 import { X, Check, CheckCheck } from 'lucide-react';

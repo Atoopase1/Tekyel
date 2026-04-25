@@ -1,6 +1,4 @@
-// ============================================================
 // ManageStorageModal — Professional storage management UI
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -1,6 +1,4 @@
-// ============================================================
 // CallModal — Premium active call overlay
-// ============================================================
 'use client';
 
 import { useEffect, useRef, useState } from 'react';

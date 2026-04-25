@@ -1,6 +1,4 @@
-// ============================================================
 // ProfileEditor — Premium profile editor with cover + avatar
-// ============================================================
 'use client';
 
 import { useState, useRef } from 'react';

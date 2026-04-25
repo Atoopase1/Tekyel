@@ -1,6 +1,4 @@
-// ============================================================
 // ForwardModal — Premium forward message modal
-// ============================================================
 'use client';
 
 import { useState } from 'react';

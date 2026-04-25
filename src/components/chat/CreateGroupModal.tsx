@@ -1,6 +1,4 @@
-// ============================================================
 // CreateGroupModal — Premium group creation modal
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

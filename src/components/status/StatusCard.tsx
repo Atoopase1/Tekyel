@@ -1,6 +1,4 @@
-// ============================================================
 // StatusCard — Post card with like, follow, save, download
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

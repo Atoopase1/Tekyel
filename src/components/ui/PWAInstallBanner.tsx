@@ -1,6 +1,4 @@
-// ============================================================
 // PWA Install Banner — Slide-in desktop install prompt
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

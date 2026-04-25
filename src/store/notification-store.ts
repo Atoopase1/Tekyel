@@ -1,6 +1,4 @@
-// ============================================================
 // NotificationStore — Local notifications for followed user posts
-// ============================================================
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 

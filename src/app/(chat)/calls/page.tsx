@@ -1,6 +1,4 @@
-// ============================================================
 // Calls Page — Premium call history
-// ============================================================
 'use client';
 
 import { Phone, Video, PhoneIncoming, PhoneOutgoing, PhoneMissed } from 'lucide-react';

@@ -1,6 +1,4 @@
-// ============================================================
 // FollowersModal — Shows list of followers for a profile
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

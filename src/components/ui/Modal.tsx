@@ -1,6 +1,4 @@
-// ============================================================
 // Modal — Premium glassmorphic overlay dialog
-// ============================================================
 'use client';
 
 import { useEffect, useRef, useState } from 'react';

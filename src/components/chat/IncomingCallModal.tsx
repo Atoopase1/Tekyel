@@ -1,6 +1,4 @@
-// ============================================================
 // IncomingCallModal — Premium incoming call overlay
-// ============================================================
 'use client';
 
 import { Phone, PhoneOff, Video } from 'lucide-react';

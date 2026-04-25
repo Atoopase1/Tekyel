@@ -1,6 +1,4 @@
-// ============================================================
 // TekyelLogo — Premium SVG logo for the Tekyel app
-// ============================================================
 'use client';
 
 interface TekyelLogoProps {

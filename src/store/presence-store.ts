@@ -1,6 +1,4 @@
-// ============================================================
 // Presence Store — Online status & typing indicators
-// ============================================================
 'use client';
 
 import { create } from 'zustand';

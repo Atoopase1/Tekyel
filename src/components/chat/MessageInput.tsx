@@ -1,6 +1,4 @@
-// ============================================================
 // MessageInput — Premium glass input bar with attachments
-// ============================================================
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';

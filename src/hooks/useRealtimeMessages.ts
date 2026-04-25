@@ -1,6 +1,4 @@
-// ============================================================
 // Real-time messages hook — subscribes to new messages via Supabase Realtime
-// ============================================================
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -80,7 +78,7 @@ export function useRealtimeMessages(chatId: string | null) {
 
       const channel = supabase
         .channel(uniqueChannelName)
-        // ── New messages ──────────────────────────────────────────────────
+        // ── New messages 
         .on(
           'postgres_changes',
           {
@@ -145,7 +143,7 @@ export function useRealtimeMessages(chatId: string | null) {
             } as Message);
           }
         )
-        // ── Edited / unsent messages ──────────────────────────────────────
+        // ── Edited / unsent messages 
         .on(
           'postgres_changes',
           {
@@ -166,7 +164,7 @@ export function useRealtimeMessages(chatId: string | null) {
             } as Message);
           }
         )
-        // ── Message status (read receipts / delivery ticks) ───────────────
+        // ── Message status (read receipts / delivery ticks) 
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'message_status' },
@@ -212,7 +210,7 @@ export function useRealtimeMessages(chatId: string | null) {
 
     subscribe();
 
-    // ── Tab Focus & Wake Up Synchronization ─────────────────────────────
+    // ── Tab Focus & Wake Up Synchronization 
     let syncLock = false;
     let lastSyncTime = Date.now();
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -482,7 +480,7 @@ export function useRealtimeChatList() {
 
     subscribe();
 
-    // ── Tab Focus & Wake Up Synchronization ─────────────────────────────
+    // ── Tab Focus & Wake Up Synchronization 
     let syncLock = false;
     let lastSyncTime = Date.now();
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;

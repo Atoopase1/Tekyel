@@ -1,6 +1,4 @@
-// ============================================================
 // GroupInfoPanel — Full admin management panel
-// ============================================================
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -409,9 +407,7 @@ export default function GroupInfoPanel({ chat, isOpen, onClose }: GroupInfoPanel
   );
 }
 
-// ============================================================
 // AddMembersOverlay — Inline member search/select overlay
-// ============================================================
 function AddMembersOverlay({
   chat,
   onClose,

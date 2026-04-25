@@ -1,6 +1,4 @@
-// ============================================================
 // Setup Profile Page — After first signup
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

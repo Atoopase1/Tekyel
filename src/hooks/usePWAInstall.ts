@@ -1,6 +1,4 @@
-// ============================================================
 // usePWAInstall — Captures beforeinstallprompt for desktop & mobile
-// ============================================================
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';

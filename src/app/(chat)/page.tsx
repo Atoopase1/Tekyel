@@ -1,6 +1,4 @@
-// ============================================================
 // Default chat page — Premium "no chat selected" landing
-// ============================================================
 import { Shield } from 'lucide-react';
 import ChatSidebar from '@/components/chat/ChatSidebar';
 import TekyelLogo from '@/components/ui/TekyelLogo';

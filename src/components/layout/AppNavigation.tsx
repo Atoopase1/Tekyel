@@ -1,6 +1,4 @@
-// ============================================================
 // AppNavigation — Premium glass nav with Calls tab
-// ============================================================
 'use client';
 
 import { MessageSquare, Users, Aperture, Phone } from 'lucide-react';

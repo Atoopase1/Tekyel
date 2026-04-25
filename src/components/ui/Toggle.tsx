@@ -1,6 +1,4 @@
-// ============================================================
 // Toggle — Premium toggle switch component
-// ============================================================
 'use client';
 
 interface ToggleProps {

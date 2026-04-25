@@ -1,6 +1,4 @@
-// ============================================================
 // MessageSkeleton — Premium loading skeleton
-// ============================================================
 'use client';
 
 export default function MessageSkeleton({ isOwn }: { isOwn: boolean }) {

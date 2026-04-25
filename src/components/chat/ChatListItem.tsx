@@ -1,6 +1,4 @@
-// ============================================================
 // ChatListItem — Premium row in chat list
-// ============================================================
 'use client';
 
 import Avatar from '@/components/ui/Avatar';

@@ -1,6 +1,4 @@
-// ============================================================
 // NotificationPanel — Premium notification panel with post alerts
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

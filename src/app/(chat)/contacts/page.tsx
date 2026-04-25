@@ -1,6 +1,4 @@
-// ============================================================
 // Contacts Page — Premium network & contacts
-// ============================================================
 'use client';
 
 import { useState, useEffect } from 'react';

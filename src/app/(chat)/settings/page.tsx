@@ -1,6 +1,4 @@
-// ============================================================
 // Settings Page — Premium structured layout with toggles
-// ============================================================
 'use client';
 
 import { ArrowLeft, Moon, Sun, Bell, Lock, HardDrive, Info, Palette, User, Type, LogOut, Download, CheckCircle, Monitor, Smartphone } from 'lucide-react';

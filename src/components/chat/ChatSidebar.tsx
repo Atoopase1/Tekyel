@@ -1,6 +1,4 @@
-// ============================================================
 // ChatSidebar — Premium left panel with LinkedIn-style cover
-// ============================================================
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';

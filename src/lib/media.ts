@@ -1,6 +1,4 @@
-// ============================================================
 // Media upload & compression utilities
-// ============================================================
 import imageCompression from 'browser-image-compression';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 

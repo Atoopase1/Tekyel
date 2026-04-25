@@ -1,6 +1,4 @@
-// ============================================================
 // Chat Store — Zustand store for chat & message state
-// ============================================================
 'use client';
 
 import { create } from 'zustand';

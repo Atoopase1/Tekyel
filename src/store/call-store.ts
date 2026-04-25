@@ -1,6 +1,4 @@
-// ============================================================
 // Call Store — WebRTC-based audio/video calling
-// ============================================================
 'use client';
 
 import { create } from 'zustand';

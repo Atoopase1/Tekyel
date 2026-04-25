@@ -1,6 +1,4 @@
-// ============================================================
 // Button — Premium button with variants and hover lift
-// ============================================================
 'use client';
 
 import { cn } from '@/lib/utils';

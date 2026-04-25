@@ -1,7 +1,5 @@
--- ============================================================
 -- MIGRATION: Real-time publication fix + group chat RPC
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor)
--- ============================================================
 
 -- 1. Ensure all required tables are in the realtime publication
 -- (Safe to run even if already added — EXCEPTION block handles duplicates)

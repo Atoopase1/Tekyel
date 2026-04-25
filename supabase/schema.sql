@@ -1,14 +1,10 @@
--- ============================================================
 -- WhatsApp Clone — Full Database Schema
 -- Run this in your Supabase SQL Editor
--- ============================================================
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ============================================================
 -- 1. PROFILES TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   phone TEXT UNIQUE,
@@ -26,9 +22,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE INDEX IF NOT EXISTS idx_profiles_phone ON profiles(phone);
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
 
--- ============================================================
 -- 2. CHATS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   is_group BOOLEAN DEFAULT false,
@@ -44,9 +38,7 @@ CREATE TABLE IF NOT EXISTS chats (
 
 CREATE INDEX IF NOT EXISTS idx_chats_last_message_at ON chats(last_message_at DESC);
 
--- ============================================================
 -- 3. CHAT PARTICIPANTS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS chat_participants (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
@@ -60,9 +52,7 @@ CREATE TABLE IF NOT EXISTS chat_participants (
 CREATE INDEX IF NOT EXISTS idx_chat_participants_user ON chat_participants(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_participants_chat ON chat_participants(chat_id);
 
--- ============================================================
 -- 4. MESSAGES TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
@@ -84,9 +74,7 @@ ALTER TABLE chats DROP CONSTRAINT IF EXISTS fk_chats_last_message;
 ALTER TABLE chats ADD CONSTRAINT fk_chats_last_message
   FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE SET NULL;
 
--- ============================================================
 -- 5. MESSAGE STATUS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS message_status (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   message_id UUID NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
@@ -99,9 +87,7 @@ CREATE TABLE IF NOT EXISTS message_status (
 CREATE INDEX IF NOT EXISTS idx_message_status_message ON message_status(message_id);
 CREATE INDEX IF NOT EXISTS idx_message_status_user ON message_status(user_id);
 
--- ============================================================
 -- 5a. CONTACTS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -114,9 +100,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE INDEX IF NOT EXISTS idx_contacts_user ON contacts(user_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_category ON contacts(user_id, category);
 
--- ============================================================
 -- 5b. FOLLOWS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS follows (
   follower_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   following_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -126,9 +110,7 @@ CREATE TABLE IF NOT EXISTS follows (
 
 CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
 
--- ============================================================
 -- 5c. STATUSES TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS statuses (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -143,9 +125,7 @@ CREATE INDEX IF NOT EXISTS idx_statuses_user ON statuses(user_id);
 CREATE INDEX IF NOT EXISTS idx_statuses_visibility ON statuses(visibility);
 CREATE INDEX IF NOT EXISTS idx_statuses_created ON statuses(created_at DESC);
 
--- ============================================================
 -- 5d. STATUS LIKES TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS status_likes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
@@ -155,9 +135,7 @@ CREATE TABLE IF NOT EXISTS status_likes (
 );
 CREATE INDEX IF NOT EXISTS idx_status_likes_status ON status_likes(status_id);
 
--- ============================================================
 -- 5e. STATUS COMMENTS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS status_comments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
@@ -168,9 +146,7 @@ CREATE TABLE IF NOT EXISTS status_comments (
 CREATE INDEX IF NOT EXISTS idx_status_comments_status ON status_comments(status_id);
 CREATE INDEX IF NOT EXISTS idx_status_comments_created ON status_comments(created_at DESC);
 
--- ============================================================
 -- 5f. STATUS RATINGS TABLE
--- ============================================================
 CREATE TABLE IF NOT EXISTS status_ratings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   status_id UUID NOT NULL REFERENCES statuses(id) ON DELETE CASCADE,
@@ -181,9 +157,7 @@ CREATE TABLE IF NOT EXISTS status_ratings (
 );
 CREATE INDEX IF NOT EXISTS idx_status_ratings_status ON status_ratings(status_id);
 
--- ============================================================
 -- 6. DATABASE FUNCTIONS
--- ============================================================
 
 -- Function: Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -306,9 +280,7 @@ RETURNS BOOLEAN AS $$
   );
 $$ LANGUAGE sql SECURITY DEFINER SET search_path = public;
 
--- ============================================================
 -- 7. ROW LEVEL SECURITY (RLS) POLICIES
--- ============================================================
 
 -- Enable RLS on all tables
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -555,9 +527,7 @@ CREATE POLICY "Users can manage own ratings"
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
 
--- ============================================================
 -- 8. REALTIME PUBLICATION
--- ============================================================
 -- Enable realtime (wrapped in a DO block to ignore "already exists" errors)
 DO $$
 BEGIN
@@ -609,23 +579,17 @@ BEGIN
   ALTER PUBLICATION supabase_realtime ADD TABLE status_ratings;
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
--- ============================================================
 -- 9. STORAGE BUCKET
--- ============================================================
 -- NOTE: Create a bucket named 'chat-media' in the Supabase Dashboard
 -- Then apply these policies via Dashboard → Storage → Policies:
---
 -- Policy 1: Allow authenticated uploads
 --   Operation: INSERT
 --   Policy: (auth.role() = 'authenticated')
---
 -- Policy 2: Allow authenticated reads
 --   Operation: SELECT
 --   Policy: (auth.role() = 'authenticated')
 
--- ============================================================
 -- 10. NEW FEATURES: STARS, REACTIONS, DELETIONS, PINS
--- ============================================================
 
 -- Add pinned_message_id to chats
 ALTER TABLE chats ADD COLUMN IF NOT EXISTS pinned_message_id UUID REFERENCES messages(id) ON DELETE SET NULL;

@@ -1,6 +1,4 @@
-// ============================================================
 // SearchInput — Premium glassmorphic search bar
-// ============================================================
 'use client';
 
 import { Search, X } from 'lucide-react';
