@@ -40,7 +40,7 @@ export default function RootLayout({
         <meta name="google-site-verification" content="sk3Hm1wRQhXhx0Z-Dg0lxMs0HQudYUbN4maojIGSsPs" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -54,10 +54,18 @@ export default function RootLayout({
                   'Poppins': "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif",
                   'Roboto': "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
                   'Open Sans': "'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif",
-                  'Lato': "'Lato', -apple-system, BlinkMacSystemFont, sans-serif"
+                  'Lato': "'Lato', -apple-system, BlinkMacSystemFont, sans-serif",
+                  'Nunito': "'Nunito', -apple-system, BlinkMacSystemFont, sans-serif",
+                  'Playfair': "'Playfair Display', serif",
+                  'Caveat': "'Caveat', cursive"
                 };
                 var savedFont = localStorage.getItem('app-font') || 'Inter';
                 document.documentElement.style.setProperty('--font-sans', fontFamilies[savedFont] || fontFamilies['Inter']);
+                
+                var savedStyle = localStorage.getItem('app-font-style');
+                if (savedStyle === 'italic') {
+                  document.documentElement.style.fontStyle = 'italic';
+                }
                 
                 // Register Service Worker for PWA
                 if ('serviceWorker' in navigator) {

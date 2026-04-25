@@ -22,6 +22,7 @@ export default function SettingsPage() {
     router.push('/login');
   };
   const [isDark, setIsDark] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
   const [currentFont, setCurrentFont] = useState('Inter');
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
 
@@ -34,6 +35,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
+    setIsItalic(localStorage.getItem('app-font-style') === 'italic');
     setCurrentFont(localStorage.getItem('app-font') || 'Inter');
     
     // Load toggle states
@@ -58,6 +60,9 @@ export default function SettingsPage() {
     'Roboto': "'Roboto', -apple-system, BlinkMacSystemFont, sans-serif",
     'Open Sans': "'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif",
     'Lato': "'Lato', -apple-system, BlinkMacSystemFont, sans-serif",
+    'Nunito': "'Nunito', -apple-system, BlinkMacSystemFont, sans-serif",
+    'Playfair': "'Playfair Display', serif",
+    'Caveat': "'Caveat', cursive",
   };
 
   const changeFont = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -65,6 +70,13 @@ export default function SettingsPage() {
     setCurrentFont(fontKey);
     localStorage.setItem('app-font', fontKey);
     document.documentElement.style.setProperty('--font-sans', fontMap[fontKey] || fontMap['Inter']);
+  };
+
+  const toggleItalicMode = () => {
+    const newItalic = !isItalic;
+    setIsItalic(newItalic);
+    document.documentElement.style.fontStyle = newItalic ? 'italic' : 'normal';
+    localStorage.setItem('app-font-style', newItalic ? 'italic' : 'normal');
   };
 
   const toggleSetting = (key: string, setter: React.Dispatch<React.SetStateAction<boolean>>, currentVal: boolean) => {
@@ -135,14 +147,30 @@ export default function SettingsPage() {
                 <select 
                   value={currentFont}
                   onChange={changeFont}
-                  className="bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[14px] rounded-lg px-2 py-1.5 border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--emerald)] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors"
+                  className="bg-[var(--bg-secondary)] text-[var(--text-primary)] text-[14px] rounded-lg px-2 py-1.5 border border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[var(--emerald)] cursor-pointer hover:bg-[var(--bg-hover)] transition-colors max-w-[140px] sm:max-w-none truncate"
                 >
                   <option value="Inter">Inter (Default)</option>
                   <option value="Poppins">Poppins</option>
+                  <option value="Nunito">Nunito</option>
+                  <option value="Playfair">Playfair Display</option>
+                  <option value="Caveat">Caveat (Fancy)</option>
                   <option value="Roboto">Roboto</option>
                   <option value="Open Sans">Open Sans</option>
                   <option value="Lato">Lato</option>
                 </select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
+                    <Type size={26} className="text-[var(--text-muted)] italic" />
+                  </div>
+                  <div>
+                    <p className="text-[14px] font-medium text-[var(--text-primary)]">Italic Text</p>
+                    <p className="text-[14px] text-[var(--text-muted)]">Apply cursive/italic styling</p>
+                  </div>
+                </div>
+                <Toggle checked={isItalic} onChange={toggleItalicMode} />
               </div>
             </div>
           </div>
