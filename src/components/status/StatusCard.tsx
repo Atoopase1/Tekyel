@@ -301,8 +301,8 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
       )}
 
       {/* Action bar: Like, Comments, Rating */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)] flex-wrap gap-y-3">
-        <div className="flex items-center gap-3 sm:gap-5 flex-wrap">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[var(--border-color)] gap-2 flex-wrap min-w-0">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           {/* Like */}
           <button
             onClick={handleLike}
@@ -328,13 +328,13 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
           </button>
 
           {/* 5-Star Rating System */}
-          <div className="flex items-center gap-1 sm:ml-2 flex-wrap">
+          <div className="flex items-center gap-0.5 flex-wrap">
             {[1, 2, 3, 4, 5].map((star) => (
               <button key={star} onClick={() => handleRating(star)} className="focus:outline-none transition-transform hover:scale-110">
-                <Star size={26} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
+                <Star size={20} className={`${star <= myRating ? 'text-yellow-400 fill-yellow-400' : 'text-[var(--text-muted)] hover:text-yellow-200'}`} />
               </button>
             ))}
-            {ratingCount > 0 && <span className="text-sm text-[var(--text-muted)] ml-1">({averageRating})</span>}
+            {ratingCount > 0 && <span className="text-xs text-[var(--text-muted)] ml-0.5">({averageRating})</span>}
           </div>
         </div>
 
