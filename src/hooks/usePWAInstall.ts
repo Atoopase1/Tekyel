@@ -41,8 +41,10 @@ export function usePWAInstall() {
     }
 
     const handler = (e: BeforeInstallPromptEvent) => {
-      // Always prevent default so we control when the prompt appears
-      e.preventDefault();
+      // Prevent the mini-infobar from appearing on mobile, but let desktop show the browser bar icon
+      if (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent)) {
+        e.preventDefault();
+      }
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
