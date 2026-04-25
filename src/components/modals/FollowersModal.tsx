@@ -41,7 +41,23 @@ export default function FollowersModal({ isOpen, onClose, profileId, followerCou
     if (!isOpen) return;
 
     const fetchFollowers = async () => {
-      setIsLoading(true);
+      // Try to load from cache first
+      const cacheKey = `followers-list-${profileId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed.followers) setFollowers(parsed.followers);
+          if (parsed.followingMap) setFollowingMap(parsed.followingMap);
+          setIsLoading(false);
+        } catch (e) {
+          console.error('Failed to parse cached followers data', e);
+        }
+      }
+
+      if (!cached) {
+        setIsLoading(true);
+      }
 
       // Get all follower records for this profile
       await supabase.auth.getSession();
@@ -50,8 +66,15 @@ export default function FollowersModal({ isOpen, onClose, profileId, followerCou
         .select('follower_id')
         .eq('following_id', profileId);
 
-      if (error || !followRows || followRows.length === 0) {
+      if (error) {
+        console.warn('Network offline or Failed to fetch followers, relying on cache if available:', error);
+        setIsLoading(false);
+        return;
+      }
+
+      if (!followRows || followRows.length === 0) {
         setFollowers([]);
+        localStorage.setItem(cacheKey, JSON.stringify({ followers: [], followingMap: {} }));
         setIsLoading(false);
         return;
       }
@@ -64,7 +87,9 @@ export default function FollowersModal({ isOpen, onClose, profileId, followerCou
         .select('id, display_name, avatar_url, bio')
         .in('id', followerIds);
 
-      setFollowers((profiles as FollowerProfile[]) || []);
+      const fetchedFollowers = (profiles as FollowerProfile[]) || [];
+      
+      let fetchedFollowingMap: Record<string, boolean> = {};
 
       // Check which of these followers the current user is following back
       if (currentUser) {
@@ -74,10 +99,17 @@ export default function FollowersModal({ isOpen, onClose, profileId, followerCou
           .eq('follower_id', currentUser.id)
           .in('following_id', followerIds);
 
-        const map: Record<string, boolean> = {};
-        (myFollows || []).forEach(f => { map[f.following_id] = true; });
-        setFollowingMap(map);
+        (myFollows || []).forEach(f => { fetchedFollowingMap[f.following_id] = true; });
       }
+
+      // Update state and cache only after full fetch succeeds
+      setFollowers(fetchedFollowers);
+      setFollowingMap(fetchedFollowingMap);
+      
+      localStorage.setItem(cacheKey, JSON.stringify({
+        followers: fetchedFollowers,
+        followingMap: fetchedFollowingMap
+      }));
 
       setIsLoading(false);
     };

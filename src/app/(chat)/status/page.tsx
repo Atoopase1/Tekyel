@@ -23,7 +23,24 @@ export default function StatusPage() {
   const [followingIds, setFollowingIds] = useState<string[]>([]);
 
   const loadStatuses = useCallback(async () => {
-    setIsLoading(true);
+    const cacheKey = `status-feed-${activeTab}`;
+    
+    // 1. Try to load from cache first for instant display
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.statuses) setStatuses(parsed.statuses);
+        if (parsed.followingIds) setFollowingIds(parsed.followingIds);
+        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse cached status data', e);
+      }
+    }
+
+    if (!cached) {
+      setIsLoading(true);
+    }
     
     const buildQuery = (advanced: boolean) => {
       const selectStr = advanced 
@@ -43,8 +60,8 @@ export default function StatusPage() {
 
     let { data, error } = await buildQuery(true);
     
-    // If the advanced query with likes/comments fails, fall back to basic query immediately
-    if (error) {
+    // If the advanced query with likes/comments fails (e.g. offline or missing relationships)
+    if (error && (error.message?.includes('relationship') || error.message?.includes('schema'))) {
       console.warn('Advanced query failed, falling back to basic query:', error);
       const result = await buildQuery(false);
       data = result.data;
@@ -52,25 +69,35 @@ export default function StatusPage() {
     }
 
     if (error) {
-      console.error('Error fetching statuses:', error.message || JSON.stringify(error) || error);
+      console.warn('Network offline or Failed to fetch statuses, relying on cache if available:', error.message || error);
     }
     
-    if (data) setStatuses(data);
-
+    let currentFollowingIds = followingIds;
+    
     // Also fetch the current user's follows to accurately set the Follow button states
-    if (profile) {
-      const { data: followData } = await supabase
+    if (profile && !error) {
+      const { data: followData, error: followError } = await supabase
         .from('follows')
         .select('following_id')
         .eq('follower_id', profile.id);
       
-      if (followData) {
-        setFollowingIds(followData.map(f => f.following_id));
+      if (followData && !followError) {
+        currentFollowingIds = followData.map(f => f.following_id);
+        setFollowingIds(currentFollowingIds);
       }
     }
 
+    // Only update state and cache if we got new data
+    if (data) {
+      setStatuses(data);
+      localStorage.setItem(cacheKey, JSON.stringify({
+        statuses: data,
+        followingIds: currentFollowingIds
+      }));
+    }
+
     setIsLoading(false);
-  }, [activeTab, supabase, profile]);
+  }, [activeTab, supabase, profile, followingIds]);
 
   useEffect(() => {
     loadStatuses();

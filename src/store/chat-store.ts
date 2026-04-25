@@ -108,10 +108,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       // Step 1: Get our participations (needed to know which chats to fetch)
-      const { data: myParticipations } = await supabase
+      const { data: myParticipations, error: partError } = await supabase
         .from('chat_participants')
         .select('chat_id, role, unread_count')
         .eq('user_id', user.id);
+
+      if (partError) throw partError;
 
       if (!myParticipations?.length) {
         set({ chats: [], isLoadingChats: false, _hasFetchedOnce: true });
@@ -132,6 +134,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
           .select('*, profile:profiles(*)')
           .in('chat_id', chatIds),
       ]);
+
+      if (chatsResult.error) throw chatsResult.error;
+      if (participantsResult.error) throw participantsResult.error;
 
       const chatsData = chatsResult.data;
       const allParticipants = participantsResult.data;
