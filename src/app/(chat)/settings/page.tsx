@@ -21,6 +21,7 @@ export default function SettingsPage() {
   };
   const [isDark, setIsDark] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
+  const [isBold, setIsBold] = useState(false);
   const [currentFont, setCurrentFont] = useState('Inter');
   const [textSize, setTextSize] = useState('16px');
   const [isStorageModalOpen, setIsStorageModalOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'));
     setIsItalic(localStorage.getItem('app-font-style') === 'italic');
+    setIsBold(localStorage.getItem('app-font-weight') === 'bold');
     setCurrentFont(localStorage.getItem('app-font') || 'Inter');
     
     let storedSize = localStorage.getItem('app-text-size') || 'medium';
@@ -107,6 +109,13 @@ export default function SettingsPage() {
     setIsItalic(newItalic);
     document.documentElement.style.fontStyle = newItalic ? 'italic' : 'normal';
     localStorage.setItem('app-font-style', newItalic ? 'italic' : 'normal');
+  };
+
+  const toggleBoldMode = () => {
+    const newBold = !isBold;
+    setIsBold(newBold);
+    document.documentElement.style.fontWeight = newBold ? '700' : 'normal';
+    localStorage.setItem('app-font-weight', newBold ? 'bold' : 'normal');
   };
 
   const toggleSetting = (key: string, setter: React.Dispatch<React.SetStateAction<boolean>>, currentVal: boolean) => {
@@ -211,6 +220,19 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <Toggle checked={isItalic} onChange={toggleItalicMode} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center">
+                    <Type size={26} className="text-[var(--text-muted)] font-bold" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">Bold Text</p>
+                    <p className="text-sm text-[var(--text-muted)]">Apply bold weighting globally</p>
+                  </div>
+                </div>
+                <Toggle checked={isBold} onChange={toggleBoldMode} />
               </div>
 
               <div className="flex items-center justify-between">

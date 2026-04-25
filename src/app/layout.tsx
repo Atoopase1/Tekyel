@@ -76,6 +76,11 @@ export default function RootLayout({
                   document.documentElement.style.fontStyle = 'italic';
                 }
                 
+                var savedWeight = localStorage.getItem('app-font-weight');
+                if (savedWeight === 'bold') {
+                  document.documentElement.style.fontWeight = '700';
+                }
+                
                 var savedTextSize = localStorage.getItem('app-text-size') || 'medium';
                 if (savedTextSize === '14px') savedTextSize = 'small';
                 if (savedTextSize === '16px') savedTextSize = 'medium';
