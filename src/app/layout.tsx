@@ -93,13 +93,39 @@ export default function RootLayout({
                 if (savedTextSize === 'extra-large') textScale = '1.25';
                 document.documentElement.style.setProperty('--text-scale', textScale);
                 
-                // Register Service Worker for PWA
+                // Register Service Worker for PWA with auto-update
                 if ('serviceWorker' in navigator) {
                   window.addEventListener('load', function() {
                     navigator.serviceWorker.register('/sw.js').then(function(registration) {
                       console.log('ServiceWorker registration successful');
+
+                      // Check for updates every 60 seconds
+                      setInterval(function() {
+                        registration.update().catch(function() {});
+                      }, 60 * 1000);
+
+                      // When a new SW is found and waiting, tell it to activate immediately
+                      registration.addEventListener('updatefound', function() {
+                        var newWorker = registration.installing;
+                        if (newWorker) {
+                          newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                              console.log('New version available — reloading...');
+                              // The new SW will skipWaiting(), triggering controllerchange below
+                            }
+                          });
+                        }
+                      });
                     }, function(err) {
                       console.log('ServiceWorker registration failed: ', err);
+                    });
+
+                    // When a new SW takes over, reload to get the latest assets
+                    var refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', function() {
+                      if (refreshing) return;
+                      refreshing = true;
+                      window.location.reload();
                     });
                   });
                 }
