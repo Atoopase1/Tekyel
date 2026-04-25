@@ -43,8 +43,10 @@ export function usePWAInstall() {
     }
 
     const handler = (e: BeforeInstallPromptEvent) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
+      // Prevent the mini-infobar from appearing on mobile, but let desktop show the browser bar icon
+      if (window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent)) {
+        e.preventDefault();
+      }
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
@@ -81,7 +83,8 @@ export function usePWAInstall() {
         localStorage.setItem('pwa-install-dismissed', Date.now().toString());
         return false;
       }
-    } catch {
+    } catch (err) {
+      console.error('Failed to prompt install:', err);
       return false;
     }
   }, [deferredPrompt]);
