@@ -392,10 +392,17 @@ export default function SettingsPage() {
                       if (isInstallable && promptInstall) {
                         promptInstall();
                       } else {
-                        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                        const msg = isIOS
-                          ? 'Tap the Share button (□↑) at the bottom of Safari, then tap "Add to Home Screen".'
-                          : 'Tap the browser menu (⋮) then "Add to Home Screen" or "Install App".';
+                        const ua = navigator.userAgent;
+                        const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+                        const isAndroid = /Android/i.test(ua);
+                        let msg = '';
+                        if (isIOS) {
+                          msg = 'Tap the Share button (□↑) at the bottom of Safari, then tap "Add to Home Screen".';
+                        } else if (isAndroid) {
+                          msg = 'Tap the menu (⋮) at the top-right of Chrome, then tap "Add to Home Screen".';
+                        } else {
+                          msg = 'Click the install icon (⊕) in the address bar, or go to Menu → "Install Tekyel".';
+                        }
                         toast(msg, { icon: 'ℹ️', duration: 6000 });
                       }
                     }}
