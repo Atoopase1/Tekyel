@@ -706,12 +706,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
   initOfflineQueue: () => {
     if (typeof window === 'undefined') return;
     
-    const handleOnline = () => {
+    const handleOnline = async () => {
+      console.log('[Offline] Network restored — flushing queue and syncing...');
+
+      // 1. Flush queued messages sequentially
       const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
       if (queue.length > 0) {
-        queue.forEach((q: any) => {
-          get().retryMessage(q.optimisticId, q.chatId, q.content, q.messageType, q.mediaUrl, q.mediaMetadata, q.replyToId);
+        const toast = (await import('react-hot-toast')).default;
+        toast.success(`Sending ${queue.length} queued message${queue.length > 1 ? 's' : ''}…`, {
+          icon: '📤',
+          duration: 2000,
         });
+        for (const q of queue) {
+          await get().retryMessage(q.optimisticId, q.chatId, q.content, q.messageType, q.mediaUrl, q.mediaMetadata, q.replyToId);
+        }
+      }
+
+      // 2. Refresh chat list to sync any messages received while offline
+      await get().fetchChats();
+
+      // 3. If user has an active chat open, refresh its messages too
+      const activeChatId = get().activeChatId;
+      if (activeChatId) {
+        await get().fetchMessages(activeChatId);
       }
     };
 

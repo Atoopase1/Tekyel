@@ -11,6 +11,7 @@ import CallModal from '@/components/chat/CallModal';
 import IncomingCallModal from '@/components/chat/IncomingCallModal';
 import LottieLoader from '@/components/ui/LottieLoader';
 import PWAInstallBanner from '@/components/ui/PWAInstallBanner';
+import OfflineBanner from '@/components/ui/OfflineBanner';
 import { Toaster } from 'react-hot-toast';
 import AppNavigation from '@/components/layout/AppNavigation';
 import { useChatStore } from '@/store/chat-store';
@@ -48,7 +49,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="h-screen flex bg-[var(--bg-app)]">
+    <div className="h-screen flex flex-col bg-[var(--bg-app)]">
       <Toaster
         position="top-center"
         toastOptions={{
@@ -70,13 +71,19 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       {/* PWA Install prompt for desktop */}
       <PWAInstallBanner />
 
-      {/* Main Navigation Tab Bar */}
-      <AppNavigation />
+      {/* Offline indicator — sits at the very top, non-blocking */}
+      <OfflineBanner />
 
-      {/* Main content area */}
-      <div className="flex-1 flex min-w-0 lg:h-full h-[calc(100vh-64px)] relative">
-        <div className="flex-1 flex min-w-0 h-full w-full">
-            {children}
+      {/* Main app row: nav + content */}
+      <div className="flex-1 flex min-h-0">
+        {/* Main Navigation Tab Bar */}
+        <AppNavigation />
+
+        {/* Main content area */}
+        <div className="flex-1 flex min-w-0 lg:h-full h-[calc(100vh-64px)] relative">
+          <div className="flex-1 flex min-w-0 h-full w-full">
+              {children}
+          </div>
         </div>
       </div>
     </div>

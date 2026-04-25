@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tekyel-pwa-cache-v2';
+const CACHE_NAME = 'tekyel-pwa-cache-v3';
 const MEDIA_CACHE_NAME = 'tekyel-media-cache-v1';
 const STATIC_ROOT_CACHES = [
   '/',
@@ -6,7 +6,7 @@ const STATIC_ROOT_CACHES = [
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  '/offline.html',
+  '/logo.jpg',
 ];
 
 // Install event: cache core static assets
@@ -122,7 +122,9 @@ self.addEventListener('fetch', (event) => {
   }
 
   // ── STRATEGY 4: HTML Pages & Dynamic Navigation ──
-  // Network-First with Cache Fallback
+  // Network-First with Cache Fallback.
+  // When offline, serve the cached version of the page so the React app boots up
+  // and shows the OfflineBanner instead of a dead offline.html page.
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -137,8 +139,12 @@ self.addEventListener('fetch', (event) => {
           if (cachedResponse) {
             return cachedResponse;
           }
+          // For navigation requests (page loads), serve the cached root page
+          // so the React app can boot and show the offline banner in-app
           if (event.request.mode === 'navigate') {
-            return caches.match('/offline.html');
+            return caches.match('/').then((rootResponse) => {
+              return rootResponse || caches.match('/offline.html');
+            });
           }
         });
       })
