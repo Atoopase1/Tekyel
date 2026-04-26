@@ -194,22 +194,6 @@ body {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.011em;
   line-height: 1.5;
-}
-
-/* Premium heading font */
-h1, h2, h3 {
-  font-family: var(--font-heading);
-}
-
-/* 
-   SCROLLBAR
-    */
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 5px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 

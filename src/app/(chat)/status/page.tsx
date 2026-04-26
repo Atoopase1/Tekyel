@@ -176,7 +176,12 @@ export default function StatusPage() {
               >
                 <ArrowLeft size={24} />
               </Link>
-              <h1 className="text-xl font-semibold text-[var(--text-primary)]">Status & Feed</h1>
+              <h1 
+                className="text-xl font-semibold text-[var(--text-primary)]"
+                style={{ fontFamily: "'Exo 2', sans-serif" }}
+              >
+                Status & Feed
+              </h1>
               {!isHeaderExpanded && (
                 <span className="text-xs bg-[var(--bg-secondary)] text-[var(--text-muted)] px-2 py-0.5 rounded-full ml-auto">
                   Tap to expand
@@ -228,6 +233,7 @@ export default function StatusPage() {
 
             <div className="flex gap-4 border-b border-[var(--border-color)]">
               <button
+                style={{ fontFamily: "'Exo 2', sans-serif" }}
                 className={`pb-2 px-2 font-medium transition-colors ${
                   activeTab === 'public' && !showUploader
                     ? 'text-[var(--wa-green)] border-b-2 border-[var(--wa-green)]'
@@ -238,6 +244,7 @@ export default function StatusPage() {
                 🌍 Public Feed
               </button>
               <button
+                style={{ fontFamily: "'Exo 2', sans-serif" }}
                 className={`pb-2 px-2 font-medium transition-colors ${
                   activeTab === 'circle' && !showUploader
                     ? 'text-[var(--wa-green)] border-b-2 border-[var(--wa-green)]'
@@ -248,6 +255,7 @@ export default function StatusPage() {
                 👥 My Tekyel
               </button>
               <button
+                style={{ fontFamily: "'Exo 2', sans-serif" }}
                 className={`pb-2 px-2 font-medium transition-colors flex items-center gap-1.5 ${
                   showUploader
                     ? 'text-[var(--wa-green)] border-b-2 border-[var(--wa-green)]'
