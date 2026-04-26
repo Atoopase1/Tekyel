@@ -179,3 +179,55 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// ── STRATEGY 5: Web Push Notifications ──
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      
+      const options = {
+        body: data.body || 'You have a new message',
+        icon: data.icon || '/icon-192.png',
+        badge: data.badge || '/icon-192.png',
+        vibrate: [100, 50, 100],
+        data: {
+          url: data.url || '/'
+        }
+      };
+
+      event.waitUntil(
+        self.registration.showNotification(data.title || 'Tekyel', options)
+      );
+    } catch (err) {
+      console.warn('Failed to parse push data:', err);
+    }
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check if there is already a window/tab open with the target URL
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url.includes('tekyel.com') || client.url.includes('localhost') || client.url.includes(self.location.host)) {
+          // Focus the existing window
+          client.focus();
+          
+          // Optionally send a message to the client to navigate to the specific chat
+          client.postMessage({ type: 'NAVIGATE', url: urlToOpen });
+          return;
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

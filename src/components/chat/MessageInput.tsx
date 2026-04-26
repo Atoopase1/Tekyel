@@ -124,6 +124,26 @@ export default function MessageInput({ chatId }: MessageInputProps) {
           mediaMetadata,
           replyingTo?.id
         );
+
+        // Trigger Web Push Notifications for all other participants
+        if (activeChat?.participants) {
+          const myId = currentUser?.id;
+          activeChat.participants.forEach((p) => {
+            if (p.user_id !== myId) {
+              fetch('/api/web-push', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  userId: p.user_id,
+                  title: `New message from ${currentUser?.display_name || 'Tekyel'}`,
+                  body: trimmed || (mediaUrl ? '[Media]' : 'Sent a message'),
+                  icon: currentUser?.avatar_url || '/icon-192.png',
+                  url: `/?chatId=${chatId}`
+                })
+              }).catch(() => {});
+            }
+          });
+        }
       }
 
       setText('');

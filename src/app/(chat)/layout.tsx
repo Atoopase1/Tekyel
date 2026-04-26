@@ -8,6 +8,7 @@ import { useRealtimeChatList } from '@/hooks/useRealtimeMessages';
 import { useCallSignaling } from '@/hooks/useCallSignaling';
 import { useAppNotifications } from '@/hooks/useAppNotifications';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 import CallModal from '@/components/chat/CallModal';
 import IncomingCallModal from '@/components/chat/IncomingCallModal';
 import LottieLoader from '@/components/ui/LottieLoader';
@@ -40,6 +41,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
 
   // Keep the device awake while the app is actively open
   useWakeLock();
+
+  // Register device for background Web Push Notifications
+  usePushNotifications();
 
   if (!isInitialized || isLoading) {
     return (
