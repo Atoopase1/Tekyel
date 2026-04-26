@@ -2,16 +2,9 @@ import { NextResponse } from 'next/server';
 import webPush from 'web-push';
 import { createClient } from '@supabase/supabase-js';
 
-// Setup Web Push
+// Setup Web Push — keys are read at runtime, not build time
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
-
-// If you want to use the push service, you MUST set a subject (mailto: or https://)
-webPush.setVapidDetails(
-  'mailto:admin@tekyel.com',
-  vapidPublicKey,
-  vapidPrivateKey
-);
 
 // We need a service-role supabase client to fetch all subscriptions for a user,
 // since RLS might prevent User A from reading User B's push subscriptions.
@@ -25,6 +18,14 @@ export async function POST(req: Request) {
       console.warn('[Web Push] VAPID keys not configured');
       return NextResponse.json({ error: 'VAPID keys not configured' }, { status: 500 });
     }
+
+    // Initialize VAPID inside the handler so it only runs at request time,
+    // not at build time — this prevents the Vercel build crash.
+    webPush.setVapidDetails(
+      'mailto:admin@tekyel.com',
+      vapidPublicKey,
+      vapidPrivateKey
+    );
 
     const body = await req.json();
     const { userId, title, body: messageBody, icon, url } = body;
