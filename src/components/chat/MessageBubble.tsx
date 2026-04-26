@@ -2,7 +2,7 @@
 'use client';
 
 import { Check, CheckCheck, Clock, Download, Play, FileText, X, ZoomIn, ZoomOut } from 'lucide-react';
-import { formatMessageTime, formatFileSize } from '@/lib/utils';
+import { formatMessageTime, formatFileSize, formatTimeRemaining } from '@/lib/utils';
 import type { Message, MessageStatusType } from '@/types';
 import React, { useState, useCallback } from 'react';
 import { Star, RefreshCw, AlertCircle, Reply } from 'lucide-react';
@@ -450,7 +450,14 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {/* Time & Status */}
             <div className="flex items-center justify-end gap-1 -mb-0.5 mt-1" style={{ minWidth: isOwn ? '64px' : '44px' }}>
               {isStarred && <Star size={10} className={isOwn ? 'fill-[var(--gold)] text-[var(--gold)]' : 'fill-[var(--gold)] text-[var(--gold)]'} />}
-              {message.expires_at && <Clock size={10} className={isOwn ? 'text-white/70' : 'text-[var(--text-muted)]'} />}
+              {message.expires_at && (
+                <div className="flex items-center gap-0.5" title={`Expires in ${formatTimeRemaining(message.expires_at)}`}>
+                  <Clock size={10} className={isOwn ? 'text-white/70' : 'text-[var(--text-muted)]'} />
+                  <span className="text-[10px]" style={{ color: isOwn ? 'var(--bubble-out-meta, #667781)' : 'var(--bubble-in-meta, #667781)' }}>
+                    {formatTimeRemaining(message.expires_at)}
+                  </span>
+                </div>
+              )}
               <span className="text-xs font-normal" style={{ color: isOwn ? 'var(--bubble-out-meta, #667781)' : 'var(--bubble-in-meta, #667781)' }}>
                 {formatMessageTime(message.created_at)}
               </span>
