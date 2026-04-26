@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { UserPlus, UserCheck, Bookmark, BookmarkCheck, Download, Heart, MessageSquare, Star, Send, MoreVertical, Trash2, Edit, Check, X, Play, Pause } from 'lucide-react';
+import { UserPlus, UserCheck, Bookmark, BookmarkCheck, Download, Heart, MessageSquare, Star, Send, MoreVertical, Trash2, Edit, Check, X, Play, Pause, Pin } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import ImageViewerModal from '@/components/ui/ImageViewerModal';
 import { createPortal } from 'react-dom';
@@ -106,6 +106,22 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
   const [editText, setEditText] = useState(status.text_content || '');
 
   const isOwnPost = status.user_id === profile?.id;
+
+  const handlePin = async () => {
+    setShowMenu(false);
+    const pinUntil = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase
+      .from('statuses')
+      .update({ pinned_until: pinUntil })
+      .eq('id', status.id);
+    
+    if (error) {
+      toast.error('Failed to pin status');
+    } else {
+      toast.success('Status pinned for 5 days');
+      onRefresh?.();
+    }
+  };
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
@@ -289,9 +305,15 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
                 {visibility}
               </span>
             </div>
-            <span className="text-sm text-[var(--text-muted)] block truncate mt-0.5">
-              {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
-            </span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-sm text-[var(--text-muted)] block truncate">
+                {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
+              </span>
+              <span className="text-[10px] sm:text-xs bg-[var(--bg-hover)] text-[var(--text-muted)] px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                {status.pinned_until && <Pin size={10} className="text-emerald-500" />}
+                Expires in {formatDistanceToNow(status.pinned_until ? new Date(status.pinned_until) : new Date(new Date(created_at).getTime() + 50 * 60 * 60 * 1000), { addSuffix: false })}
+              </span>
+            </div>
           </div>
         </button>
 
@@ -322,6 +344,13 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
                   >
                     <Edit size={16} className="text-blue-500" />
                     Edit
+                  </button>
+                  <button
+                    onClick={handlePin}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+                  >
+                    <Pin size={16} className="text-emerald-500" />
+                    Pin (5 Days)
                   </button>
                   <div className="h-px bg-[var(--border-color)]" />
                   <button

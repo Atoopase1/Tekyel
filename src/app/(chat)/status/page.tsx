@@ -36,12 +36,13 @@ export default function StatusPage() {
   // Auto-delete expired statuses from DB (older than 50 hours)
   const cleanupExpiredStatuses = useCallback(async () => {
     const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
+    const now = new Date().toISOString();
     
     // Find expired statuses
     const { data: expired } = await supabase
       .from('statuses')
       .select('id')
-      .lt('created_at', cutoff);
+      .or(`pinned_until.lt.${now},and(pinned_until.is.null,created_at.lt.${cutoff})`);
 
     if (expired && expired.length > 0) {
       const ids = expired.map(s => s.id);
@@ -65,9 +66,15 @@ export default function StatusPage() {
       try {
         const parsed = JSON.parse(cached);
         // Filter cached statuses to only show non-expired ones
-        const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
+        const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).getTime();
+        const now = Date.now();
         if (parsed.statuses) {
-          setStatuses(parsed.statuses.filter((s: any) => s.created_at >= cutoff));
+          setStatuses(parsed.statuses.filter((s: any) => {
+            if (s.pinned_until) {
+              return new Date(s.pinned_until).getTime() > now;
+            }
+            return new Date(s.created_at).getTime() >= cutoff;
+          }));
         }
         if (parsed.followingIds) setFollowingIds(parsed.followingIds);
         setIsLoading(false);
@@ -80,8 +87,9 @@ export default function StatusPage() {
       setIsLoading(true);
     }
 
-    // Only fetch statuses within the 50-hour window
+    // Only fetch statuses within the 50-hour window (or pinned up to 5 days)
     const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
+    const nowIso = new Date().toISOString();
     
     const buildQuery = (advanced: boolean) => {
       const selectStr = advanced 
@@ -97,7 +105,7 @@ export default function StatusPage() {
       }
       
       // Only fetch non-expired statuses
-      q = q.gte('created_at', cutoff);
+      q = q.or(`pinned_until.gte.${nowIso},and(pinned_until.is.null,created_at.gte.${cutoff})`);
       
       return q.order('created_at', { ascending: false }).limit(50);
     };
