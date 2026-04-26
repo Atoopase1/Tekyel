@@ -107,6 +107,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     try {
+      // Force Supabase to load the session from localStorage before making the request.
+      // If we don't do this, the request might fire before the token is ready, causing RLS to return 0 rows.
+      await supabase.auth.getSession();
+
       // Step 1: Get our participations (needed to know which chats to fetch)
       const { data: myParticipations, error: partError } = await supabase
         .from('chat_participants')

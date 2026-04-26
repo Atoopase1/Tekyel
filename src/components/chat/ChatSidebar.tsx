@@ -30,7 +30,13 @@ export default function ChatSidebar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchUsers, setSearchUsers] = useState<Profile[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [followerCount, setFollowerCount] = useState<number>(0);
+  const [followerCount, setFollowerCount] = useState<number>(() => {
+    // Optimistically load from localStorage so it never starts at 0 if we already had followers
+    if (typeof window !== 'undefined' && profile?.id) {
+      return parseInt(localStorage.getItem(`followers_${profile.id}`) || '0', 10);
+    }
+    return 0;
+  });
   const [showFollowers, setShowFollowers] = useState(false);
   const [isBellShaking, setIsBellShaking] = useState(false);
 
@@ -53,6 +59,7 @@ export default function ChatSidebar() {
   // Fetch follower count
   useEffect(() => {
     if (!profile?.id) return;
+    
     const fetchFollowers = async () => {
       const supabase = getSupabaseBrowserClient();
       await supabase.auth.getSession(); // Ensure auth context is loaded for RLS
@@ -63,11 +70,33 @@ export default function ChatSidebar() {
       
       if (error) {
         console.error('[Sidebar] Follower count error:', error);
+        return; // Important: Don't set to 0 if there was a network/RLS error on boot
       }
-      console.log('[Sidebar] Followers for', profile.id, ':', followRows);
-      setFollowerCount(followRows?.length || 0);
+      
+      if (followRows) {
+        const count = followRows.length;
+        setFollowerCount(count);
+        localStorage.setItem(`followers_${profile.id}`, count.toString());
+      }
     };
+    
     fetchFollowers();
+
+    // Re-fetch when auth state restores or network comes back
+    const supabase = getSupabaseBrowserClient();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        fetchFollowers();
+      }
+    });
+    
+    const handleOnline = () => fetchFollowers();
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      authListener.subscription.unsubscribe();
+      window.removeEventListener('online', handleOnline);
+    };
   }, [profile?.id]);
 
   // Search users for new chat
