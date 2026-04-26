@@ -44,7 +44,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [expirationDays, setExpirationDays] = useState<number | null>(null);
+  const [expirationDays, setExpirationDays] = useState<number | null>(7);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -230,7 +230,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
     setSelectedFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
-    setExpirationDays(null);
+    setExpirationDays(7);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
