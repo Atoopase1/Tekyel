@@ -77,7 +77,7 @@ export default function StatusPage() {
       console.warn('Network offline or Failed to fetch statuses, relying on cache if available:', error.message || error);
     }
     
-    let currentFollowingIds = followingIds;
+    let currentFollowingIds: string[] = [];
     
     // Also fetch the current user's follows to accurately set the Follow button states
     if (profile && !error) {
@@ -102,7 +102,7 @@ export default function StatusPage() {
     }
 
     setIsLoading(false);
-  }, [activeTab, supabase, profile, followingIds]);
+  }, [activeTab, supabase, profile]);
 
   useEffect(() => {
     loadStatuses();
