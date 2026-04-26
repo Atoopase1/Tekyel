@@ -4,9 +4,9 @@
 import { Check, CheckCheck, Clock, Download, Play, FileText, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { formatMessageTime, formatFileSize, formatTimeRemaining } from '@/lib/utils';
 import type { Message, MessageStatusType } from '@/types';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Star, RefreshCw, AlertCircle, Reply } from 'lucide-react';
-import { motion, useAnimation, PanInfo } from 'framer-motion';
+import { motion, useAnimation, PanInfo, AnimatePresence } from 'framer-motion';
 import { useChatStore } from '@/store/chat-store';
 import { useAuthStore } from '@/store/auth-store';
 import { useInView } from '@/hooks/useInView';
@@ -15,6 +15,25 @@ import MessageContextMenu from './MessageContextMenu';
 import { useGifStore } from '@/store/gif-store';
 import MessageInfoModal from '../modals/MessageInfoModal';
 import ForwardModal from '../modals/ForwardModal';
+
+const ExpiryOverlay = ({ expiresAt, isOwn }: { expiresAt: string, isOwn: boolean }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className={`absolute top-2 right-2 z-20`}
+    >
+      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 shadow-lg ${isOwn ? 'bg-black/60' : 'bg-[var(--emerald)]/60'}`}>
+        <Clock size={12} className="text-white animate-pulse" />
+        <span className="text-[11px] font-bold text-white tracking-tight tabular-nums">
+          {formatTimeRemaining(expiresAt)}
+        </span>
+      </div>
+    </motion.div>
+  );
+};
 
 interface MessageBubbleProps {
   message: Message;
@@ -94,6 +113,29 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
 
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
+  const [showExpiry, setShowExpiry] = useState(false);
+  const expiryTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerExpiryDisplay = useCallback(() => {
+    if (!message.expires_at) return;
+    setShowExpiry(true);
+    if (expiryTimerRef.current) clearTimeout(expiryTimerRef.current);
+    expiryTimerRef.current = setTimeout(() => {
+      setShowExpiry(false);
+    }, 4000);
+  }, [message.expires_at]);
+
+  useEffect(() => {
+    if (isMediaInView) {
+      triggerExpiryDisplay();
+    }
+  }, [isMediaInView, triggerExpiryDisplay]);
+
+  useEffect(() => {
+    return () => {
+      if (expiryTimerRef.current) clearTimeout(expiryTimerRef.current);
+    };
+  }, []);
 
   const handleDragEnd = async (event: any, info: PanInfo) => {
     if (info.offset.x > 60) {
@@ -373,7 +415,14 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {((message.message_type === 'image') ||
               message.media_metadata?.mime_type?.startsWith('image/') ||
               message.media_metadata?.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && message.media_url && (
-                <div ref={mediaRef} className="mb-1.5 -mx-1 -mt-0.5 min-h-[150px] overflow-hidden rounded-xl bg-[var(--bg-hover)] relative">
+                <div 
+                  ref={mediaRef} 
+                  className="mb-1.5 -mx-1 -mt-0.5 min-h-[150px] overflow-hidden rounded-xl bg-[var(--bg-hover)] relative"
+                  onMouseEnter={triggerExpiryDisplay}
+                >
+                  <AnimatePresence>
+                    {showExpiry && message.expires_at && <ExpiryOverlay expiresAt={message.expires_at} isOwn={isOwn} />}
+                  </AnimatePresence>
                   {isMediaInView && !mediaError ? (
                     <img
                       src={message.media_url}
@@ -401,7 +450,15 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {((message.message_type === 'video') ||
               (message.message_type !== 'audio' && message.message_type !== 'image' && message.message_type !== 'document' && (message.media_metadata?.mime_type?.startsWith('video/') ||
                 message.media_metadata?.filename?.match(/\.(mp4|webm|ogg|mov)$/i)))) && message.media_url && (
-                <div ref={mediaRef} className="mb-1.5 -mx-1 -mt-0.5 min-h-[150px] overflow-hidden rounded-xl bg-[var(--bg-hover)] relative cursor-pointer" onClick={(e) => { e.stopPropagation(); openLightbox('video'); }}>
+                <div 
+                  ref={mediaRef} 
+                  className="mb-1.5 -mx-1 -mt-0.5 min-h-[150px] overflow-hidden rounded-xl bg-[var(--bg-hover)] relative cursor-pointer" 
+                  onClick={(e) => { e.stopPropagation(); openLightbox('video'); }}
+                  onMouseEnter={triggerExpiryDisplay}
+                >
+                  <AnimatePresence>
+                    {showExpiry && message.expires_at && <ExpiryOverlay expiresAt={message.expires_at} isOwn={isOwn} />}
+                  </AnimatePresence>
                   {isMediaInView ? (
                     <video
                       src={message.media_url}
@@ -436,7 +493,10 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {((message.message_type === 'audio') ||
               (message.message_type !== 'video' && message.message_type !== 'image' && message.message_type !== 'document' && (message.media_metadata?.mime_type?.startsWith('audio/') ||
                 message.media_metadata?.filename?.match(/\.(mp3|wav|ogg|m4a|webm)$/i)))) && message.media_url && (
-                <div className="mb-1.5 min-w-[200px]">
+                <div className="mb-1.5 min-w-[200px] relative" onMouseEnter={triggerExpiryDisplay}>
+                  <AnimatePresence>
+                    {showExpiry && message.expires_at && <ExpiryOverlay expiresAt={message.expires_at} isOwn={isOwn} />}
+                  </AnimatePresence>
                   <audio src={message.media_url} controls className="w-full h-10" preload="none" />
                 </div>
               )}
@@ -452,9 +512,13 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
               message.media_url && (
                 <div
                   onClick={(e) => { e.stopPropagation(); openLightbox('document'); }}
-                  className={`flex items-center gap-3 mb-1.5 p-3 rounded-xl hover:opacity-80 transition-opacity cursor-pointer ${isOwn ? 'bg-white/10' : 'bg-[var(--bg-secondary)]'
+                  onMouseEnter={triggerExpiryDisplay}
+                  className={`flex items-center gap-3 mb-1.5 p-3 rounded-xl hover:opacity-80 transition-opacity cursor-pointer relative ${isOwn ? 'bg-white/10' : 'bg-[var(--bg-secondary)]'
                     }`}
                 >
+                  <AnimatePresence>
+                    {showExpiry && message.expires_at && <ExpiryOverlay expiresAt={message.expires_at} isOwn={isOwn} />}
+                  </AnimatePresence>
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isOwn ? 'bg-white/15' : 'bg-[var(--emerald)]/10'}`}>
                     <FileText size={26} className={isOwn ? 'text-white/80' : 'text-[var(--emerald)]'} />
                   </div>
@@ -482,7 +546,7 @@ const MessageBubble = React.memo(function MessageBubble({ message, isOwn, showSe
             {/* Time & Status */}
             <div className="flex items-center justify-end gap-1 -mb-0.5 mt-1" style={{ minWidth: isOwn ? '64px' : '44px' }}>
               {isStarred && <Star size={10} className={isOwn ? 'fill-[var(--gold)] text-[var(--gold)]' : 'fill-[var(--gold)] text-[var(--gold)]'} />}
-              {message.expires_at && (
+              {message.expires_at && message.message_type === 'text' && (
                 <div className="flex items-center gap-0.5" title={`Expires in ${formatTimeRemaining(message.expires_at)}`}>
                   <Clock size={10} className={isOwn ? 'text-white/70' : 'text-[var(--text-muted)]'} />
                   <span className="text-[10px]" style={{ color: isOwn ? 'var(--bubble-out-meta, #667781)' : 'var(--bubble-in-meta, #667781)' }}>
