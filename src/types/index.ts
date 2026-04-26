@@ -59,6 +59,7 @@ export interface Message {
   } | null;
   reply_to_id: string | null;
   is_deleted: boolean;
+  expires_at?: string | null;
   created_at: string;
   // Joined fields
   sender?: Profile;

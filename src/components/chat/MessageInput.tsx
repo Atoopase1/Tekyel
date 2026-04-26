@@ -44,6 +44,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [expirationDays, setExpirationDays] = useState<number | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showEmoji, setShowEmoji] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
@@ -116,13 +117,19 @@ export default function MessageInput({ chatId }: MessageInputProps) {
         // Stop the typing indicator immediately on the other end
         sendStopTyping();
         // Fire and forget, database handles it asynchronously
+        let expiresAtStr: string | undefined;
+        if (expirationDays !== null && expirationDays > 0) {
+          expiresAtStr = new Date(Date.now() + expirationDays * 24 * 60 * 60 * 1000).toISOString();
+        }
+
         sendMessage(
           chatId,
           trimmed || null!,
           messageType,
           mediaUrl,
           mediaMetadata,
-          replyingTo?.id
+          replyingTo?.id,
+          expiresAtStr
         );
 
         // Trigger Web Push Notifications for all other participants
@@ -223,6 +230,7 @@ export default function MessageInput({ chatId }: MessageInputProps) {
     setSelectedFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
+    setExpirationDays(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -325,9 +333,22 @@ export default function MessageInput({ chatId }: MessageInputProps) {
           )}
           <div className="flex-1 min-w-0">
             <p className="text-sm text-[var(--text-primary)] truncate font-medium">{selectedFile.name}</p>
-            <p className="text-sm text-[var(--text-muted)]">
-              {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
-            </p>
+            <div className="flex items-center gap-3 mt-0.5">
+              <p className="text-sm text-[var(--text-muted)]">
+                {(selectedFile.size / 1024 / 1024).toFixed(1)} MB
+              </p>
+              <select
+                value={expirationDays || 0}
+                onChange={(e) => setExpirationDays(Number(e.target.value))}
+                className="text-xs bg-[var(--bg-hover)] text-[var(--text-primary)] border-none rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-[var(--emerald)]"
+              >
+                <option value={0}>Permanent</option>
+                <option value={1}>1 Day</option>
+                <option value={2}>2 Days</option>
+                <option value={3}>3 Days</option>
+                <option value={7}>7 Days</option>
+              </select>
+            </div>
           </div>
           <button
             onClick={clearFile}

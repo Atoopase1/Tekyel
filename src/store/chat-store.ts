@@ -29,7 +29,7 @@ interface ChatState {
   setActiveChat: (chatId: string | null) => Promise<void>;
   fetchMessages: (chatId: string, before?: string) => Promise<void>;
   lastNewMessageAt: number | null;
-  sendMessage: (chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string) => Promise<Message | null>;
+  sendMessage: (chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string, expiresAt?: string | null) => Promise<Message | null>;
   markAsRead: (chatId: string) => Promise<void>;
   addMessage: (message: Message) => void;
   updateMessageInList: (message: Message) => void;
@@ -42,7 +42,7 @@ interface ChatState {
   setReplyingTo: (message: Message | null) => void;
   setEditingMessage: (message: Message | null) => void;
   editMessage: (messageId: string, newContent: string) => Promise<void>;
-  retryMessage: (messageId: string, chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string) => Promise<void>;
+  retryMessage: (messageId: string, chatId: string, content: string, messageType?: string, mediaUrl?: string, mediaMetadata?: Record<string, unknown>, replyToId?: string, expiresAt?: string | null) => Promise<void>;
   initOfflineQueue: () => void;
   flushOfflineQueue: () => Promise<void>;
   deleteMessageForMe: (messageId: string) => Promise<void>;
@@ -111,6 +111,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       // Force Supabase to load the session from localStorage before making the request.
       // If we don't do this, the request might fire before the token is ready, causing RLS to return 0 rows.
       await supabase.auth.getSession();
+
+      // Clean up expired messages (background task)
+      supabase.from('messages')
+        .delete()
+        .lt('expires_at', new Date().toISOString())
+        .then(({ error }) => {
+          if (error) console.error('Failed to cleanup expired messages:', error);
+        });
 
       // Step 1: Get our participations (needed to know which chats to fetch)
       const { data: myParticipations, error: partError } = await supabase
@@ -321,10 +329,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       const localDeletedIds = typeof localStorage !== 'undefined' && user ? JSON.parse(localStorage.getItem(`deleted-messages-${user.id}`) || '[]') : [];
 
-      // Filter out messages deleted for ME (from DB or local fallback)
-      const filteredMessages = rawMessages.filter(m => 
-        !localDeletedIds.includes(m.id) && !m.deletions?.some(d => d.user_id === user?.id)
-      );
+      const now = new Date().getTime();
+
+      // Filter out messages deleted for ME (from DB or local fallback), and expired messages
+      const filteredMessages = rawMessages.filter(m => {
+        if (localDeletedIds.includes(m.id)) return false;
+        if (m.deletions?.some(d => d.user_id === user?.id)) return false;
+        if (m.expires_at && new Date(m.expires_at).getTime() < now) return false;
+        return true;
+      });
 
       const messages = filteredMessages.reverse();
 
@@ -380,7 +393,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId) => {
+  sendMessage: async (chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId, expiresAt) => {
     const supabase = getSupabaseBrowserClient();
     const user = useAuthStore.getState().user;
     const profile = useAuthStore.getState().profile;
@@ -406,6 +419,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       reply_to_id: replyToId || null,
       reply_to: replyingToMessage ? [replyingToMessage] : undefined,
       is_deleted: false,
+      expires_at: expiresAt || null,
       created_at: new Date().toISOString(),
       sender: profile || undefined,
       status: [{ 
@@ -425,7 +439,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     if (isOffline) {
       const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
-      queue.push({ chatId, content, messageType, mediaUrl, mediaMetadata, replyToId, optimisticId: messageId });
+      queue.push({ chatId, content, messageType, mediaUrl, mediaMetadata, replyToId, expiresAt, optimisticId: messageId });
       localStorage.setItem('offline-messages-queue', JSON.stringify(queue));
       return optimisticMessage;
     }
@@ -444,6 +458,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         media_url: mediaUrl || null,
         media_metadata: mediaMetadata || null,
         reply_to_id: replyToId || null,
+        expires_at: expiresAt || null,
       });
 
     if (error) {
@@ -451,7 +466,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       
       // Push to offline queue so it survives a browser refresh and can be retried
       const queue = JSON.parse(localStorage.getItem('offline-messages-queue') || '[]');
-      queue.push({ chatId, content, messageType, mediaUrl, mediaMetadata, replyToId, optimisticId: messageId });
+      queue.push({ chatId, content, messageType, mediaUrl, mediaMetadata, replyToId, expiresAt, optimisticId: messageId });
       localStorage.setItem('offline-messages-queue', JSON.stringify(queue));
 
       // Mark as queued/failed so the user sees it hasn't gone through yet
@@ -681,7 +696,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  retryMessage: async (messageId, chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId) => {
+  retryMessage: async (messageId, chatId, content, messageType = 'text', mediaUrl, mediaMetadata, replyToId, expiresAt) => {
     const supabase = getSupabaseBrowserClient();
     const user = useAuthStore.getState().user;
     if (!user) return;
@@ -706,6 +721,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         media_url: mediaUrl || null,
         media_metadata: mediaMetadata || null,
         reply_to_id: replyToId || null,
+        expires_at: expiresAt || null,
       });
 
     if (error) {
@@ -734,7 +750,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         duration: 2000,
       });
       for (const q of queue) {
-        await get().retryMessage(q.optimisticId, q.chatId, q.content, q.messageType, q.mediaUrl, q.mediaMetadata, q.replyToId);
+        await get().retryMessage(q.optimisticId, q.chatId, q.content, q.messageType, q.mediaUrl, q.mediaMetadata, q.replyToId, q.expiresAt);
       }
     }
   },
