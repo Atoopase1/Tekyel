@@ -11,6 +11,7 @@ import ChatSidebar from '@/components/chat/ChatSidebar';
 import { useAuthStore } from '@/store/auth-store';
 import ManageStorageModal from '@/components/modals/ManageStorageModal';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const router = useRouter();
