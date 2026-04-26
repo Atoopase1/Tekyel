@@ -13,9 +13,11 @@ import {
   RotateCcw,
   Type,
   Sparkles,
+  Crop,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Spinner from '@/components/ui/Spinner';
+import ImageCropper from '@/components/ui/ImageCropper';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth-store';
 import toast from 'react-hot-toast';
@@ -33,6 +35,11 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
   const [visibility, setVisibility] = useState<'public' | 'friends' | 'family'>('public');
   const [isPosting, setIsPosting] = useState(false);
   const [step, setStep] = useState<EditorStep>('compose');
+
+  // Cropper state
+  const [showCropper, setShowCropper] = useState(false);
+  const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);
+  const [rawFileName, setRawFileName] = useState('image.jpg');
 
   const determineContentType = (file: File | null) => {
     if (!file) return 'text';
@@ -54,17 +61,49 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
       e.target.value = '';
       return;
     }
+
+    // Open cropper for images
+    if (selected.type.startsWith('image/')) {
+      const url = URL.createObjectURL(selected);
+      setRawImageUrl(url);
+      setRawFileName(selected.name);
+      setShowCropper(true);
+      return;
+    }
     
     setFile(selected);
 
-    // Create preview URL
-    if (selected.type.startsWith('image/') || selected.type.startsWith('video/')) {
+    // Create preview URL for video
+    if (selected.type.startsWith('video/')) {
       const url = URL.createObjectURL(selected);
       setFilePreviewUrl(url);
     } else {
       setFilePreviewUrl(null);
     }
   }, []);
+
+  const handleCropDone = useCallback((croppedFile: File) => {
+    setShowCropper(false);
+    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
+    setRawImageUrl(null);
+    setFile(croppedFile);
+    const url = URL.createObjectURL(croppedFile);
+    setFilePreviewUrl(url);
+  }, [rawImageUrl]);
+
+  const handleCropCancel = useCallback(() => {
+    setShowCropper(false);
+    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
+    setRawImageUrl(null);
+  }, [rawImageUrl]);
+
+  const openRecrop = useCallback(() => {
+    if (!file || !file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    setRawImageUrl(url);
+    setRawFileName(file.name);
+    setShowCropper(true);
+  }, [file]);
 
   const clearFile = () => {
     if (filePreviewUrl) {
@@ -228,6 +267,13 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
             <div className="relative rounded-lg overflow-hidden border border-[var(--border-color)] max-w-[200px]">
               <img src={filePreviewUrl} alt="Selected" className="w-full h-auto max-h-[150px] object-cover" />
               <button
+                onClick={openRecrop}
+                className="absolute bottom-1 left-1 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
+                title="Re-crop"
+              >
+                <Crop size={16} />
+              </button>
+              <button
                 onClick={clearFile}
                 className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition-colors"
               >
@@ -312,6 +358,16 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
           Preview & Post
         </Button>
       </div>
+
+      {/* Image Cropper Modal */}
+      {showCropper && rawImageUrl && (
+        <ImageCropper
+          src={rawImageUrl}
+          onCrop={handleCropDone}
+          onCancel={handleCropCancel}
+          fileName={rawFileName}
+        />
+      )}
     </div>
   );
 }
