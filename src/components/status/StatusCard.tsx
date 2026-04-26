@@ -6,6 +6,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { UserPlus, UserCheck, Bookmark, BookmarkCheck, Download, Heart, MessageSquare, Star, Send, MoreVertical, Trash2, Edit, Check, X, Play, Pause } from 'lucide-react';
 import Avatar from '@/components/ui/Avatar';
 import ImageViewerModal from '@/components/ui/ImageViewerModal';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth-store';
@@ -304,24 +305,34 @@ export default function StatusCard({ status, onToggleFollow, onRefresh, initialF
               <MoreVertical size={20} />
             </button>
             
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-32 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 animate-scaleIn overflow-hidden">
-                <button
-                  onClick={() => { setIsEditing(true); setShowMenu(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
-                >
-                  <Edit size={16} className="text-blue-500" />
-                  Edit
-                </button>
-                <div className="h-px bg-[var(--border-color)]" />
-                <button
-                  onClick={handleDelete}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-[var(--bg-hover)] transition-colors"
-                >
-                  <Trash2 size={16} />
-                  Delete
-                </button>
-              </div>
+            {showMenu && typeof document !== 'undefined' && (
+              <>
+                {createPortal(
+                  <div
+                    className="fixed inset-0 z-40"
+                    onPointerDown={() => setShowMenu(false)}
+                    onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+                  />,
+                  document.body
+                )}
+                <div className="absolute right-0 mt-2 w-32 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-xl z-50 animate-scaleIn overflow-hidden">
+                  <button
+                    onClick={() => { setIsEditing(true); setShowMenu(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+                  >
+                    <Edit size={16} className="text-blue-500" />
+                    Edit
+                  </button>
+                  <div className="h-px bg-[var(--border-color)]" />
+                  <button
+                    onClick={handleDelete}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-500 hover:bg-[var(--bg-hover)] transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                </div>
+              </>
             )}
           </div>
         ) : (
