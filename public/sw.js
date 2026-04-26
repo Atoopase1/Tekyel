@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tekyel-pwa-cache-v3';
+const CACHE_NAME = 'tekyel-pwa-cache-v4';
 const MEDIA_CACHE_NAME = 'tekyel-media-cache-v1';
 const STATIC_ROOT_CACHES = [
   '/',
