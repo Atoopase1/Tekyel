@@ -13,6 +13,8 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/auth-store';
 import toast from 'react-hot-toast';
 
+const STATUS_LIFETIME_HOURS = 50;
+
 export default function StatusPage() {
   const router = useRouter();
   const { profile } = useAuthStore();
@@ -31,6 +33,29 @@ export default function StatusPage() {
   const uploaderRef = useRef<HTMLDivElement>(null);
   const headerContentRef = useRef<HTMLDivElement>(null);
 
+  // Auto-delete expired statuses from DB (older than 50 hours)
+  const cleanupExpiredStatuses = useCallback(async () => {
+    const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
+    
+    // Find expired statuses
+    const { data: expired } = await supabase
+      .from('statuses')
+      .select('id')
+      .lt('created_at', cutoff);
+
+    if (expired && expired.length > 0) {
+      const ids = expired.map(s => s.id);
+      // Delete children first (likes, comments, ratings)
+      await Promise.all([
+        supabase.from('status_comments').delete().in('status_id', ids),
+        supabase.from('status_likes').delete().in('status_id', ids),
+        supabase.from('status_ratings').delete().in('status_id', ids),
+      ]);
+      // Delete the statuses
+      await supabase.from('statuses').delete().in('id', ids);
+    }
+  }, [supabase]);
+
   const loadStatuses = useCallback(async () => {
     const cacheKey = `status-feed-${activeTab}`;
     
@@ -39,7 +64,11 @@ export default function StatusPage() {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        if (parsed.statuses) setStatuses(parsed.statuses);
+        // Filter cached statuses to only show non-expired ones
+        const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
+        if (parsed.statuses) {
+          setStatuses(parsed.statuses.filter((s: any) => s.created_at >= cutoff));
+        }
         if (parsed.followingIds) setFollowingIds(parsed.followingIds);
         setIsLoading(false);
       } catch (e) {
@@ -50,6 +79,9 @@ export default function StatusPage() {
     if (!cached) {
       setIsLoading(true);
     }
+
+    // Only fetch statuses within the 50-hour window
+    const cutoff = new Date(Date.now() - STATUS_LIFETIME_HOURS * 60 * 60 * 1000).toISOString();
     
     const buildQuery = (advanced: boolean) => {
       const selectStr = advanced 
@@ -63,6 +95,9 @@ export default function StatusPage() {
       } else {
         q = q.neq('visibility', 'public');
       }
+      
+      // Only fetch non-expired statuses
+      q = q.gte('created_at', cutoff);
       
       return q.order('created_at', { ascending: false }).limit(50);
     };
@@ -110,6 +145,8 @@ export default function StatusPage() {
 
   useEffect(() => {
     loadStatuses();
+    // Cleanup expired statuses from DB on page load
+    cleanupExpiredStatuses();
 
     const channel = supabase.channel('public:statuses')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'statuses' }, () => {
@@ -120,7 +157,7 @@ export default function StatusPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [loadStatuses, supabase]);
+  }, [loadStatuses, cleanupExpiredStatuses, supabase]);
 
   const handleToggleFollow = (userId: string, isFollowing: boolean) => {
     setFollowingIds(prev => {

@@ -49,7 +49,7 @@ export default function StatusUploader({ onStatusPosted }: { onStatusPosted: () 
     return 'document';
   };
 
-  const MAX_VIDEO_SIZE_MB = 7;
+  const MAX_VIDEO_SIZE_MB = 10;
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
