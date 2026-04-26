@@ -225,18 +225,17 @@ export default function StatusPage() {
                 👥 My Tekyel
               </button>
             </div>
+
+            {/* Status Uploader — pinned in header so it's always reachable */}
+            <div className="mt-4">
+              <StatusUploader onStatusPosted={loadStatuses} />
+            </div>
           </div>
         </div>
 
         {/* Main Feed Container */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-full">
           <div className="max-w-2xl mx-auto w-full px-3 sm:px-6 py-6 pb-32 overflow-x-hidden">
-            
-            <div className="mb-8">
-              <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3 px-1">Share an update</h2>
-              <StatusUploader onStatusPosted={loadStatuses} />
-            </div>
-
             <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3 px-1">
               {activeTab === 'public' ? 'Recent Public Posts' : 'Friends & Family Updates'}
             </h2>
