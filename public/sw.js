@@ -44,6 +44,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // Ignore non-HTTP protocols (chrome-extension, etc)
+  if (!url.protocol.startsWith('http')) return;
+
   // Ignore WebSockets, POST requests, and Supabase REST/Realtime API calls
   if (
     event.request.method !== 'GET' ||
@@ -56,7 +59,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Next.js Hot Module Reloading for dev should bypass cache
-  if (url.pathname.includes('/_next/webpack-hmr')) return;
+  if (url.pathname.includes('/_next/webpack-hmr') || url.pathname.includes('/__nextjs_')) return;
 
   // ── STRATEGY 1: Supabase Storage Media (profile pics, shared images, audio, video) ──
   // Cache-First with background revalidation. These URLs rarely change.
@@ -123,18 +126,20 @@ self.addEventListener('fetch', (event) => {
 
   // ── STRATEGY 4: HTML Pages & Dynamic Navigation ──
   // Network-First with Cache Fallback.
-  // When offline, serve the cached version of the page so the React app boots up
-  // and shows the OfflineBanner instead of a dead offline.html page.
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const resClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, resClone);
-        });
+        // Only cache successful HTTP responses
+        if (response && response.status === 200 && response.type === 'basic') {
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, resClone).catch(() => {});
+          });
+        }
         return response;
       })
-      .catch(() => {
+      .catch((err) => {
+        console.warn('[Service Worker] Fetch failed:', err);
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
@@ -143,9 +148,33 @@ self.addEventListener('fetch', (event) => {
           // so the React app can boot and show the offline banner in-app
           if (event.request.mode === 'navigate') {
             return caches.match('/').then((rootResponse) => {
-              return rootResponse || caches.match('/offline.html');
+              if (rootResponse) return rootResponse;
+              
+              // If absolutely nothing is in cache, return a functional fallback instead of crashing the PWA
+              return new Response(
+                `<!DOCTYPE html>
+                <html lang="en">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>Offline - Tekyel</title>
+                  <style>
+                    body { font-family: system-ui, sans-serif; background: #0F172A; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; padding: 20px; }
+                    button { margin-top: 20px; padding: 12px 24px; background: #3B82F6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+                  </style>
+                </head>
+                <body>
+                  <h2>You are offline</h2>
+                  <p>Tekyel could not connect to the server and no offline cache was found.</p>
+                  <button onclick="window.location.reload()">Retry Connection</button>
+                </body>
+                </html>`,
+                { headers: { 'Content-Type': 'text/html' } }
+              );
             });
           }
+          
+          return new Response('', { status: 404, statusText: 'Offline' });
         });
       })
   );
