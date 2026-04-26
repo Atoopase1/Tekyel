@@ -1,10 +1,10 @@
 // Status Feed Page
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import StatusUploader from '@/components/status/StatusUploader';
 import StatusCard from '@/components/status/StatusCard';
@@ -26,6 +26,8 @@ export default function StatusPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'media' | 'text'>('all');
   const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
+  const uploaderRef = useRef<HTMLDivElement>(null);
 
   const loadStatuses = useCallback(async () => {
     const cacheKey = `status-feed-${activeTab}`;
@@ -224,11 +226,30 @@ export default function StatusPage() {
               >
                 👥 My Tekyel
               </button>
+              <button
+                className={`pb-2 px-2 font-medium transition-colors flex items-center gap-1.5 ${
+                  showUploader
+                    ? 'text-[var(--wa-green)] border-b-2 border-[var(--wa-green)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+                onClick={() => setShowUploader(!showUploader)}
+              >
+                <PlusCircle size={18} />
+                Post Status
+              </button>
             </div>
 
-            {/* Status Uploader — pinned in header so it's always reachable */}
-            <div className="mt-4">
-              <StatusUploader onStatusPosted={loadStatuses} />
+            {/* Status Uploader — toggles on tap */}
+            <div
+              ref={uploaderRef}
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxHeight: showUploader ? (uploaderRef.current?.scrollHeight ?? 500) + 'px' : '0px',
+                opacity: showUploader ? 1 : 0,
+                marginTop: showUploader ? '12px' : '0px',
+              }}
+            >
+              <StatusUploader onStatusPosted={() => { loadStatuses(); setShowUploader(false); }} />
             </div>
           </div>
         </div>
