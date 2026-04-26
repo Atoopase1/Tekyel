@@ -27,7 +27,9 @@ export default function StatusPage() {
   const [filterType, setFilterType] = useState<'all' | 'media' | 'text'>('all');
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [showUploader, setShowUploader] = useState(false);
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(true);
   const uploaderRef = useRef<HTMLDivElement>(null);
+  const headerContentRef = useRef<HTMLDivElement>(null);
 
   const loadStatuses = useCallback(async () => {
     const cacheKey = `status-feed-${activeTab}`;
@@ -161,19 +163,38 @@ export default function StatusPage() {
         <div className="bg-[var(--bg-header)] shadow-sm z-10 w-full">
           <div className="max-w-2xl mx-auto px-3 sm:px-6 py-4">
             
-            <div className="flex items-center gap-3 mb-4">
+            <div 
+              className="flex items-center gap-3 mb-4 cursor-pointer transition-opacity hover:opacity-80"
+              onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+            >
               {/* Mobile-only back button (lg:hidden because sidebar is visible on desktop) */}
               <Link 
                 href="/"
                 className="p-2 -ml-2 rounded-xl hover:bg-[var(--bg-secondary)] transition-colors lg:hidden text-[var(--text-primary)]"
                 aria-label="Back to chat list"
+                onClick={(e) => e.stopPropagation()}
               >
                 <ArrowLeft size={24} />
               </Link>
               <h1 className="text-xl font-semibold text-[var(--text-primary)]">Status & Feed</h1>
+              {!isHeaderExpanded && (
+                <span className="text-xs bg-[var(--bg-secondary)] text-[var(--text-muted)] px-2 py-0.5 rounded-full ml-auto">
+                  Tap to expand
+                </span>
+              )}
             </div>
             
-            {/* Search & Filter Bar */}
+            {/* Expandable Header Content */}
+            <div
+              ref={headerContentRef}
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{
+                maxHeight: isHeaderExpanded ? ((headerContentRef.current?.scrollHeight ?? 800) + (showUploader ? 500 : 0)) + 'px' : '0px',
+                opacity: isHeaderExpanded ? 1 : 0,
+                transform: isHeaderExpanded ? 'translateY(0)' : 'translateY(-10px)',
+              }}
+            >
+              {/* Search & Filter Bar */}
             <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <div className="relative flex-1">
                 <input
@@ -251,11 +272,21 @@ export default function StatusPage() {
             >
               <StatusUploader onStatusPosted={() => { loadStatuses(); setShowUploader(false); }} />
             </div>
+            </div>
           </div>
         </div>
 
         {/* Main Feed Container */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-full">
+        <div 
+          className="flex-1 overflow-y-auto overflow-x-hidden w-full max-w-full"
+          onScroll={(e) => {
+            if (e.currentTarget.scrollTop > 50 && isHeaderExpanded) {
+              setIsHeaderExpanded(false);
+            } else if (e.currentTarget.scrollTop === 0 && !isHeaderExpanded) {
+              setIsHeaderExpanded(true);
+            }
+          }}
+        >
           <div className="max-w-2xl mx-auto w-full px-3 sm:px-6 py-6 pb-32 overflow-x-hidden">
             <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase mb-3 px-1">
               {activeTab === 'public' ? 'Recent Public Posts' : 'Friends & Family Updates'}
