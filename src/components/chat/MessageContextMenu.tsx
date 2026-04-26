@@ -241,8 +241,8 @@ export default function MessageContextMenu(props: MessageContextMenuProps) {
           {/* Invisible backdrop to catch taps + ghost click shield */}
           <div 
             className="fixed inset-0 z-[9990]" 
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); if (isOpen) handleClose(); }} 
-            onTouchEnd={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onPointerDown={(e) => { e.stopPropagation(); if (isOpen) handleClose(); }}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
           />
           
           {/* Floating card — WhatsApp style (only visible when open, not during closing shield) */}
