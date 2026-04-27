@@ -16,6 +16,6 @@ export const config = {
      * - sw.js
      * - images, icons, etc.
      */
-    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)',
   ],
 };
